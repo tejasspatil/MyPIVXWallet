@@ -104,9 +104,10 @@ importWallet = function (newWif = false, raw = false) {
       console.log(Crypto.util.bytesToHex(privkeyBytes));
     }
     // Public Key Derivation
-    const publicKey = Secp256k1.generatePublicKeyFromPrivateKeyData(Secp256k1.uint256(privkeyBytes, 16));
-    const pubY = Secp256k1.uint256(publicKey.y, 16);
-    const publicKeyBytesCompressed = Crypto.util.hexToBytes(publicKey.x);
+    let nPubkey = Crypto.util.bytesToHex(nSecp256k1.getPublicKey(privkeyBytes)).substr(2);
+    const pubY = Secp256k1.uint256(nPubkey.substr(64), 16);
+    nPubkey = nPubkey.substr(0, 64);
+    const publicKeyBytesCompressed = Crypto.util.hexToBytes(nPubkey);
     if (pubY.isEven()) {
       publicKeyBytesCompressed.unshift(0x02);
     } else {
@@ -235,9 +236,10 @@ generateWallet = async function (noUI = false) {
     privateKeyForTransactions = to_b58(keyWithChecksum);
 
     // Public Key Derivation
-    const publicKey = Secp256k1.generatePublicKeyFromPrivateKeyData(Secp256k1.uint256(pkBytes, 16));
-    const pubY = Secp256k1.uint256(publicKey.y, 16);
-    const publicKeyBytesCompressed = Crypto.util.hexToBytes(publicKey.x);
+    let nPubkey = Crypto.util.bytesToHex(nSecp256k1.getPublicKey(pkBytes)).substr(2);
+    const pubY = Secp256k1.uint256(nPubkey.substr(64), 16);
+    nPubkey = nPubkey.substr(0, 64);
+    const publicKeyBytesCompressed = Crypto.util.hexToBytes(nPubkey);
     if (pubY.isEven()) {
       publicKeyBytesCompressed.unshift(0x02);
     } else {

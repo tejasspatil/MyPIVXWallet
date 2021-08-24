@@ -548,6 +548,7 @@
   <script type="text/javascript" src="scripts/libs/sha256.js"></script>
   <script type="text/javascript" src="scripts/libs/bn.js"></script>
   <script type="text/javascript" src="scripts/libs/secp256k1.js"></script>
+  <script type="text/javascript" src="scripts/libs/noble-secp256k1.js"></script>
 
   <script type="text/javascript" src="scripts/settings.js"></script>
   <script type="text/javascript" src="scripts/wallet.js"></script>
@@ -558,6 +559,8 @@
     // WALLET STATE DATA
     let cachedUTXOs = [];
     let cachedBlockCount = 0;
+
+    const nSecp256k1 = nobleSecp256k1.default;
 
     // Cached DOM elements
     const domStart = document.getElementById("start");

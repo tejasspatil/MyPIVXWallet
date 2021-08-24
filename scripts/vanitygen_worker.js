@@ -2,7 +2,9 @@
 const PUBKEY_ADDRESS = 30;
 const SECRET_KEY     = 212;
 
-importScripts('libs/bn.js', 'libs/secp256k1.js', 'libs/crypto-min.js', 'libs/crypto-sha256-hmac.js', 'libs/crypto-sha256.js', 'libs/jsbn.js', 'libs/ripemd160.js', 'libs/sha256.js');
+importScripts('libs/noble-secp256k1.js', 'libs/bn.js', 'libs/secp256k1.js', 'libs/crypto-min.js', 'libs/crypto-sha256-hmac.js', 'libs/crypto-sha256.js', 'libs/jsbn.js', 'libs/ripemd160.js', 'libs/sha256.js');
+
+const nSecp256k1 = nobleSecp256k1.default;
 
 // B58 Encoding Map
 const MAP = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -83,9 +85,10 @@ while (true) {
     const pkBytes = getSafeRand();
 
     // Public Key Derivation
-    const publicKey = Secp256k1.generatePublicKeyFromPrivateKeyData(Secp256k1.uint256(pkBytes, 16));
-    const pubY = Secp256k1.uint256(publicKey.y, 16);
-    const publicKeyBytesCompressed = Crypto.util.hexToBytes(publicKey.x);
+    let nPubkey = Crypto.util.bytesToHex(nSecp256k1.getPublicKey(pkBytes)).substr(2);
+    const pubY = Secp256k1.uint256(nPubkey.substr(64), 16);
+    nPubkey = nPubkey.substr(0, 64);
+    const publicKeyBytesCompressed = Crypto.util.hexToBytes(nPubkey);
     if (pubY.isEven()) {
       publicKeyBytesCompressed.unshift(0x02);
     } else {

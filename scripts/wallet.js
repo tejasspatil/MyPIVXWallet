@@ -104,13 +104,10 @@ importWallet = function (newWif = false, raw = false) {
       console.log(Crypto.util.bytesToHex(privkeyBytes));
     }
     // Public Key Derivation
-    const privkeyBigInt = BigInteger.fromByteArrayUnsigned(Array.from(privkeyBytes));
-    const curve = EllipticCurve.secNamedCurves["secp256k1"]();
-    const curvePt = curve.getG().multiply(privkeyBigInt);
-    const x = curvePt.getX().toBigInteger();
-    const y = curvePt.getY().toBigInteger();
-    const publicKeyBytesCompressed = EllipticCurve.integerToBytes(x, 32);
-    if (y.isEven()) {
+    const publicKey = Secp256k1.generatePublicKeyFromPrivateKeyData(Secp256k1.uint256(privkeyBytes, 16));
+    const pubY = Secp256k1.uint256(publicKey.y, 16);
+    const publicKeyBytesCompressed = Crypto.util.hexToBytes(publicKey.x);
+    if (pubY.isEven()) {
       publicKeyBytesCompressed.unshift(0x02);
     } else {
       publicKeyBytesCompressed.unshift(0x03);
@@ -238,13 +235,10 @@ generateWallet = async function (noUI = false) {
     privateKeyForTransactions = to_b58(keyWithChecksum);
 
     // Public Key Derivation
-    const privkeyBigInt = BigInteger.fromByteArrayUnsigned(Array.from(pkBytes));
-    const curve = EllipticCurve.secNamedCurves["secp256k1"]();
-    const curvePt = curve.getG().multiply(privkeyBigInt);
-    const x = curvePt.getX().toBigInteger();
-    const y = curvePt.getY().toBigInteger();
-    const publicKeyBytesCompressed = EllipticCurve.integerToBytes(x, 32);
-    if (y.isEven()) {
+    const publicKey = Secp256k1.generatePublicKeyFromPrivateKeyData(Secp256k1.uint256(pkBytes, 16));
+    const pubY = Secp256k1.uint256(publicKey.y, 16);
+    const publicKeyBytesCompressed = Crypto.util.hexToBytes(publicKey.x);
+    if (pubY.isEven()) {
       publicKeyBytesCompressed.unshift(0x02);
     } else {
       publicKeyBytesCompressed.unshift(0x03);

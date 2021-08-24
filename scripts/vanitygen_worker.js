@@ -2,7 +2,7 @@
 const PUBKEY_ADDRESS = 30;
 const SECRET_KEY     = 212;
 
-importScripts('libs/crypto-min.js', 'libs/crypto-sha256-hmac.js', 'libs/crypto-sha256.js', 'libs/ellipticcurve.js', 'libs/jsbn.js', 'libs/ripemd160.js', 'libs/sha256.js');
+importScripts('libs/bn.js', 'libs/secp256k1.js', 'libs/crypto-min.js', 'libs/crypto-sha256-hmac.js', 'libs/crypto-sha256.js', 'libs/jsbn.js', 'libs/ripemd160.js', 'libs/sha256.js');
 
 // B58 Encoding Map
 const MAP = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -83,13 +83,10 @@ while (true) {
     const pkBytes = getSafeRand();
 
     // Public Key Derivation
-    const privkeyBigInt = BigInteger.fromByteArrayUnsigned(Array.from(pkBytes));
-    const curve = EllipticCurve.secNamedCurves["secp256k1"]();
-    const curvePt = curve.getG().multiply(privkeyBigInt);
-    const x = curvePt.getX().toBigInteger();
-    const y = curvePt.getY().toBigInteger();
-    const publicKeyBytesCompressed = EllipticCurve.integerToBytes(x, 32);
-    if (y.isEven()) {
+    const publicKey = Secp256k1.generatePublicKeyFromPrivateKeyData(Secp256k1.uint256(pkBytes, 16));
+    const pubY = Secp256k1.uint256(publicKey.y, 16);
+    const publicKeyBytesCompressed = Crypto.util.hexToBytes(publicKey.x);
+    if (pubY.isEven()) {
       publicKeyBytesCompressed.unshift(0x02);
     } else {
       publicKeyBytesCompressed.unshift(0x03);

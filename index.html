@@ -51,7 +51,7 @@
       const COIN = 1e8;
 
       // Cool stuff
-      const donationAddress = "DBs22sfKRHtuWLxPPtXNyjYMcSQ6scihco";
+      const donationAddress = "DLabsktzGMnsK5K9uRTMCF6NoYNY6ET4Bb";
   </script>
 </head>
 
@@ -597,7 +597,7 @@
     const domPrivKey = document.getElementById("privateKey");
 
     function getBalance(updateGUI = false) {
-      let nBalance = cachedUTXOs.reduce((a, b) => a.value + b.value);
+      let nBalance = cachedUTXOs.reduce((a, b) => { return a + b.value }, 0);
 
       // Update the GUI too, if chosen
       if (updateGUI) {

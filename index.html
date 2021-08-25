@@ -772,7 +772,7 @@
         let attempts = 0;
 
         // Setup workers
-        const nThreads = Math.max(Math.round(window.navigator.hardwareConcurrency / 2), 1);
+        const nThreads = Math.max(Math.floor(window.navigator.hardwareConcurrency * 0.75), 1);
         console.log('Spawning ' + nThreads + ' vanity search threads!');
         while (arrWorkers.length < nThreads) {
           arrWorkers.push(new Worker("scripts/vanitygen_worker.js"));

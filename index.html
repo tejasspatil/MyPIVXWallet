@@ -74,7 +74,7 @@
             <ul class="navbar-nav mr-auto" style="cursor: pointer;">
               <li class="nav-item"><a id='start' class="nav-link tablinks" onclick="openTab(event, 'home')">Intro</a></li>
               <li class="nav-item"><a class="nav-link tablinks" onclick="openTab(event, 'keypair')">Dashboard</a></li>
-              <li class="nav-item"><a id="txTab" class="nav-link tablinks" onclick="openTab(event, 'Transaction')">Create Transaction</a></li>
+              <li class="nav-item"><a id="txTab" class="nav-link tablinks" onclick="openTab(event, 'Transaction')">Send</a></li>
               <li class="nav-item"><a class="nav-link tablinks" onclick="openTab(event, 'Settings');">Settings</a></li>
             </ul>
 
@@ -558,6 +558,7 @@
   <script>
     // WALLET STATE DATA
     let cachedUTXOs = [];
+    let arrDelegatedUTXOs = [];
     let cachedBlockCount = 0;
 
     const nSecp256k1 = nobleSecp256k1.default;
@@ -597,7 +598,7 @@
     const domPrivKey = document.getElementById("privateKey");
 
     function getBalance(updateGUI = false) {
-      let nBalance = cachedUTXOs.reduce((a, b) => { return a + b.value }, 0);
+      let nBalance = cachedUTXOs.reduce((a, b) => { return a + b.sats }, 0);
 
       // Update the GUI too, if chosen
       if (updateGUI) {
@@ -607,6 +608,10 @@
       }
 
       return nBalance;
+    }
+
+    function getStakingBalance() {
+      return arrDelegatedUTXOs.reduce((a, b) => { return a + b.sats }, 0);
     }
 
     // URL-Query request processing
@@ -818,6 +823,92 @@
         alert("You need a wallet to transact with! Please import a wallet via the 'Dashboard --> Access my wallet' menu");
       }
     }
+    function undelegate(value) {
+      if (!publicKeyForNetwork) {
+        if (hasEncryptedWallet())
+          alert("Please unlock your wallet before sending transactions!");
+        else
+          alert("Please import/create your wallet before sending transactions!");
+        return;
+      }
+      let nBalance = getStakingBalance() / COIN;
+      if (value > nBalance) return alert("Balance is too small! (" + nBalance + " - " + value + " = " + (nBalance - value).toFixed(8) + ")");
+      console.log("Constructing TX of value: " + value + " PIV");
+      // Loop our cached UTXOs and construct a TX
+      trx = bitjs.transaction();
+      let txValue = 0;
+      for (const UTXO of arrDelegatedUTXOs) {
+        if (txValue > value) {
+          // Required Coin Control value met, yahoo!
+          console.log("Coin Control: TX Constructed! Selected " + trx.inputs.length + " input(s) (" + txValue + " PIV)");
+          break;
+        }
+        trx.addinput(UTXO.id, UTXO.vout, UTXO.script);
+        txValue += UTXO.sats / COIN;
+        console.log("Coin Control: Selected CS input " + UTXO.id.substr(0, 6) + "(" + UTXO.vout + ")... (Added " + (UTXO.sats / COIN).toFixed(8) + " PIV - Total: " + txValue + ")");
+      }
+      calculatefee(trx.serialize().length);
+      trx.addoutput(publicKeyForNetwork, value);
+      addresschange = publicKeyForNetwork;
+      totalSent = (parseFloat(fee) + parseFloat(value)).toFixed(8);
+      valuechange = (parseFloat(txValue) - parseFloat(totalSent)).toFixed(8);
+      if (totalSent <= nBalance) {
+        domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + fee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
+        trx.addoutput(addresschange, valuechange); //Change Address
+        if (typeof privateKeyForTransactions !== 'undefined') {
+          sendTransaction(trx.sign(privateKeyForTransactions, 1, 'coldstake'));
+          domGenIt.innerHTML = "Continue";
+        } else {
+          console.log("No private key");
+        }
+      } else {
+        console.warn("Amount: " + value + "\nFee: " + fee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
+        domHumanReadable.innerHTML = "You are trying to send more than you have!";
+      }
+    }
+    function delegate(value, coldAddr) {
+      if (!publicKeyForNetwork) {
+        if (hasEncryptedWallet())
+          alert("Please unlock your wallet before sending transactions!");
+        else
+          alert("Please import/create your wallet before sending transactions!");
+        return;
+      }
+      let nBalance = getBalance() / COIN;
+      if (value > nBalance) return alert("Balance is too small! (" + nBalance + " - " + value + " = " + (nBalance - value).toFixed(8) + ")");
+      console.log("Constructing TX of value: " + value + " PIV");
+      // Loop our cached UTXOs and construct a TX
+      trx = bitjs.transaction();
+      let txValue = 0;
+      for (const UTXO of cachedUTXOs) {
+        if (txValue > value) {
+          // Required Coin Control value met, yahoo!
+          console.log("Coin Control: TX Constructed! Selected " + trx.inputs.length + " input(s) (" + txValue + " PIV)");
+          break;
+        }
+        trx.addinput(UTXO.id, UTXO.vout, UTXO.script);
+        txValue += UTXO.sats / COIN;
+        console.log("Coin Control: Selected input " + UTXO.id.substr(0, 6) + "(" + UTXO.vout + ")... (Added " + (UTXO.sats / COIN).toFixed(8) + " PIV - Total: " + txValue + ")");
+      }
+      calculatefee(trx.serialize().length);
+      trx.addcoldstakingoutput(publicKeyForNetwork, coldAddr, value);
+      addresschange = publicKeyForNetwork;
+      totalSent = (parseFloat(fee) + parseFloat(value)).toFixed(8);
+      valuechange = (parseFloat(txValue) - parseFloat(totalSent)).toFixed(8);
+      if (totalSent <= nBalance) {
+        domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + fee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
+        trx.addoutput(addresschange, valuechange); //Change Address
+        if (typeof privateKeyForTransactions !== 'undefined') {
+          sendTransaction(trx.sign(privateKeyForTransactions, 1));
+          domGenIt.innerHTML = "Continue";
+        } else {
+          console.log("No private key");
+        }
+      } else {
+        console.warn("Amount: " + value + "\nFee: " + fee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
+        domHumanReadable.innerHTML = "You are trying to send more than you have!";
+      }
+    }
     function createSimpleTransation() {
       if (!networkEnabled) return alert("Cannot create Simple Transactions in offline mode; this requires an explorer to sync your balance (UTXOs), please enable Networking to use this feature! Otherwise, use 'Advanced Transactions'");
       if (!publicKeyForNetwork) {
@@ -850,9 +941,9 @@
           console.log("Coin Control: TX Constructed! Selected " + trx.inputs.length + " input(s) (" + txValue + " PIV)");
           break;
         }
-        trx.addinput(UTXO.tx_hash, UTXO.tx_ouput_n, UTXO.script);
-        txValue += UTXO.value / COIN;
-        console.log("Coin Control: Selected input " + UTXO.tx_hash.substr(0, 6) + "(" + UTXO.tx_ouput_n + ")... (Added " + (UTXO.value / COIN).toFixed(8) + " PIV - Total: " + txValue + ")");
+        trx.addinput(UTXO.id, UTXO.vout, UTXO.script);
+        txValue += UTXO.sats / COIN;
+        console.log("Coin Control: Selected input " + UTXO.id.substr(0, 6) + "(" + UTXO.vout + ")... (Added " + (UTXO.sats / COIN).toFixed(8) + " PIV - Total: " + txValue + ")");
       }
 
       if (address != '' && value != '') {

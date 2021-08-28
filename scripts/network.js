@@ -13,6 +13,7 @@ if (networkEnabled) {
         console.log("New block detected! " + cachedBlockCount + " --> " + data);
         if (publicKeyForNetwork)
           getUnspentTransactions();
+          getDelegatedUTXOs();
       }
       cachedBlockCount = data;
     }
@@ -34,7 +35,12 @@ if (networkEnabled) {
           document.getElementById("errorNotice").innerHTML = '';
         if (amountOfTransactions <= 1000) {
           for (i = 0; i < amountOfTransactions; i++) {
-            cachedUTXOs.push(data.unspent_outputs[i]);
+            cachedUTXOs.push({
+              'id': data.unspent_outputs[i].tx_hash,
+              'vout': data.unspent_outputs[i].tx_ouput_n,
+              'sats': data.unspent_outputs[i].value,
+              'script': data.unspent_outputs[i].script
+            });
           }
           // Update the GUI with the newly cached UTXO set
           getBalance(true);
@@ -46,6 +52,42 @@ if (networkEnabled) {
       }
     }
     request.send()
+  }
+  var arrUTXOsToSearch = [];
+  var searchUTXO = function () {
+    if (!arrUTXOsToSearch.length) return;
+    var request = new XMLHttpRequest()
+    request.open('GET', "https://stakecubecoin.net/pivx/api/tx-specific/" + arrUTXOsToSearch[0].txid, true);
+    request.onload = function () {
+      data = JSON.parse(this.response);
+      // Check the specified UTXO
+      const cVout = data.vout[arrUTXOsToSearch[0].vout];
+      if (cVout.scriptPubKey.type === 'coldstake' && cVout.scriptPubKey.addresses.includes(publicKeyForNetwork)) {
+        if (!arrDelegatedUTXOs.find(a => a.id === arrUTXOsToSearch[0].txid && a.vout === arrUTXOsToSearch[0].vout)) {
+          arrDelegatedUTXOs.push({
+            'id': arrUTXOsToSearch[0].txid,
+            'vout': arrUTXOsToSearch[0].vout,
+            'sats': Number(arrUTXOsToSearch[0].value),
+            'script': cVout.scriptPubKey.hex
+          });
+          console.log('Found new Cold Staking UTXO!');
+        }
+      }
+      arrUTXOsToSearch.shift();
+      if (arrUTXOsToSearch.length) searchUTXO();
+    }
+    request.send();
+  }
+  var getDelegatedUTXOs = function () {
+    if (arrUTXOsToSearch.length) return;
+    var request = new XMLHttpRequest()
+    request.open('GET', "https://stakecubecoin.net/pivx/api/utxo/" + publicKeyForNetwork, true);
+    request.onload = function () {
+      data = JSON.parse(this.response);
+      arrUTXOsToSearch = data;
+      searchUTXO();
+    }
+    request.send();
   }
   var sendTransaction = function (hex) {
     if (typeof hex !== 'undefined') {

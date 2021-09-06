@@ -641,16 +641,31 @@
       if (audio === null) {
         audio = new Audio('assets/music.mp3');
         audio.play();
-        document.getElementById("navlogo").className += " discoFilter";
+        startDisco();
       } else
       if (audio.paused) {
         audio.play();
+        startDisco();
       } else
       if (audio.ended) {
         audio.play();
+        startDisco();
       } else {
         audio.pause();
+        stopDisco();
       }
+    }
+
+    function startDisco() {
+      for (const domImg of document.getElementsByTagName('img')) {
+        domImg.classList.add("discoFilter");
+      }
+    }
+
+    function stopDisco() {
+      for (const domImg of document.getElementsByTagName('img')) {
+          domImg.classList.remove("discoFilter");
+        }
     }
 
     function toClipboard(element, caller) {

@@ -105,12 +105,15 @@
 			let buf = [];
 			const addrDecoded = btrx.addressDecode(address);
 			o.value = new BigInteger('' + Math.round((value * 1) * 1e8), 10);
-			buf.push(118); // OP_DUP
-			buf.push(169); // OP_HASH160
+			buf.push(OP['DUP']);
+			buf.push(OP['HASH160']);
 			buf.push(addrDecoded.length);
 			buf = buf.concat(addrDecoded); // address in bytes
-			buf.push(136); // OP_EQUALVERIFY
-			buf.push(172); // OP_CHECKSIG
+			buf.push(OP['EQUALVERIFY']);
+			buf.push(OP['CHECKSIG']);
+			o.script = buf;
+			return this.outputs.push(o);
+		}
 			o.script = buf;
 			return this.outputs.push(o);
 		}
@@ -121,19 +124,19 @@
 			const addrDecoded = btrx.addressDecode(addr);
 			const addrCSDecoded = btrx.addressDecode(addrColdStake);
 			o.value = new BigInteger('' + Math.round((value * 1) * 1e8), 10);
-			buf.push(118);  // OP_DUP
-			buf.push(169);  // OP_HASH160
-			buf.push(123);  // OP_ROT
-			buf.push(99);   // OP_IF
-			buf.push(209);  // OP_CHECKCOLDSTAKEVERIFY
+			buf.push(OP['DUP']);
+			buf.push(OP['HASH160']);
+			buf.push(OP['ROT']);
+			buf.push(OP['IF']);
+			buf.push(OP['CHECKCOLDSTAKEVERIFY']);
 			buf.push(addrCSDecoded.length);
 			buf = buf.concat(addrCSDecoded); // staking key in bytes
-			buf.push(103);  // OP_ELSE
+			buf.push(OP['ELSE']);
 			buf.push(addrDecoded.length);
 			buf = buf.concat(addrDecoded); // spending key in bytes
-			buf.push(104)   // OP_ENDIF
-			buf.push(136);  // OP_EQUALVERIFY
-			buf.push(172);  // OP_CHECKSIG
+			buf.push(OP['ENDIF']);
+			buf.push(OP['EQUALVERIFY']);
+			buf.push(OP['CHECKSIG']);
 			o.script = buf;
 			return this.outputs.push(o);
 		}

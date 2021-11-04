@@ -349,18 +349,24 @@
 		btrx.signinput = function(index, wif, sigHashType, txType = 'pubkey') {
 			const key = bitjs.wif2pubkey(wif);
 			const shType = sigHashType || 1;
-			const signature = this.transactionSig(index, wif, shType);
 			var buf = [];
-			const sigBytes = Crypto.util.hexToBytes(signature);
-			buf.push(sigBytes.length);
-			buf = buf.concat(sigBytes);
-			if (txType === 'coldstake') {
-				// OP_FALSE to flag the redeeming of the delegation back to the Owner Address
-				buf.push(0);
+			if (txType !== 'preimage') {
+				const signature = this.transactionSig(index, wif, shType);
+				const sigBytes = Crypto.util.hexToBytes(signature);
+				buf.push(sigBytes.length);
+				buf = buf.concat(sigBytes);
+				if (txType === 'coldstake') {
+					// OP_FALSE to flag the redeeming of the delegation back to the Owner Address
+					buf.push(OP['FALSE']);
+				}
+				const pubkeyBytes = Crypto.util.hexToBytes(key['pubkey']);
+				buf.push(pubkeyBytes.length);
+				buf = buf.concat(pubkeyBytes);
+			} else {
+				const preimage = Crypto.util.hexToBytes(wif);
+				buf.push(preimage.length);
+				buf = buf.concat(preimage);
 			}
-	        const pubkeyBytes = Crypto.util.hexToBytes(key['pubkey']);
-			buf.push(pubkeyBytes.length);
-			buf = buf.concat(pubkeyBytes);
 			this.inputs[index].script = buf;
 			return true;
 		}

@@ -7,13 +7,12 @@ if (networkEnabled) {
     request.onload = function () {
       let data = Number(this.response);
       // If the block count has changed, refresh all of our data!
-      let reloader = document.getElementById("balanceReload");
-      reloader.className = reloader.className.replace(/ playAnim/g, "");
+      domBalanceReload.className = domBalanceReload.className.replace(/ playAnim/g, "");
+      domBalanceReloadStaking.className = domBalanceReloadStaking.className.replace(/ playAnim/g, "");
       if (data > cachedBlockCount) {
         console.log("New block detected! " + cachedBlockCount + " --> " + data);
         if (publicKeyForNetwork)
           getUnspentTransactions();
-          getDelegatedUTXOs();
       }
       cachedBlockCount = data;
     }
@@ -51,7 +50,9 @@ if (networkEnabled) {
         }
       }
     }
-    request.send()
+    request.send();
+    // In parallel, fetch Cold Staking UTXOs
+    getDelegatedUTXOs();
   }
   var arrUTXOsToSearch = [];
   var searchUTXO = function () {
@@ -60,20 +61,21 @@ if (networkEnabled) {
     request.open('GET', "https://stakecubecoin.net/pivx/api/tx-specific/" + arrUTXOsToSearch[0].txid, true);
     request.onload = function () {
       data = JSON.parse(this.response);
-      // Check the specified UTXO
-      const cVout = data.vout[arrUTXOsToSearch[0].vout];
-      if (cVout.scriptPubKey.type === 'coldstake' && cVout.scriptPubKey.addresses.includes(publicKeyForNetwork)) {
-        if (!arrDelegatedUTXOs.find(a => a.id === arrUTXOsToSearch[0].txid && a.vout === arrUTXOsToSearch[0].vout)) {
-          arrDelegatedUTXOs.push({
-            'id': arrUTXOsToSearch[0].txid,
-            'vout': arrUTXOsToSearch[0].vout,
-            'sats': Number(arrUTXOsToSearch[0].value),
-            'script': cVout.scriptPubKey.hex
-          });
-          console.log('Found new Cold Staking UTXO!');
+      // Check the UTXOs
+      for (const cVout of data.vout) {
+        if (cVout.scriptPubKey.type === 'coldstake' && cVout.scriptPubKey.addresses.includes(publicKeyForNetwork)) {
+          if (!arrDelegatedUTXOs.find(a => a.id === data.txid && a.vout === cVout.n)) {
+            arrDelegatedUTXOs.push({
+              'id': data.txid,
+              'vout': cVout.n,
+              'sats': Number(cVout.value * COIN),
+              'script': cVout.scriptPubKey.hex
+            });
+          }
         }
       }
       arrUTXOsToSearch.shift();
+      getStakingBalance(true);
       if (arrUTXOsToSearch.length) searchUTXO();
     }
     request.send();
@@ -85,11 +87,12 @@ if (networkEnabled) {
     request.onload = function () {
       data = JSON.parse(this.response);
       arrUTXOsToSearch = data;
+      arrDelegatedUTXOs = [];
       searchUTXO();
     }
     request.send();
   }
-  var sendTransaction = function (hex) {
+  var sendTransaction = function (hex, msg = '') {
     if (typeof hex !== 'undefined') {
       var request = new XMLHttpRequest()
       request.open('GET', 'https://stakecubecoin.net/pivx/submittx?tx=' + hex, true)
@@ -104,6 +107,7 @@ if (networkEnabled) {
           domSimpleTXs.style.display = 'none';
           domAddress1s.value = '';
           domValue1s.innerHTML = '';
+          if (msg) alert(msg);
         } else {
           console.log('Error sending transaction: ' + data);
           document.getElementById("transactionFinal").innerHTML = ('<h4 style="color:red">Error sending transaction: ' + data + "</h4>");

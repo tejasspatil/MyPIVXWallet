@@ -114,6 +114,16 @@
 			o.script = buf;
 			return this.outputs.push(o);
 		}
+
+		btrx.addpreimageoutput = function(preimage, value) {
+			const o = {};
+			let buf = [];
+			const preimageTarr = Crypto.util.hexToBytes(preimage);
+			o.value = new BigInteger('' + Math.round((value * 1) * 1e8), 10);
+			//buf.push(preimageTarr.length);
+			//buf = buf.concat(preimageTarr); // address in bytes
+			//buf.push(OP['EQUALVERIFY']);
+			buf.push(OP['TRUE']);
 			o.script = buf;
 			return this.outputs.push(o);
 		}

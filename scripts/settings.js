@@ -22,7 +22,7 @@ function toggleDebug() {
     document.getElementById('Debug').innerHTML = "";
   } else {
     debug = true;
-    document.getElementById('Debug').innerHTML = "<b> DEBUG MODE </b>" + closeTheAlert;
+    document.getElementById('Debug').innerHTML = "<b> DEBUG MODE </b>";
   }
   alert(`Debug set to ${debug}`);
 }
@@ -32,7 +32,7 @@ function toggleNetwork() {
     document.getElementById('Network').innerHTML = "";
   } else {
     networkEnabled = true;
-    document.getElementById('Network').innerHTML = "<b> Network Enabled </b>" + closeTheAlert;
+    document.getElementById('Network').innerHTML = "<b> Network Enabled </b>";
   }
   alert(`Network set to ${networkEnabled}`);
 }

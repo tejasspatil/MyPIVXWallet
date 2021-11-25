@@ -902,7 +902,7 @@
     function undelegateGUI() {
       // Verify the amount
       const nAmount = Number(document.getElementById('undelegateAmount').value);
-      if (nAmount < 1) return alert('Minimum amount is 1 PIV!');
+      if (nAmount < 0.01) return alert('Minimum amount is 0.01 PIV!');
       undelegate(nAmount);
     }
     function undelegate(value) {
@@ -930,13 +930,13 @@
         txValue += UTXO.sats / COIN;
         console.log("Coin Control: Selected CS input " + UTXO.id.substr(0, 6) + "(" + UTXO.vout + ")... (Added " + (UTXO.sats / COIN).toFixed(8) + " PIV - Total: " + txValue + ")");
       }
-      calculatefee(trx.serialize().length);
+      const nFee = calculatefee(trx.serialize().length);
       trx.addoutput(publicKeyForNetwork, value);
       addresschange = publicKeyForNetwork;
-      totalSent = (parseFloat(fee) + parseFloat(value)).toFixed(8);
-      valuechange = (parseFloat(txValue) - parseFloat(totalSent)).toFixed(8);
+      totalSent = (nFee + value).toFixed(8);
+      valuechange = (txValue - parseFloat(totalSent)).toFixed(8);
       if (totalSent <= nBalance) {
-        domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + fee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
+        domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
         if (valuechange > 1.01) {
           // Enough change to resume cold staking, so we'll send the change back to the cold staking address
           // Ensure the user has an address set - if not, request one!
@@ -960,7 +960,7 @@
           console.log("No private key");
         }
       } else {
-        console.warn("Amount: " + value + "\nFee: " + fee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
+        console.warn("Amount: " + value + "\nFee: " + nFee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
         alert('You are trying to undelegate more than you have, don\'t forget blockchain fees! Removing ~0.001 PIV will do fine.');
       }
     }
@@ -1013,13 +1013,13 @@
         txValue += UTXO.sats / COIN;
         console.log("Coin Control: Selected input " + UTXO.id.substr(0, 6) + "(" + UTXO.vout + ")... (Added " + (UTXO.sats / COIN).toFixed(8) + " PIV - Total: " + txValue + ")");
       }
-      calculatefee(trx.serialize().length);
+      const nFee = calculatefee(trx.serialize().length);
       trx.addcoldstakingoutput(publicKeyForNetwork, coldAddr, value);
       addresschange = publicKeyForNetwork;
-      totalSent = (parseFloat(fee) + parseFloat(value)).toFixed(8);
-      valuechange = (parseFloat(txValue) - parseFloat(totalSent)).toFixed(8);
+      totalSent = (nFee + parseFloat(value)).toFixed(8);
+      valuechange = (txValue - parseFloat(totalSent)).toFixed(8);
       if (totalSent <= nBalance) {
-        domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + fee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
+        domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
         trx.addoutput(addresschange, valuechange); //Change Address
         if (typeof privateKeyForTransactions !== 'undefined') {
           sendTransaction(trx.sign(privateKeyForTransactions, 1), "Delegation successful, please wait for confirmations, enjoy your staking!");
@@ -1028,7 +1028,7 @@
           console.log("No private key");
         }
       } else {
-        console.warn("Amount: " + value + "\nFee: " + fee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
+        console.warn("Amount: " + value + "\nFee: " + nFee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
         alert('You are trying to delegate more than you have, don\'t forget blockchain fees! Removing ~0.001 PIV will do fine.');
       }
     }
@@ -1057,13 +1057,13 @@
         txValue += UTXO.sats / COIN;
         console.log("Coin Control: Selected input " + UTXO.id.substr(0, 6) + "(" + UTXO.vout + ")... (Added " + (UTXO.sats / COIN).toFixed(8) + " PIV - Total: " + txValue + ")");
       }
-      calculatefee(trx.serialize().length);
+      const nFee = calculatefee(trx.serialize().length);
       trx.addpreimageoutput(hex, value);
       addresschange = publicKeyForNetwork;
-      totalSent = (parseFloat(fee) + parseFloat(value)).toFixed(8);
-      valuechange = (parseFloat(txValue) - parseFloat(totalSent)).toFixed(8);
+      totalSent = (nFee + parseFloat(value)).toFixed(8);
+      valuechange = (txValue - parseFloat(totalSent)).toFixed(8);
       if (totalSent <= nBalance) {
-        domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + fee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
+        domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
         trx.addoutput(addresschange, valuechange); //Change Address
         if (typeof privateKeyForTransactions !== 'undefined') {
           sendTransaction(trx.sign(privateKeyForTransactions, 1));
@@ -1072,7 +1072,7 @@
           console.log("No private key");
         }
       } else {
-        console.warn("Amount: " + value + "\nFee: " + fee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
+        console.warn("Amount: " + value + "\nFee: " + nFee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
         domHumanReadable.innerHTML = "You are trying to send more than you have!";
       }
     }
@@ -1115,13 +1115,13 @@
       }
 
       if (address != '' && value != '') {
-        calculatefee(trx.serialize().length);
+        const nFee = calculatefee(trx.serialize().length);
         trx.addoutput(address, value); //Sending to this address
         addresschange = publicKeyForNetwork;
-        totalSent = (parseFloat(fee) + parseFloat(value)).toFixed(8);
-        valuechange = (parseFloat(txValue) - parseFloat(totalSent)).toFixed(8);
+        totalSent = (nFee + parseFloat(value)).toFixed(8);
+        valuechange = (txValue - parseFloat(totalSent)).toFixed(8);
         if (totalSent <= nBalance) {
-          domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + fee + "<br>To: " + address + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
+          domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + address + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
           trx.addoutput(addresschange, valuechange); //Change Address
           if (typeof privateKeyForTransactions !== 'undefined') {
             sendTransaction(trx.sign(privateKeyForTransactions, 1));
@@ -1130,7 +1130,7 @@
             console.log("No private key");
           }
         } else {
-          console.warn("Amount: " + value + "\nFee: " + fee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
+          console.warn("Amount: " + value + "\nFee: " + nFee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
           domHumanReadable.innerHTML = "You are trying to send more than you have!";
         }
       } else {

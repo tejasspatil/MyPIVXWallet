@@ -59,7 +59,7 @@ var randArr = new Uint8Array(32) //create a typed array of 32 bytes (256 bits)
 if (debug) {
   document.getElementById('Debug').innerHTML = "<b> DEBUG MODE </b>";
 }
-document.getElementById('dcfooter').innerHTML = '© MIT 2021 - Built with 💜 by PIVX Labs - <b style=\'cursor:pointer\' onclick=\'openDonatePage()\'>Donate!</b><br><a href="https://github.com/PIVX-Labs/MyPIVXWallet">MyPIVXWallet - v' + wallet_version + '</a>';
+document.getElementById('dcfooter').innerHTML = '© MIT 2021 - Built with 💜 by PIVX Labs - <b style=\'cursor:pointer\' onclick=\'openDonatePage()\'>Donate!</b><br><a href="https://github.com/PIVX-Labs/MyPIVXWallet">MyPIVXWallet</a>';
 // Wallet Import
 importWallet = function (newWif = false, raw = false) {
   if (walletAlreadyMade != 0) {

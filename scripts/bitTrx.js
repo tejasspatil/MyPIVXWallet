@@ -94,7 +94,6 @@
 		btrx.addinput = function(txid, index, script, sequence) {
 			const o = {};
 			o.outpoint = {'hash': txid, 'index': index};
-			//o.script = []; Signature and Public Key should be added after singning
 			o.script = Crypto.util.hexToBytes(script); //push previous output pubkey script
 			o.sequence = sequence || ((btrx.locktime==0) ? 4294967295 : 0);
 			return this.inputs.push(o);

@@ -9,6 +9,7 @@ body {
   background-color:#150c25;
   color: #f2f8fa;
 }
+
 textarea,input {
   background-color:	#fff;
   border-style: dashed;
@@ -17,6 +18,7 @@ textarea,input {
   margin-bottom: 5px;
   width: 100%; height: 43px; margin-bottom: 14px;
 }
+
 button {
   color:rgba(255, 255, 255, 0.65);
   border-radius: 15px;
@@ -50,7 +52,7 @@ button:active {
 }
 
 
-.nav-link {  font-weight: 400; font-size:14px;  }
+.nav-link {  font-weight: 500; font-size: 16px;  }
 .nav-item { margin-left:15px; }
 .navButton {
   color: #999;
@@ -79,12 +81,35 @@ input::-moz-focus-inner {
 }
 
 .large-box {
-  background: rgba(43,9,80,0.75);
+  background: rgba(43, 9, 80, 0.55);
   border-radius: 8px;
-  border-color: #5b00a0;
+  border-color: #6222ab;
   border-width: 1px;
   border-style: solid;
   margin: 5px;
+}
+
+
+.large-box:hover {
+    background: linear-gradient(217deg, rgb(51, 0, 153, 0.1), rgb(34, 0, 102, 0.3) 70.71%);
+    border-color: #763acf;
+
+}
+
+.add-frame {
+    display: block;
+    margin: 0 auto;
+    width: 85% !important;
+    height: 460px !important;;
+    background: rgba(72, 2, 125, 0.60);
+    border: 1px solid #a366ff;
+    border-radius: 8px;
+    padding: 5px;
+}
+
+#StakingTab {
+    padding: 10px 10px 30px;
+    margin: 20px 0 100px;
 }
 
 .modal {
@@ -150,11 +175,11 @@ input::-moz-focus-inner {
   min-height: 100vh;
 }
 #content-wrap {
-  padding-bottom: 3rem;    /* Footer height */
+  padding-bottom: 4rem;    /* Footer height */
   margin-top: 75px;
 }
 
-.rm-pd { padding: 0px; }
+.rm-pd { padding: 15px 15px 40px; }
 
 .pullDown {
   width:100%;
@@ -200,7 +225,126 @@ input::-moz-focus-inner {
   padding: 6px 12px;
   border-radius: 8px;
 }
-.footer {position: absolute; bottom: 0; width: 100%; background-color: #2b09508c; color: white; height: 4rem; padding-top: 10px; text-align: center; border-top-style: solid; border-top-color: #521186; border-width: 1px;}
+
+#Transaction.tabcontent {
+    padding-bottom: 100px;
+}
+
+
+.frame {
+    display: block;
+    margin: 0 auto;
+    background: #2B0950BF;
+}
+
+/* DASHBOARD */
+
+#genKeyWarning {
+    position: relative;
+    padding: 20px;
+}
+
+    #genKeyWarning div {
+        display: inline-block !important;
+        width: 100%;
+        max-width: calc(100% - 304px) !important;
+        padding-top: 5px;
+
+    }
+
+        #genKeyWarning .pivx-button-big {
+            display: inline-block;
+            float: right;
+        }
+
+
+    #create-wallet-box {
+        display: block;
+        position: relative;
+        width: 100%;
+        height: 550px;
+        border: 1px #4b1282 solid;
+        box-shadow: 2px 2px 15px 2px #4b1271;
+        margin: 0 0 280px 0;
+        background: linear-gradient(0.25turn, rgba(77, 77, 77, 0.5), rgba(115, 0, 255, 0.3));
+    }
+
+    #balance-box {
+        position: absolute;
+            top: 20px;
+            left: 27px;
+        display: block !important;
+        margin: 0 auto !important;
+        width: 95%;
+        height: 125px;
+        background: linear-gradient(0.25turn, rgba(122, 122, 122, 0.5), rgba(115, 0, 255, 0.4));
+    }
+
+    #address-box {
+        position: absolute;
+            top: 200px;
+            left: 100px;
+        height: 250px;
+        padding: 30px 25px;
+    }
+
+    #address-box.large-box {
+        width: 890px !important;
+        background: linear-gradient(0.15turn, rgba(43, 9, 80, 0.45),rgba(43, 9, 80, 0.02));
+    }
+
+    #pubkey-box {
+        position: absolute;
+            top: 200px;
+            left: 660px;
+        height: 225px !important;
+        padding: 25px 30px;
+    }
+
+        #PrivateQR img {
+            width: 95px !important;
+            height: 95px !important;
+
+        }
+
+        #PublicQR img {
+            width: 95px !important;
+            height: 95px !important;
+        }
+
+
+/* STAKE */
+
+#balanceReloadStaking {
+    top: -15px !important;
+    left: 148px;
+}
+
+
+/* FOOTER */
+
+#foot {
+    display: block;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 100px;
+    width: 100%;
+    padding-top: 50px;
+}
+
+    .footer {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #2b09508c;
+        height: 4rem;
+        color: white;
+        text-align: center;
+        border: solid #521186 1px;
+        padding-top: 10px;
+    }
 
 .footer a { color:white; font-weight:bold; }
 
@@ -215,12 +359,14 @@ input::-moz-focus-inner {
 
 /* New styling */
 
+/* Buttons */
 .pivx-button-big {
   display: inline-block;
   outline: none;
   margin: 5px;
   font-family: Montserrat,sans-serif;
-  padding: 16px 40px;
+  height: auto;
+  padding: 14px 30px;
   background: linear-gradient( 183deg ,#9621ff, #7d21ff);
   line-height: 1.25em;
   font: 15px Montserrat,sans-serif!important;
@@ -241,6 +387,13 @@ input::-moz-focus-inner {
   transition: all .2s ease-out;
 }
 
+.button-padd {
+    display: inline-block;
+    height: auto;
+    width: auto;
+    padding: 15px 10px;
+}
+
 .home-hero {
     background: radial-gradient(45vw 80% at 90% 40%,rgba(162,50,255,.3),rgba(44,11,76,0) 95%),linear-gradient(
 90deg
@@ -251,7 +404,7 @@ input::-moz-focus-inner {
 ,#2c0b4c,#500f83 60%,#2c0b4c);
 }
 
-.title-section { margin-bottom:20px; float:left;  }
+.title-section { margin-bottom:20px; }
 
 /*PIVX WARNINGS*/
 .warning-message { display:none; background-color:#9021fe; padding-top:20px; padding-bottom:20px; margin-bottom:15px;  }
@@ -262,6 +415,7 @@ input::-moz-focus-inner {
 /*PIVX TEXT CUSTOMS*/
 .pivx-bold-title { line-height: 1.35em; font-size: calc(37.88235px + .70588vw); font-weight: 700; font-family: Montserrat,sans-serif;;  }
 .pivx-bold-title span { font-size: .6em; display: block; line-height: 1.2em; font-weight: 300;  }
+.pivx-center-title { text-align: center; }
 
 /*PIVX FEATURES SECTION*/
 .pivx-feature-father { margin-top:90px; }
@@ -297,9 +451,66 @@ input::-moz-focus-inner {
 .dashboard-title { margin-top:15px; }
 .badge{ margin-bottom: 13px; }
 .private-key-area { height: 29px!important; font-size: 14px!important; padding-top: 4px; padding-bottom: 4px; background: #521685; border: none; resize: none; color: white; }
-/*Breakpoints */
+
+
+/* BREAKPOINTS */
+
+@media screen and (max-width: 1200px) {
+
+    /* Stake page */
+
+    #piv-price {
+        left: 40px !important;
+    }
+    #guiBalanceBoxStaking {
+        left: 135px !important;
+    }
+    #stake-title {
+        left: 540px !important;
+    }
+
+    .button-padd .pivx-button-big {
+        margin: 0;
+        display: inline-block !important;
+        width: 100% !important;
+        padding: 15px 13px;
+
+    }
+}
+
+@media screen and (max-width: 1199px) {
+
+        /* Dashboard page */
+            #genKeyWarning .pivx-button-big { margin-top: 20px;}
+
+            #balance-box h3 { left: 640px !important; }
+
+        #address-box.large-box {
+            width: 770px !important;
+            position: absolute;
+            left: 70px !important;
+        }
+
+        #pubkey-box {
+            left: 566px !important;
+            top: 205px !important;
+
+        }
+
+            #PrivateQR img {
+                width: 90px !important;
+                height: 90px !important;
+
+            }
+
+            #PublicQR img {
+                width: 90px !important;
+                height: 90px !important;
+            }
+}
 
 @media screen and (min-width: 1025px) {
+
   /*Main Wallet page */
   #PrivateTxt {
     font-size: 25px;
@@ -308,50 +519,480 @@ input::-moz-focus-inner {
     font-size: 25px;
   }
 }
+
 @media screen and (max-width: 1024px) {
+
   /*Main Wallet page */
-  #PrivateTxt {
-    font-size: 18px;
+  #PrivateTxt { font-size: 18px; }
+
+  #PublicTxt { font-size: 25px; }
+
+  /* Settings */
+
+  #submit-button.pivx-button-big {
+      width: auto !important;
+      padding: 14px 90px;
   }
-  #PublicTxt {
-    font-size: 25px;
-  }
+
+  #Settings .pivx-button-big { margin: 8px 2px; }
 }
+
+@media screen and (max-width: 1000px) {
+
+    /* Stake page */
+    #stake-title { left: 600px !important; }
+
+    #balanceReloadStaking {
+        top: -13px !important;
+        left: 160px;
+    }
+
+    #guiBalanceBoxStaking {
+    display: inline-block;
+    width: 100%;
+    }
+
+    .stake-box.large-box.col-md-4 {
+        margin: 30px 30px !important;
+        padding: 10px;
+        display: inline-block !important;
+        width: 90% !important;
+    }
+
+    .add-frame { width: 100% !important; }
+
+    .stake-box .button-padd { padding: 15px 6px; }
+
+    .stake-box .button-padd .pivx-button-big { padding: 15px 22px 15px 27px; }
+
+    .stake-box .button-padd .buttoni-icon { display: none; }
+
+    .button-padd .buttoni-arrow {
+        padding-left: 5px;
+        padding-right: 0;
+    }
+}
+
+@media screen and (max-width: 992px) {
+
+    /* Stake page */
+    #stake-title {
+        left: 445px !important;
+    }
+    #balanceReloadStaking {
+        top: -14px !important;
+        left: 135px;
+    }
+
+    /* Dashboard page */
+    #genKeyWarning div  { max-width: 100% !important; }
+        #genKeyWarning p {
+            width: 100% !important;
+            padding-bottom: 15px;
+         }
+
+        #genKeyWarning .pivx-button-big {
+            float: none;
+            clear: both;
+            display: block !important;
+            margin: 0 auto;
+        }
+
+    #create-wallet-box { height: 650px; }
+
+    #balance-box {
+        width: 93%;
+        left: 22px;
+    }
+        #balance-box h3 {
+            left: 420px !important;
+        }
+
+    #address-box.large-box {
+        width: 580px !important;
+        height: 235px;
+        left: 35px !important;
+        top: 170px;
+        background: none;
+
+    }
+        #address-box .noselect {
+            left: 10px !important;
+            top: -10px;
+        }
+
+        #identicon {
+            position: absolute;
+            top: -20px !important;
+            left: 30px !important;
+
+        }
+
+        #guiAddress {
+            left: 80px !important;
+        }
+
+        #guiQRButton {
+            left: 175px !important;
+        }
+
+    #pubkey-box {
+        left: 380px !important;
+        top: 410px !important;
+    }
+
+    #pubkey-box .pivx-button-big {
+        width: 230px !important;
+        position: absolute;
+            right: -10px;
+    }
+
+        #PrivateQR img {
+            width: 75px !important;
+            height: 75px !important;
+
+        }
+
+        #PublicQR img {
+            width: 75px !important;
+            height: 75px !important;
+        }
+
+
+    /* Intro page */
+        .intro-page .col-md-11  {
+            width: 100% !important;
+            padding-bottom: 35px;
+        }
+}
+
 @media screen and (max-width: 768px) {
-  /*Main Wallet page */
+
+  /* Main Wallet page */
   #PrivateTxt {
     font-size: 17px;
   }
   #PublicTxt {
     font-size: 25px;
   }
-  /*Paddings - text*/
+  /* Paddings - text */
   .dashboard-item {
       padding-left: 5%;
       padding-right: 5%;
   }
+
+   /* Dashboard page */
+
+   #balance-box {
+       width: 92%;
+       height: 120px;
+       left: 20px;
+   }
+
+       #balance-box h3 { left: 250px !important; }
+
+           #guiBalanceBox { left: 45px !important; }
+
+           #piv-ring { left: 25px !important; }
+
+   #address-box.large-box {
+       width: 438px !important;
+       height: 235px;
+       left: 20px !important;
+       background: none;
+   }
+
+   #pubkey-box {
+       left: 15px !important;
+       top: 410px !important;
+   }
+
+   #pubkey-box .pivx-button-big {
+       width: 225px !important;
+           right: 130px !important;
+   }
+
+  /* STAKE page */
+
+  #guiBalanceBoxStaking {
+      left: 120px !important;
+      width: 90px !important;
+  }
+
+  #stake-title { left: 450px !important; }
+
+  #balanceReloadStaking {
+      top: -14px !important;
+      left: 130px !important;
+  }
 }
+
+@media screen and (max-width: 767px) {
+
+ /* Dashboard */
+
+     #genKeyWarning .pivx-button-big { padding: 13px 20px; }
+
+ /* Stake page */
+    #stake-title { left: 282px !important; }
+
+    #balanceReloadStaking {
+        top: 16px !important;
+        left: 30px !important;
+    }
+
+    .add-frame { height: 740px !important; }
+}
+
+@media screen and (max-width: 690px) {
+
+ /* Stake page */
+    #guiBalanceBoxStaking {
+        left: 50px !important;
+        top: 30px !important;
+    }
+
+        #stake-title { left: 290px !important; }
+
+        #balanceReloadStaking {
+            top: 16px !important;
+            left: 30px !important;
+        }
+
+        #piv-price { display: none !important; }
+}
+
 @media screen and (max-width: 600px) {
 
-/* Buttons - Hide icons or it will be deformed*/
+/* Buttons - Hide icons or it will be deformed */
   .buttoni-arrow, .buttoni-icon { display:none; }
 
-  /*Main Wallet page */
-  #PrivateTxt {
-    font-size: 13px;
-  }
-  #PublicTxt {
-    font-size: 17px;
-  }
+  /* Main Wallet page */
+  #PrivateTxt { font-size: 13px; }
 
+  #PublicTxt { font-size: 17px; }
+
+  /* STAKE page */
+  #stake-title { font-size: 25px; }
+
+  #submit-button.pivx-button-big {
+      padding: 14px 85px 14px 100px;
+      margin-top: 20px;
+  }
+     .buttoni-arrow { display: inline-block; }
 }
+
+@media screen and (max-width: 550px) {
+
+ /* Dashboard page */
+
+     #guiBalanceBox { bottom: 43px !important; }
+
+     #piv-ring {
+         left: 25px !important;
+         width: 60px !important;
+         height: 60px !important;
+      }
+
+     #balance-box h3 { left: 230px !important; }
+
+    #address-box.large-box {
+     width: 420px !important;
+     height: 235px;
+     left: 22px !important;
+     border: none !important;
+     background: linear-gradient(217deg, rgb(51, 0, 153, 0.1), rgb(34, 0, 102, 0.3) 70.71%);
+     border-color: #763acf;
+
+    }
+        #pubkey-box .pivx-button-big {
+         width: 225px !important;
+             right: 120px !important;
+        }
+
+ /* STAKE page */
+
+   #stake-title { left: 270px !important; }
+
+   #balanceReloadStaking {
+       top: 15px !important;
+       left: 25px !important;
+   }
+
+   #info { margin-bottom: 35px; }
+}
+
+@media screen and (max-width: 535px) {
+
+ /* Dashboard */
+    #address-box.large-box {
+     width: 400px !important;
+    }
+
+    #pubkey-box .pivx-button-big {
+     width: 200px !important;
+         right: 125px !important;
+    }
+}
+
+@media screen and (max-width: 510px) {
+
+/* Dashboard page */
+
+        #balance-box h3 { left: 207px !important; }
+
+    #address-box.large-box {
+        left: 14px !important;
+        width: 390px !important;
+    }
+        #guiAddress {
+            left: 70px !important;
+        }
+
+        #guiQRButton {
+            left: 160px !important;
+        }
+
+    #pubkey-box .pivx-button-big {
+         width: 200px !important;
+         padding: 12px 10px;
+         right: 110px !important;
+    }
+
+ /* Settings page */
+    #Settings {
+        text-align: center;
+    }
+
+ /* STAKE page */
+    #stake-title { left: 230px !important; }
+
+    #balanceReloadStaking {
+        top: 15px !important;
+        left: 35px;
+    }
+
+    #piv-price {
+        width: 50px !important;
+        height: 50px !important;
+        top: -5px !important;
+        display: none !important;
+    }
+}
+
 @media screen and (max-width: 480px) {
-  /*Main Wallet page */
+
+  /* Main Wallet page */
   #PrivateTxt {
     font-size: 8px;
   }
   #PublicTxt {
     font-size: 13px;
   }
+}
 
+@media screen and (max-width: 420px) {
+
+    /* Stake page */
+    #stake-title { left: 180px !important; }
+
+    #balanceReloadStaking {
+        top: 16px !important;
+        left: 15px !important;
+    }
+
+    /* Settings page */
+
+    #submit-button.pivx-button-big {
+        display: block;
+        height: auto;
+        width: 280px !important;
+        margin: 0 auto;
+    }
+
+        .buttoni-arrow { display: none; }
+
+        #navbarToggler {
+            position: sticky;
+            left: 290px;
+        }
+
+ /* Dashboard */
+
+    #genKeyWarning .pivx-button-big {  padding: 11px 8px 12px 12px;  }
+
+    #piv-ring { display: none !important; }
+
+    #guiBalanceBox {
+        top: -7px;
+        left: -18px;
+        font-size: 18px;
+    }
+
+    #balance-box { width: 90%;}
+
+         #balance-box h3 {
+             left: 137px !important;
+             font-size: 24px;
+         }
+
+     #identicon {
+         top: 1px !important;
+         left: 17px !important;
+         width: 55px;
+         height: 55px;
+
+     }
+
+     #guiAddress {
+         left: 20px !important;
+         top: 7px;
+         padding-left: 15px !important;
+     }
+
+     #guiQRButton {
+         left: 180px !important;
+         bottom: 145px !important;
+     }
+
+        #pubkey-box .pivx-button-big {
+             width: 200px !important;
+             padding: 11px 10px;
+             right: 80px !important;
+        }
+}
+
+@media screen and (max-width: 380px) {
+
+    /* Stake page */
+    #stake-title {
+        top: 32px !important;
+        left: 155px !important;
+    }
+
+    #balanceReloadStaking {
+        top: 17px !important;
+        left: 12px !important;
+    }
+
+    #guiBalanceBoxStaking {
+        left: 30px !important;
+    }
+
+    /* Nav */
+    #navbarToggler {
+        left: 180px;
+    }
+
+    /* Dashboard */
+    #balance-box h3 {
+        left: 122px !important;
+        font-size: 24px;
+    }
+
+    #pubkey-box .pivx-button-big {
+         width: 200px !important;
+         padding: 11px 10px;
+         right: 60px !important;
+    }
 }

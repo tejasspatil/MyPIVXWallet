@@ -425,22 +425,22 @@
               <!-- STAKING FEATURES -->
               <p id="info" class="minor-notif-subtext"><b>New Feature!</b><br>Please be aware MPW Cold Staking is a new, slightly experimental feature, it may be unstable, and is currently slow. Please have patience when using this feature, and wait for block confirmations before actions and balances are shown on-screen.</p>
               <div class="add-frame">
-              <div id="banners" style="max-height: 120px; width: 100%; display: flex; flex-wrap: wrap; justify-content: space-evenly; border-bottom: 1px solid #a366ff;">
-                <div id="staking-rectangle" style=" position: relative; display:block; height:100px; width: 800px !important;">
+              <div id="banners" class="staking-banner-top">
+                <div id="staking-rectangle">
                 <div class="col-md-4">
                   <h3 id="stake-title" class="noselect">Staking &nbsp;&nbsp;<span id="balanceReloadStaking" class="reload noselect" onclick="refreshChainData()">&#x21bb;</span></h3>
                   <div>
-                    <div id="piv-price" style="display: inline-block; position: absolute; width: 55px; height: 55px; left: 0; top: 20px; border-style: solid; border-radius: 1000px; border-width: 3px; background-size: cover; background-image: url(assets/logo-circle.svg);"></div>
-                    <p id="guiBalanceBoxStaking" style=" margin:0; position: absolute;  left: 100px; top: 28px; display: inline-block; padding: 0 10px; font-size: x-large;"><b id="guiBalanceStaking">~</b> PIV</p>
+                    <div id="piv-price" class="staking-piv-icon"></div>
+                    <p id="guiBalanceBoxStaking"><b id="guiBalanceStaking">~</b> PIV</p>
                   </div>
                 </div>
                 </div>
             </div>
               <br>
-              <div id="banners" style="min-height: 200px; width: 100%; display: flex; flex-wrap: wrap; justify-content: space-evenly;">
-                <div class="stake-box large-box col-md-4" style="margin: 30px 5px 10px; height: 220px; text-align:center; margin-left: auto;margin-right: auto;">
-                  <h5 id="availToDelegate" style="margin-top: 1rem; margin-bottom: 0.75rem; padding: 5px;">Available: 0 PIV</h5>
-                  <textarea id="delegateAmount" style="color: black; font-size: 16px !important; text-align: center; line-height: 20px;" class="form-control private-key-area"></textarea>
+              <div id="banners" class="staking-banner-bottom">
+                <div class="stake-box large-box col-md-4">
+                  <h5 id="availToDelegate" class="stake-balances">Available: 0 PIV</h5>
+                  <textarea id="delegateAmount" class="stake-input form-control private-key-area"></textarea>
                   <div class="button-padd">
                       <button class="pivx-button-big" onclick="delegateGUI()">
                                   <span class="buttoni-icon"><i class="far fa-eye fa-tiny-margin"></i></span>
@@ -449,9 +449,9 @@
                         </button>
                  </div>
                 </div>
-                <div class="stake-box large-box col-md-4" style="margin: 30px 5px 10px; height: 220px; text-align:center;margin-left: auto;margin-right: auto;">
-                  <h5 id="availToUndelegate" style="margin-top: 1rem; margin-bottom: 0.75rem; padding: 5px;">Staking: 0 PIV</h5>
-                  <textarea id="undelegateAmount" style="color: black; font-size: 16px !important; text-align: center; line-height: 20px;" class="form-control private-key-area"></textarea>
+                <div class="stake-box large-box col-md-4">
+                  <h5 id="availToUndelegate" class="stake-balances">Staking: 0 PIV</h5>
+                  <textarea id="undelegateAmount" class="stake-input form-control private-key-area"></textarea>
                   <div class="button-padd">
                       <button class="pivx-button-big" onclick="undelegateGUI()">
                                   <span class="buttoni-icon"><i class="far fa-eye fa-tiny-margin"></i></span>
@@ -478,21 +478,21 @@
 
               <div id='errorNotice' class="col-md-12 float-left" style="margin: 10px 0;"></div>
               <div class="col-md-12" style="margin-top: 54px;">
-                <p style="color: white; opacity: 0.6; text-align: center; padding:15px 5px 70px 5px;">Please <b>AVOID</b> sending to Shielded or Cold Staking addresses using this wallet - this functionality is currently unsupported.</p>
+                <p class="center-text" style="color: white; opacity: 0.6; padding:15px 5px 70px 5px;">Please <b>AVOID</b> sending to Shielded or Cold Staking addresses using this wallet - this functionality is currently unsupported.</p>
               </div>
-              <div class='pullDown' style='clear:both;'>
+              <div class='max-width' style='clear:both;'>
                 <div id="simpleTransactionsDropdown" onclick='toggleDropDown("simpleTransactions")' style="padding: 5px 0 15px; font-size: 20px; font-weight: 500;">Create Simple Transactions<span
                     style='float:right;'>▼</span></div>
                 <div id='simpleTransactions' style='display: block'>
                   <br>
                   <label>Address</label><br>
-                  <input style="min-width: 375px; max-width: 90%; font-family: monospace; text-align: center;" type="text" id="address1s">
+                  <input class="center-text" style="min-width: 375px; max-width: 90%; font-family: monospace;" type="text" id="address1s">
                   <br>
                   <label>Amount</label><br>
-                  <input style="text-align: center;" type="number" min="0" id="value1s">
+                  <input class="center-text" type="number" min="0" id="value1s">
                   <div id="reqDescDisplay" style="display: none;">
                     <label>Description (from the merchant)</label><br>
-                    <input style="text-align: center;" type="text" disabled id="reqDesc">
+                    <input class="center-text" type="text" disabled id="reqDesc">
                   </div>
                   <br>
                   <div id='HumanReadable'></div>
@@ -506,7 +506,7 @@
                 <div id='transactionFinal'></div>
               </div>
               <br>
-              <div class='pullDown' style='clear:both;'>
+              <div class='max-width' style='clear:both;'>
                 <div onclick='toggleDropDown("advTransactions")' style="padding: 15px 0 15px; font-size: 20px; font-weight: 500;">Create Manual Transactions<span
                     style='float:right;'>▼</span></div>
                 <div id='advTransactions' style='display:none'>
@@ -532,14 +532,14 @@
                   <label>key</label><br>
                   <input type="text" id="wif">
                   <br /><br />
-                  <p  style="padding: 5px 0 15px;"><b>WARNING:</b> ANY FUNDS NOT ALLOCATED WILL BE USED AS FEES</p>
+                  <p style="padding: 5px 0 15px;"><b>WARNING:</b> ANY FUNDS NOT ALLOCATED WILL BE USED AS FEES</p>
                   <button class="pivx-button-big" onclick="createRawTransaction()">
                               <span class="buttoni-icon"><i class="fas fa-paper-plane fa-tiny-margin"></i></span>
                               <span class="buttoni-text">Create Raw Signed Transction</span>
                               <span class="buttoni-arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M23.328 16.707L13.121 26.914a.5.5 0 01-.707 0l-2.828-2.828a.5.5 0 010-.707L16.964 16 9.586 8.621a.5.5 0 010-.707l2.828-2.828a.5.5 0 01.707 0l10.207 10.207a1 1 0 010 1.414z"></path></svg></span>
                     </button>
                   <br /><br /><br />
-                  <h4  style="padding: 10px 0 5px;">Signed Raw Transaction</h4>
+                  <h4 style="padding: 10px 0 5px;">Signed Raw Transaction</h4>
                   <textarea rows="15" cols="70" id="rawTrx"></textarea>
                   <p>Don't understand how this works? <a target='_blank'
                       href='https://github.com/PIVX-Labs/MyPIVXWallet#transaction'>Tutorial Here</a></p>
@@ -556,7 +556,7 @@
                   <option value="custom">custom (In Development)</option>
                 </select>
                 <br>
-                <button id="submit-button" class="pivx-button-big" type="submit" style="width:100%;">
+                <button id="submit-button" class="pivx-button-big max-width" type="submit">
                               <span class="buttoni-icon"><i class="fas fa-paper-plane fa-tiny-margin"></i></span>
                               <span class="buttoni-text">Submit</span>
                               <span class="buttoni-arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M23.328 16.707L13.121 26.914a.5.5 0 01-.707 0l-2.828-2.828a.5.5 0 010-.707L16.964 16 9.586 8.621a.5.5 0 010-.707l2.828-2.828a.5.5 0 01.707 0l10.207 10.207a1 1 0 010 1.414z"></path></svg></span>
@@ -582,7 +582,7 @@
     </div>
     <footer id="foot">
         <div class="footer">
-          <div style='display:inline;' id='dcfooter'></div>
+          <div id='dcfooter'></div>
         </div>
     </footer>
   </div>

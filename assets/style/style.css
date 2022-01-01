@@ -154,6 +154,75 @@ input::-moz-focus-inner {
     margin: 20px 0 100px;
 }
 
+.staking-banner-top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    max-height: 120px;
+    width: 100%;
+    border-bottom: 1px solid #a366ff;
+}
+
+.staking-banner-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    min-height: 200px;
+    width: 100%;
+}
+
+#staking-rectangle {
+    position: relative;
+    display: block;
+    height: 100px;
+    width: 800px !important;
+}
+
+.staking-piv-icon {
+    display: inline-block;
+    position: absolute;
+    width: 55px;
+    height: 55px;
+    left: 0;
+    top: 20px;
+    border-style: solid;
+    border-radius: 1000px;
+    border-width: 3px;
+    background-size: cover;
+    background-image: url(../logo-circle.svg);
+}
+
+.stake-box {
+    text-align: center;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    height: 220px;
+    margin: 30px 5px 10px;
+}
+
+#guiBalanceBoxStaking {
+    display: inline-block;
+    position: absolute;
+    left: 100px;
+    top: 28px;
+    margin: 0;
+    padding: 0 10px;
+    font-size: x-large;
+}
+
+.stake-balances {
+    margin-top: 1rem;
+    margin-bottom: 0.75rem;
+    padding: 5px;
+}
+
+.stake-input {
+    color: black;
+    font-size: 16px !important;
+    text-align: center;
+    line-height: 20px;
+}
+
 .modal {
     color: black;
 }
@@ -252,7 +321,7 @@ input::-moz-focus-inner {
     padding: 15px 15px 40px;
 }
 
-.pullDown {
+.max-width {
     width: 100%;
 }
 
@@ -524,6 +593,10 @@ input::-moz-focus-inner {
 .footer a {
     color: white;
     font-weight: bold;
+}
+
+#dcfooter {
+    display: inline;
 }
 
 .navbarSpecial {

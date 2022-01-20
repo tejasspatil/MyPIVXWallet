@@ -264,8 +264,6 @@
                   </div>
 
 
-
-
                   <button class="pivx-button-big" onclick="generateWallet()">
                               <span class="buttoni-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 70"><path d="M3.497 25.717C1.401 25.588 0 23.847 0 21.753v-2.535c0-.775.149-1.593.925-1.593h22.719c2.173 0 3.941 1.861 3.941 4.034 0 2.174-1.769 3.988-3.941 3.988l-20.207.048c-.02 0 .08.023.06.022z"></path><path d="M5.229 69.625C4.455 69.625 4 68.494 4 67.719V38.661c0-1.911 1.447-3.731 3.258-3.989.175-.029.285-.047.483-.047h21.525c7.137 0 12.751-5.86 12.751-13.027 0-7.096-5.528-12.841-12.586-13.177-.002 0-.671.016-1.41.016l-20.335.066C5.529 8.373 4 6.652 4 4.558V2.023C4 1.247 4.407.625 5.183.625h24.059c11.57 0 20.654 9.546 20.706 21.104 0 9.378-6.307 17.727-15.337 20.311-1.622.445-3.122.705-4.735.778L12 42.842v22.485c0 2.156-2.141 4.298-4.235 4.298H5.229z"></path></svg></span>
                               <span class="buttoni-text">Create A New Wallet</span>
@@ -298,44 +296,51 @@
 
               <!-- WALLET FEATURES -->
               <div id="guiWallet" style="display: none;">
-                <div id="create-wallet-box">
-                    <div id="banners" class="banners">
-
-                      <!-- WALLET FEATURE -->
-                      <div id="address-box" class="large-box">
-                        <h3 class="noselect addr-title">Address</h3>
-                        <br>
-                        <div>
-                          <canvas id="identicon" class="innerShadow" width="65" height="65" data-jdenticon-value=""></canvas>
-                          <b id="guiAddress">~</b>
-                          <b id="guiQRButton">
-                            <i data-toggle="modal" data-target="#qrModal" class="fas fa-qrcode fa-stacked-ptr"></i>
-                            <i onclick="toClipboard('guiAddress', 'guiAddressCopy')" id="guiAddressCopy" class="fas fa-clipboard fa-stacked-ptr"></i>
-                          </b>
+                <div id="bcg-wallet-box">
+                    <div id="headline-balance">
+                        <div id="balance-box" class="large-box">
+                            <div id="window-icon-piv">
+                                <div id="piv-ring"></div>
+                                <div id="number-piv">
+                                    <p id="guiBalanceBox"><b id="guiBalance">~</b> PIV</p>
+                                </div>
+                            </div>
+                            <div id="bal-title">
+                                <h3 class="noselect balance-title">Balance &nbsp;&nbsp;<span id="balanceReload" class="reload noselect" onclick="refreshChainData()">&#x21bb;</span></h3>
+                            </div>
                         </div>
-                      </div>
-                      <!-- // WALLET FEATURE -->
-
-                      <!-- WALLET FEATURE -->
-                      <div id="balance-box" class="large-box">
-                        <h3 class="noselect balance-title">Balance &nbsp;&nbsp;<span id="balanceReload" class="reload noselect" onclick="refreshChainData()">&#x21bb;</span></h3>
-                        <div>
-                          <div id="piv-ring"></div>
-                          <p id="guiBalanceBox"><b id="guiBalance">~</b> PIV</p>
-                        </div>
-                      </div>
                     </div>
-
-                    <!-- // WALLET FEATURE -->
-                    <div id="pubkey-box" class="col-md-4">
-                      <div id="PrivateQR" class="margin-padded-qr" style="display: none;"><img src="" width="82" height="82"></div>
-                      <div id="PublicQR" class="margin-padded-qr" style="display: block;"><img src="" width="82" height="82"></div>
-                      <textarea id="PrivateTxt" style="display: none;" disabled="" class="form-control private-key-area"></textarea>
-                      <button class="pivx-button-big" onclick="toggleKeyView()">
-                          <span class="buttoni-icon"><i class="far fa-eye fa-tiny-margin"></i></span>
-                          <span class="buttoni-text" id="guiViewKey">Pubkey QR</span>
-                          <span class="buttoni-arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M23.328 16.707L13.121 26.914a.5.5 0 01-.707 0l-2.828-2.828a.5.5 0 010-.707L16.964 16 9.586 8.621a.5.5 0 010-.707l2.828-2.828a.5.5 0 01.707 0l10.207 10.207a1 1 0 010 1.414z"></path></svg></span>
-                      </button>
+                      <!-- WALLET FEATURE -->
+                    <div id="big-frame-address">
+                        <div id="address-box" class="large-box">
+                            <div id="title-address-box">
+                                <h3 class="noselect addr-title">Address</h3>
+                            </div>
+                            <div id="box-info-address">
+                                <div id="ring">
+                                    <canvas id="identicon" class="innerShadow" width="65" height="65" data-jdenticon-value=""></canvas>
+                                </div>
+                                <div id="address-info">
+                                    <b id="guiAddress">~</b>
+                                    <b id="guiQRButton">
+                                        <i data-toggle="modal" data-target="#qrModal" class="fas fa-qrcode fa-stacked-ptr"></i>
+                                        <i onclick="toClipboard('guiAddress', 'guiAddressCopy')" id="guiAddressCopy" class="fas fa-clipboard fa-stacked-ptr"></i>
+                                    </b>
+                                </div>
+                            </div>
+                            <div id="pubkey-padd">
+                                <div id="pubkey-box" class="col-md-4 desktop-pubkey">
+                                  <div id="PrivateQR" class="margin-padded-qr" style="display: none;"><img src="" width="82" height="82"></div>
+                                  <div id="PublicQR" class="margin-padded-qr" style="display: block;"><img src="" width="82" height="82"></div>
+                                  <textarea id="PrivateTxt" style="display: none;" disabled="" class="form-control private-key-area"></textarea>
+                                  <button class="pivx-button-big" onclick="toggleKeyView()">
+                                      <span class="buttoni-icon"><i class="far fa-eye fa-tiny-margin"></i></span>
+                                      <span class="buttoni-text" id="guiViewKey">Pubkey QR</span>
+                                      <span class="buttoni-arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M23.328 16.707L13.121 26.914a.5.5 0 01-.707 0l-2.828-2.828a.5.5 0 010-.707L16.964 16 9.586 8.621a.5.5 0 010-.707l2.828-2.828a.5.5 0 01.707 0l10.207 10.207a1 1 0 010 1.414z"></path></svg></span>
+                                  </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
               </div>
@@ -425,19 +430,23 @@
               <!-- STAKING FEATURES -->
               <p id="info" class="minor-notif-subtext"><b>New Feature!</b><br>Please be aware MPW Cold Staking is a new, slightly experimental feature, it may be unstable, and is currently slow. Please have patience when using this feature, and wait for block confirmations before actions and balances are shown on-screen.</p>
               <div class="add-frame">
-              <div id="banners" class="staking-banner-top">
-                <div id="staking-rectangle">
-                <div class="col-md-4">
-                  <h3 id="stake-title" class="noselect">Staking &nbsp;&nbsp;<span id="balanceReloadStaking" class="reload noselect" onclick="refreshChainData()">&#x21bb;</span></h3>
-                  <div>
-                    <div id="piv-price" class="staking-piv-icon"></div>
-                    <p id="guiBalanceBoxStaking"><b id="guiBalanceStaking">~</b> PIV</p>
-                  </div>
-                </div>
+              <div class="staking-banner-top">
+                <div id="staking-rectangle" class="col-md-4">
+                    <div id="pivx-price-box">
+                        <div id="icon-box-piv">
+                            <div id="piv-price" class="staking-piv-icon"></div>
+                        </div>
+                        <div id="piv-price-amount">
+                            <p id="guiBalanceBoxStaking"><b id="guiBalanceStaking">~</b> PIV</p>
+                        </div>
+                    </div>
+                    <div id="staking-box">
+                      <h3 id="stake-title" class="noselect">Staking &nbsp;&nbsp;<span id="balanceReloadStaking" class="reload noselect" onclick="refreshChainData()">&#x21bb;</span></h3>
+                    </div>
                 </div>
             </div>
               <br>
-              <div id="banners" class="staking-banner-bottom">
+              <div class="staking-banner-bottom">
                 <div class="stake-box large-box col-md-4">
                   <h5 id="availToDelegate" class="stake-balances">Available: 0 PIV</h5>
                   <textarea id="delegateAmount" class="stake-input form-control private-key-area"></textarea>
@@ -476,17 +485,17 @@
               <br>
               <!-- // PIVX TITLE SECTION -->
 
-              <div id='errorNotice' class="col-md-12 float-left" style="margin: 10px 0;"></div>
-              <div class="col-md-12" style="margin-top: 54px;">
-                <p class="center-text" style="color: white; opacity: 0.6; padding:15px 5px 70px 5px;">Please <b>AVOID</b> sending to Shielded or Cold Staking addresses using this wallet - this functionality is currently unsupported.</p>
+              <div id='errorNotice' class="col-md-12 float-left"></div>
+              <div class="col-md-12">
+                <p id="comunication" class="center-text">Please <b>AVOID</b> sending to Shielded or Cold Staking addresses using this wallet - this functionality is currently unsupported.</p>
               </div>
               <div class='max-width' style='clear:both;'>
-                <div id="simpleTransactionsDropdown" onclick='toggleDropDown("simpleTransactions")' style="padding: 5px 0 15px; font-size: 20px; font-weight: 500;">Create Simple Transactions<span
+                <div id="simpleTransactionsDropdown" class="bold-trans" onclick='toggleDropDown("simpleTransactions")'>Create Simple Transactions<span
                     style='float:right;'>▼</span></div>
                 <div id='simpleTransactions' style='display: block'>
                   <br>
                   <label>Address</label><br>
-                  <input class="center-text" style="min-width: 375px; max-width: 90%; font-family: monospace;" type="text" id="address1s">
+                  <input class="center-text" style="width: 100%; font-family: monospace;" type="text" id="address1s">
                   <br>
                   <label>Amount</label><br>
                   <input class="center-text" type="number" min="0" id="value1s">
@@ -507,7 +516,7 @@
               </div>
               <br>
               <div class='max-width' style='clear:both;'>
-                <div onclick='toggleDropDown("advTransactions")' style="padding: 15px 0 15px; font-size: 20px; font-weight: 500;">Create Manual Transactions<span
+                <div onclick='toggleDropDown("advTransactions")' class="bold-trans">Create Manual Transactions<span
                     style='float:right;'>▼</span></div>
                 <div id='advTransactions' style='display:none'>
                   <br>
@@ -518,7 +527,7 @@
                   <input type="text" id="index">
                   <label>Script</label><br>
                   <input type="text" id="script"><br><br>
-                  <h2>Outputs</h2>
+                  <h3>Outputs</h3>
                   <label>Output Address 1</label><br>
                   <input type="text" id="address1">
                   <label>Amount</label><br>
@@ -539,7 +548,7 @@
                               <span class="buttoni-arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M23.328 16.707L13.121 26.914a.5.5 0 01-.707 0l-2.828-2.828a.5.5 0 010-.707L16.964 16 9.586 8.621a.5.5 0 010-.707l2.828-2.828a.5.5 0 01.707 0l10.207 10.207a1 1 0 010 1.414z"></path></svg></span>
                     </button>
                   <br /><br /><br />
-                  <h4 style="padding: 10px 0 5px;">Signed Raw Transaction</h4>
+                  <h4 id="signed-raw">Signed Raw Transaction</h4>
                   <textarea rows="15" cols="70" id="rawTrx"></textarea>
                   <p>Don't understand how this works? <a target='_blank'
                       href='https://github.com/PIVX-Labs/MyPIVXWallet#transaction'>Tutorial Here</a></p>
@@ -556,7 +565,7 @@
                   <option value="custom">custom (In Development)</option>
                 </select>
                 <br>
-                <button id="submit-button" class="pivx-button-big max-width" type="submit">
+                <button id="submit-button" class="pivx-button-big" type="submit">
                               <span class="buttoni-icon"><i class="fas fa-paper-plane fa-tiny-margin"></i></span>
                               <span class="buttoni-text">Submit</span>
                               <span class="buttoni-arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M23.328 16.707L13.121 26.914a.5.5 0 01-.707 0l-2.828-2.828a.5.5 0 010-.707L16.964 16 9.586 8.621a.5.5 0 010-.707l2.828-2.828a.5.5 0 01.707 0l10.207 10.207a1 1 0 010 1.414z"></path></svg></span>

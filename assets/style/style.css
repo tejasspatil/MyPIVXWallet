@@ -348,7 +348,6 @@ button:active {
         width: auto;
         height: 60px;
         padding: 15px 10px 15px 60px;
-        /*border: 1px yellow solid;*/
     }
 
     #guiBalanceBox {
@@ -380,7 +379,6 @@ button:active {
         height: auto;
         margin: 0 auto;
         padding-top: 40px;
-        /*border: 1px green solid;*/
     }
 
         #address-box {
@@ -389,7 +387,7 @@ button:active {
         }
 
         #address-box.large-box {
-            width: 95% !important;
+            width: 96% !important;
             margin: 0 auto;
             background: linear-gradient(0.15turn, rgba(43, 9, 80, 0.45), rgba(43, 9, 80, 0.02));
         }
@@ -478,7 +476,6 @@ button:active {
                 display: block;
                 width: 100% !important;
                 margin: 0;
-                /*border: 1px pink solid;*/
                 text-align: center;
             }
 
@@ -520,7 +517,7 @@ button:active {
 
     .margin-padded-qr {
         margin-bottom: 10px;
-        padding: 10px;
+        padding: 5px 10px 10px 10px;
     }
 
 /* STAKE */
@@ -566,7 +563,6 @@ button:active {
     #pivx-price-box {
         height: 100px;
         width: 240px;
-        /*border: 1px green solid;*/
         display: inline-block;
         float: left;
     }
@@ -581,7 +577,6 @@ button:active {
 
     #piv-price-amount {
         display: inline-block;
-        /*border: 1px yellow solid;*/
         margin: 0 !important;
         padding: 30px 30px 30px 30px;
         float: right;
@@ -596,7 +591,6 @@ button:active {
     #staking-box {
         height: 100px;
         width: 220px;
-        /*border: 1px red solid;*/
         display: inline-block;
         float: right !important;
         padding: 30px 30px 30px 20px;
@@ -959,7 +953,6 @@ button:active {
         color: white;
     }
 
-
 /* SEND */
 
     #errorNotice {
@@ -1123,39 +1116,44 @@ button:active {
         height: 98%;
     }
 
-        #address-box.large-box {
-            height: 260px;
-            background: none;
+    #address-box.large-box {
+        height: 260px;
+        background: none;
+    }
+
+    #box-info-address {
+        display: block;
+        width: 100%;
+        padding-top: 20px;
+    }
+
+    #address-info {
+        width: 69%;
+    }
+
+    .margin-padded-qr {
+        margin-bottom: 10px;
+        padding: 10px;
+    }
+
+    #pubkey-padd {
+        width: auto;
+        display: block;
+        padding-top: 60px;
+    }
+
+    #pubkey-box {
+        display: block;
+    }
+
+        #pubkey-box .pivx-button-big {
+            width: 230px !important;
         }
 
-        #box-info-address {
-            display: block;
-            width: 100%;
-            padding-top: 20px;
-        }
-
-            #address-info {
-                width: 69%;
+            #PrivateQR img, #PublicQR img {
+                width: 75px !important;
+                height: 75px !important;
             }
-
-        #pubkey-padd {
-            width: auto;
-            display: block;
-            padding-top: 60px;
-        }
-
-            #pubkey-box {
-                display: block;
-            }
-
-            #pubkey-box .pivx-button-big {
-                width: 230px !important;
-            }
-
-                #PrivateQR img, #PublicQR img {
-                    width: 75px !important;
-                    height: 75px !important;
-                }
 
     /* Intro page */
     .intro-page .col-md-11 {
@@ -1363,6 +1361,14 @@ button:active {
 
     /* Settings page */
     #Settings {  text-align: center; }
+
+    #icon-box-piv {
+        display: none;
+    }
+
+    #pivx-price-box {
+    width: 130px;
+}
 }
 
 @media screen and (max-width: 480px) {
@@ -1378,9 +1384,6 @@ button:active {
 
     /* Stake */
 
-    #icon-box-piv {
-        display: none;
-    }
 
     #pivx-price-box {
         width: auto;
@@ -1397,7 +1400,7 @@ button:active {
     }
 
     #pubkey-padd {
-        padding-top: 45px;
+        padding-top: 40px;
     }
 }
 
@@ -1453,6 +1456,10 @@ button:active {
     #pubkey-box .pivx-button-big {
         padding: 11px 10px;
     }
+
+    #pubkey-box.col-md-4 {
+        padding-top: 20px;
+    }
 }
 
 @media screen and (max-width: 393px) {
@@ -1472,22 +1479,19 @@ button:active {
         padding: 18px 20px 0 15px;
     }
 
-            #ring {
-                padding: 5px 5px 30px 20px;
-            }
+        #ring {
+            padding: 5px 5px 30px 20px;
+        }
 
-            #address-info {
-                padding-left: 15px;
-            }
+        #address-info {
+            padding-left: 15px;
+        }
 
     #pubkey-padd {
-        padding-top: 35px;
+        padding-top: 30px;
     }
-
-        #pubkey-box.col-md-4 {
-            padding-top: 20px;
-        }
 }
+
 @media screen and (max-width: 380px) {
 
     /* Nav */
@@ -1513,9 +1517,9 @@ button:active {
         padding: 45px 30px 45px 10px;
     }
 
-            #balance-box h3 {
-                font-size: 24px;
-            }
+        #balance-box h3 {
+            font-size: 24px;
+        }
 
     #pubkey-box .pivx-button-big {
         padding: 11px 10px;
@@ -1548,16 +1552,20 @@ button:active {
             font-size: 22px;
         }
 
+    #pubkey-box .pivx-button-big {
+        width: 150px !important;
+    }
+
     /* Stake */
 
     #staking-box {
         padding: 35px 10px 35px 10px;
     }
 
-        #stake-title {
-            font-size: 22px !important;
-            height: auto;
-        }
+    #stake-title {
+        font-size: 22px !important;
+        height: auto;
+    }
 }
 
 @media screen and (max-width: 332px) {
@@ -1569,19 +1577,15 @@ button:active {
         height: 140px;
     }
 
-        #window-icon-piv {
-            padding: 5px 10px;
-            height: auto;
-        }
+    #window-icon-piv {
+        padding: 5px 10px;
+        height: auto;
+    }
 
-        #bal-title {
-            float: none;
-            clear: both;
-            padding: 10px 10px 10px 50px;
-        }
-
-    #pubkey-box .pivx-button-big {
-        width: 150px !important;
+    #bal-title {
+        float: none;
+        clear: both;
+        padding: 10px 10px 10px 50px;
     }
 }
 
@@ -1632,7 +1636,6 @@ button:active {
 @media screen and (max-width: 300px) {
 
     /* Intro */
-
 
     #navbarToggler {
         left: 80px !important;

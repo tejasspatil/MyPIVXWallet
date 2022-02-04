@@ -66,40 +66,29 @@
 	        return new JacobianPoint(this.x, mod(-this.y), this.z);
 	    }
 	    double() {
-	        const X1 = this.x;
-	        const Y1 = this.y;
-	        const Z1 = this.z;
-	        const A = mod(X1 ** 2n);
-	        const B = mod(Y1 ** 2n);
+	        const A = mod(this.x ** 2n);
+	        const B = mod(this.y ** 2n);
 	        const C = mod(B ** 2n);
-	        const D = mod(2n * (mod(mod((X1 + B) ** 2n)) - A - C));
+	        const D = mod(2n * (mod(mod((this.x + B) ** 2n)) - A - C));
 	        const E = mod(3n * A);
 	        const F = mod(E ** 2n);
 	        const X3 = mod(F - 2n * D);
-	        const Y3 = mod(E * (D - X3) - 8n * C);
-	        const Z3 = mod(2n * Y1 * Z1);
-	        return new JacobianPoint(X3, Y3, Z3);
+	        return new JacobianPoint(X3, mod(E * (D - X3) - 8n * C), mod(2n * this.y * this.z));
 	    }
 	    add(other) {
 	        if (!(other instanceof JacobianPoint)) {
 	            throw new TypeError('JacobianPoint#add: expected JacobianPoint');
 	        }
-	        const X1 = this.x;
-	        const Y1 = this.y;
-	        const Z1 = this.z;
-	        const X2 = other.x;
-	        const Y2 = other.y;
-	        const Z2 = other.z;
-	        if (X2 === 0n || Y2 === 0n)
+	        if (other.x === 0n || other.y === 0n)
 	            return this;
-	        if (X1 === 0n || Y1 === 0n)
+	        if (this.x === 0n || this.y === 0n)
 	            return other;
-	        const Z1Z1 = mod(Z1 ** 2n);
-	        const Z2Z2 = mod(Z2 ** 2n);
-	        const U1 = mod(X1 * Z2Z2);
-	        const U2 = mod(X2 * Z1Z1);
-	        const S1 = mod(Y1 * Z2 * Z2Z2);
-	        const S2 = mod(mod(Y2 * Z1) * Z1Z1);
+	        const Z1Z1 = mod(this.z ** 2n);
+	        const Z2Z2 = mod(other.z ** 2n);
+	        const U1 = mod(this.x * Z2Z2);
+	        const U2 = mod(other.x * Z1Z1);
+	        const S1 = mod(this.y * other.z * Z2Z2);
+	        const S2 = mod(mod(other.y * this.z) * Z1Z1);
 	        const H = mod(U2 - U1);
 	        const r = mod(S2 - S1);
 	        if (H === 0n) {
@@ -114,9 +103,7 @@
 	        const HHH = mod(H * HH);
 	        const V = mod(U1 * HH);
 	        const X3 = mod(r ** 2n - HHH - 2n * V);
-	        const Y3 = mod(r * (V - X3) - S1 * HHH);
-	        const Z3 = mod(Z1 * Z2 * H);
-	        return new JacobianPoint(X3, Y3, Z3);
+	        return new JacobianPoint(X3, mod(r * (V - X3) - S1 * HHH), mod(this.z * other.z * H));
 	    }
 	    subtract(other) {
 	        return this.add(other.negate());
@@ -529,15 +516,18 @@
 	    }
 	    let a = mod(number, modulo);
 	    let b = modulo;
-	    let [x, y, u, v] = [0n, 1n, 1n, 0n];
+		let x = 0n, y = 1n, u = 1n, v = 0n;
 	    while (a !== 0n) {
 	        const q = b / a;
 	        const r = b % a;
 	        const m = x - u * q;
 	        const n = y - v * q;
-	        [b, a] = [a, r];
-	        [x, y] = [u, v];
-	        [u, v] = [m, n];
+			b = a;
+			a = r;
+			x = u;
+			y = v;
+			u = m;
+			v = n;
 	    }
 	    const gcd = b;
 	    if (gcd !== 1n)

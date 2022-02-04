@@ -95,14 +95,13 @@ importWallet = function (newWif = false, raw = false) {
       console.log(Crypto.util.bytesToHex(privkeyBytes));
     }
     // Public Key Derivation
-    let nPubkey = Crypto.util.bytesToHex(nSecp256k1.getPublicKey(privkeyBytes)).substr(2);
-    const pubY = new BN(nPubkey.slice(64), 16);
-    nPubkey = nPubkey.substr(0, 64);
-    const publicKeyBytesCompressed = Crypto.util.hexToBytes(nPubkey);
-    publicKeyBytesCompressed.unshift(pubY.isEven() ? 0x02 : 0x03);
+    let nPubkey = nSecp256k1.getPublicKey(privkeyBytes).slice(1, 65);
+    const pubY = new BN(nPubkey.slice(32), 16);
+    pubCompressed[0] = pubY.isEven() ? 2 : 3;
+    writeToUint8(pubCompressed, nPubkey.slice(0, 32), 1);
     // First pubkey SHA-256 hash
     const pubKeyHashing = new jsSHA(0, 0, { "numRounds": 1 });
-    pubKeyHashing.update(publicKeyBytesCompressed);
+    pubKeyHashing.update(pubCompressed);
     // RIPEMD160 hash
     const pubKeyHashRipemd160 = ripemd160(pubKeyHashing.getHash(0));
     // Network Encoding
@@ -196,6 +195,8 @@ const pkNetBytesLen = 34;                                 // (int) Length of net
 const pkNetBytes = new Uint8Array(pkNetBytesLen);         // (Uint8) Pre-allocated array for pk bytes
 const pkNetChecksumLen = 38;                              // (int) Length of net-encoded, checksummed PK bytes
 const keyWithChecksum = new Uint8Array(pkNetChecksumLen); // (Uint8) Pre-allocated array for checksummed pk bytes
+const pubCompressedLen = 33;                              // (int) Length of compressed pubkey
+const pubCompressed = new Uint8Array(pubCompressedLen);   // (Uint8) Pre-allocated array for a compressed pubkey
 const pubHashNetLen = 21;                                 // (int) Length of net-encoded pubkey hash
 const pubHashNet = new Uint8Array(pubHashNetLen);         // (Uint8) Pre-allocated array for a pubkey hash
 const pubPreBaseLen = 25;                                 // (int) Length of pre-base58 pubkey
@@ -230,14 +231,13 @@ generateWallet = async function (noUI = false) {
     privateKeyForTransactions = to_b58(keyWithChecksum);
 
     // Public Key Derivation
-    let nPubkey = Crypto.util.bytesToHex(nSecp256k1.getPublicKey(pkBytes)).substr(2);
-    const pubY = new BN(nPubkey.slice(64), 16);
-    nPubkey = nPubkey.substr(0, 64);
-    const publicKeyBytesCompressed = Crypto.util.hexToBytes(nPubkey);
-    publicKeyBytesCompressed.unshift(pubY.isEven() ? 0x02 : 0x03);
+    let nPubkey = nSecp256k1.getPublicKey(pkBytes).slice(1, 65);
+    const pubY = new BN(nPubkey.slice(32), 16);
+    pubCompressed[0] = pubY.isEven() ? 2 : 3;
+    writeToUint8(pubCompressed, nPubkey.slice(0, 32), 1);
     // First pubkey SHA-256 hash
     const pubKeyHashing = new jsSHA(0, 0, { "numRounds": 1 });
-    pubKeyHashing.update(publicKeyBytesCompressed);
+    pubKeyHashing.update(pubCompressed);
     // RIPEMD160 hash
     const pubKeyHashRipemd160 = ripemd160(pubKeyHashing.getHash(0));
     // Network Encoding
@@ -269,7 +269,7 @@ generateWallet = async function (noUI = false) {
       console.log('Private Key')
       console.log(privateKeyForTransactions)
       console.log('Public Key')
-      console.log(publicKeyBytesCompressed)
+      console.log(pubCompressed)
       console.log('Public Key Extended')
       console.log(Crypto.util.bytesToHex(pubkeyExt))
       console.log('SHA256 Public Key')

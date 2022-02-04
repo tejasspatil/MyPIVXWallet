@@ -1,5 +1,5 @@
 // B58 Encoding Map
-const MAP = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+const MAP = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".split('');
 
 // ByteArray to B58
 var to_b58 = function (
@@ -55,11 +55,9 @@ var from_b58 = function (
     b.push(d[j]);           //append each byte to the result
   return new Uint8Array(b); //return the final byte array in Uint8Array format
 }
-var randArr = new Uint8Array(32) //create a typed array of 32 bytes (256 bits)
-if (debug) {
-  document.getElementById('Debug').innerHTML = "<b> DEBUG MODE </b>";
-}
-document.getElementById('dcfooter').innerHTML = '© MIT 2021 - Built with 💜 by PIVX Labs - <b style=\'cursor:pointer\' onclick=\'openDonatePage()\'>Donate!</b><br><a href="https://github.com/PIVX-Labs/MyPIVXWallet">MyPIVXWallet</a>';
+
+if (debug) document.getElementById('Debug').innerHTML = "<b> DEBUG MODE </b>";
+document.getElementById('dcfooter').innerHTML = '© MIT 2022 - Built with 💜 by PIVX Labs - <b style=\'cursor:pointer\' onclick=\'openDonatePage()\'>Donate!</b><br><a href="https://github.com/PIVX-Labs/MyPIVXWallet">MyPIVXWallet</a>';
 // Wallet Import
 importWallet = function (newWif = false, raw = false) {
   if (walletAlreadyMade != 0) {
@@ -70,18 +68,13 @@ importWallet = function (newWif = false, raw = false) {
   if (walletConfirm) {
     walletAlreadyMade++;
     if (raw) {
-      const pkNetBytesLen = newWif.length + 2;
-      const pkNetBytes = new Uint8Array(pkNetBytesLen);
-      // Network Encoding
-      pkNetBytes[0] = SECRET_KEY;           // Private key prefix (1 byte)
-      writeToUint8(pkNetBytes, newWif, 1);  // Private key bytes  (32 bytes)
-      pkNetBytes[pkNetBytesLen - 1] = 1;    // Leading digit      (1 byte)
+      // Network Encode Private Key
+      writeToUint8(pkNetBytes, newWif, 1); // Private key bytes (32 bytes)
       // Double SHA-256 hash
       const shaObj = new jsSHA(0, 0, { "numRounds": 2 });
       shaObj.update(pkNetBytes);
       // WIF Checksum
       const checksum = shaObj.getHash(0).slice(0, 4);
-      const keyWithChecksum = new Uint8Array(pkNetBytesLen + checksum.length);
       writeToUint8(keyWithChecksum, pkNetBytes, 0);
       writeToUint8(keyWithChecksum, checksum, pkNetBytesLen);
       newWif = to_b58(keyWithChecksum);
@@ -89,9 +82,7 @@ importWallet = function (newWif = false, raw = false) {
     // Wallet Import Format to Private Key
     const privkeyWIF = newWif || domPrivKey.value;
     privateKeyForTransactions = privkeyWIF;
-    if (!newWif) {
-      domPrivKey.value = "";
-    }
+    if (!newWif) domPrivKey.value = "";
     const byteArryConvert = from_b58(privkeyWIF);
     const droplfour = byteArryConvert.slice(0, byteArryConvert.length - 4);
     const key = droplfour.slice(1, droplfour.length);
@@ -105,36 +96,28 @@ importWallet = function (newWif = false, raw = false) {
     }
     // Public Key Derivation
     let nPubkey = Crypto.util.bytesToHex(nSecp256k1.getPublicKey(privkeyBytes)).substr(2);
-    const pubY = Secp256k1.uint256(nPubkey.substr(64), 16);
+    const pubY = new BN(nPubkey.slice(64), 16);
     nPubkey = nPubkey.substr(0, 64);
     const publicKeyBytesCompressed = Crypto.util.hexToBytes(nPubkey);
-    if (pubY.isEven()) {
-      publicKeyBytesCompressed.unshift(0x02);
-    } else {
-      publicKeyBytesCompressed.unshift(0x03);
-    }
+    publicKeyBytesCompressed.unshift(pubY.isEven() ? 0x02 : 0x03);
     // First pubkey SHA-256 hash
     const pubKeyHashing = new jsSHA(0, 0, { "numRounds": 1 });
     pubKeyHashing.update(publicKeyBytesCompressed);
     // RIPEMD160 hash
     const pubKeyHashRipemd160 = ripemd160(pubKeyHashing.getHash(0));
     // Network Encoding
-    const pubKeyHashNetworkLen = pubKeyHashRipemd160.length + 1;
-    const pubKeyHashNetwork = new Uint8Array(pubKeyHashNetworkLen);
-    pubKeyHashNetwork[0] = PUBKEY_ADDRESS;
-    writeToUint8(pubKeyHashNetwork, pubKeyHashRipemd160, 1);
+    writeToUint8(pubHashNet, pubKeyHashRipemd160, 1);
     // Double SHA-256 hash
     const pubKeyHashingS = new jsSHA(0, 0, { "numRounds": 2 });
-    pubKeyHashingS.update(pubKeyHashNetwork);
+    pubKeyHashingS.update(pubHashNet);
     const pubKeyHashingSF = pubKeyHashingS.getHash(0);
     // Checksum
     const checksumPubKey = pubKeyHashingSF.slice(0, 4);
     // Public key pre-base58
-    const pubKeyPreBase = new Uint8Array(pubKeyHashNetworkLen + checksumPubKey.length);
-    writeToUint8(pubKeyPreBase, pubKeyHashNetwork, 0);
-    writeToUint8(pubKeyPreBase, checksumPubKey, pubKeyHashNetworkLen);
+    writeToUint8(pubPreBase, pubHashNet, 0);
+    writeToUint8(pubPreBase, checksumPubKey, pubHashNetLen);
     // Encode as Base58 human-readable network address
-    publicKeyForNetwork = to_b58(pubKeyPreBase);
+    publicKeyForNetwork = to_b58(pubPreBase);
 
     // Display Text
     domGuiAddress.innerHTML = publicKeyForNetwork;
@@ -154,7 +137,7 @@ importWallet = function (newWif = false, raw = false) {
 
     // Public Key
     const qrPub = qrcode(typeNumber, errorCorrectionLevel);
-    qrPub.addData(publicKeyForNetwork);
+    qrPub.addData('pivx:' + publicKeyForNetwork);
     qrPub.make();
     domPublicQr.innerHTML = qrPub.createImgTag();
     domPublicQr.firstChild.style.borderRadius = '8px';
@@ -188,7 +171,7 @@ importWallet = function (newWif = false, raw = false) {
 }
 
 // Writes a sequence of Array-like bytes into a location within a Uint8Array
-function writeToUint8(arr, bytes, pos) {
+function writeToUint8(arr, bytes, pos = 0) {
   const len = arr.length;
   let i = 0;
   for (pos; pos<len; pos++) {
@@ -198,14 +181,31 @@ function writeToUint8(arr, bytes, pos) {
 }
 
 // Cryptographic Random-Gen
-function getSafeRand() {
-  const r = new Uint8Array(32);
+function getSafeRand(b) {
+  const r = b || new Uint8Array(32);
   window.crypto.getRandomValues(r);
   return r;
 }
 
 // Wallet Generation
-const strDebugKeyBytes = "FFE09E40CE1C5F7092801D2388347C552C408FC9056734E8273977E658BC201F";
+const bDebugKeyBytes = new Uint8Array(32);
+writeToUint8(bDebugKeyBytes, Crypto.util.hexToBytes("FFE09E40CE1C5F7092801D2388347C552C408FC9056734E8273977E658BC201F"));
+
+// Generation Constants + Pre-allocations
+const pkNetBytesLen = 34;                                 // (int) Length of net-encoded Private Key bytes
+const pkNetBytes = new Uint8Array(pkNetBytesLen);         // (Uint8) Pre-allocated array for pk bytes
+const pkNetChecksumLen = 38;                              // (int) Length of net-encoded, checksummed PK bytes
+const keyWithChecksum = new Uint8Array(pkNetChecksumLen); // (Uint8) Pre-allocated array for checksummed pk bytes
+const pubHashNetLen = 21;                                 // (int) Length of net-encoded pubkey hash
+const pubHashNet = new Uint8Array(pubHashNetLen);         // (Uint8) Pre-allocated array for a pubkey hash
+const pubPreBaseLen = 25;                                 // (int) Length of pre-base58 pubkey
+const pubPreBase = new Uint8Array(pubPreBaseLen);         // (Uint8) Pre-allocated array for a pre-base58 pubkey
+pkNetBytes[0] = SECRET_KEY;                               // Private key prefix (1 byte)
+pkNetBytes[pkNetBytesLen - 1] = 1;                        // Leading digit      (1 byte)
+pubHashNet[0] = PUBKEY_ADDRESS;                           // Public key prefix  (1 byte)
+
+
+const pkBytes = new Uint8Array(32);
 generateWallet = async function (noUI = false) {
   if (walletAlreadyMade != 0 && !noUI) {
     var walletConfirm = window.confirm("Do you really want to generate a new address? If you haven't saved the last private key the key will get lost forever and any funds with it.");
@@ -214,22 +214,16 @@ generateWallet = async function (noUI = false) {
   }
   if (walletConfirm) {
     walletAlreadyMade++;
-    const pkBytes = debug ?
-                    Crypto.util.hexToBytes(strDebugKeyBytes)
-                    : getSafeRand();
-    // Private Key Generation
-    const pkNetBytesLen = pkBytes.length + 2;
-    const pkNetBytes = new Uint8Array(pkNetBytesLen);
-    // Network Encoding
-    pkNetBytes[0] = SECRET_KEY;           // Private key prefix (1 byte)
-    writeToUint8(pkNetBytes, pkBytes, 1); // Private key bytes  (32 bytes)
-    pkNetBytes[pkNetBytesLen - 1] = 1;    // Leading digit      (1 byte)
-    // Double SHA-256 hash
+    // Generate Secure Random bytes
+    if (debug) writeToUint8(pkBytes, bDebugKeyBytes);
+    else getSafeRand(pkBytes);
+    // Network Encode Private Key
+    writeToUint8(pkNetBytes, pkBytes, 1); // Private key bytes (32 bytes)
+    // Double SHA-256 hash the key
     const shaObj = new jsSHA(0, 0, { "numRounds": 2 });
     shaObj.update(pkNetBytes);
     // WIF Checksum
     const checksum = shaObj.getHash(0).slice(0, 4);
-    const keyWithChecksum = new Uint8Array(pkNetBytesLen + checksum.length);
     writeToUint8(keyWithChecksum, pkNetBytes, 0);
     writeToUint8(keyWithChecksum, checksum, pkNetBytesLen);
     // Encode as Base58 human-readable WIF
@@ -237,36 +231,28 @@ generateWallet = async function (noUI = false) {
 
     // Public Key Derivation
     let nPubkey = Crypto.util.bytesToHex(nSecp256k1.getPublicKey(pkBytes)).substr(2);
-    const pubY = Secp256k1.uint256(nPubkey.substr(64), 16);
+    const pubY = new BN(nPubkey.slice(64), 16);
     nPubkey = nPubkey.substr(0, 64);
     const publicKeyBytesCompressed = Crypto.util.hexToBytes(nPubkey);
-    if (pubY.isEven()) {
-      publicKeyBytesCompressed.unshift(0x02);
-    } else {
-      publicKeyBytesCompressed.unshift(0x03);
-    }
+    publicKeyBytesCompressed.unshift(pubY.isEven() ? 0x02 : 0x03);
     // First pubkey SHA-256 hash
     const pubKeyHashing = new jsSHA(0, 0, { "numRounds": 1 });
     pubKeyHashing.update(publicKeyBytesCompressed);
     // RIPEMD160 hash
     const pubKeyHashRipemd160 = ripemd160(pubKeyHashing.getHash(0));
     // Network Encoding
-    const pubKeyHashNetworkLen = pubKeyHashRipemd160.length + 1;
-    const pubKeyHashNetwork = new Uint8Array(pubKeyHashNetworkLen);
-    pubKeyHashNetwork[0] = PUBKEY_ADDRESS;
-    writeToUint8(pubKeyHashNetwork, pubKeyHashRipemd160, 1);
+    writeToUint8(pubHashNet, pubKeyHashRipemd160, 1);
     // Double SHA-256 hash
     const pubKeyHashingS = new jsSHA(0, 0, { "numRounds": 2 });
-    pubKeyHashingS.update(pubKeyHashNetwork);
+    pubKeyHashingS.update(pubHashNet);
     const pubKeyHashingSF = pubKeyHashingS.getHash(0);
     // Checksum
     const checksumPubKey = pubKeyHashingSF.slice(0, 4);
     // Public key pre-base58
-    const pubKeyPreBase = new Uint8Array(pubKeyHashNetworkLen + checksumPubKey.length);
-    writeToUint8(pubKeyPreBase, pubKeyHashNetwork, 0);
-    writeToUint8(pubKeyPreBase, checksumPubKey, pubKeyHashNetworkLen);
+    writeToUint8(pubPreBase, pubHashNet, 0);
+    writeToUint8(pubPreBase, checksumPubKey, pubHashNetLen);
     // Encode as Base58 human-readable network address
-    publicKeyForNetwork = to_b58(pubKeyPreBase);
+    publicKeyForNetwork = to_b58(pubPreBase);
 
     // Debug Console
     if (debug) {
@@ -291,13 +277,13 @@ generateWallet = async function (noUI = false) {
       console.log('RIPEMD160 Public Key')
       console.log(pubKeyHashRipemd160)
       console.log('PubKeyHash w/NetworkBytes')
-      console.log(pubKeyHashNetwork)
+      console.log(pubHashNet)
       console.log('2x SHA256 Public Key Secound Time')
       console.log(pubKeyHashingSF)
       console.log("CheckSum Public Key")
       console.log(checksumPubKey)
       console.log("Pub Key with Checksum")
-      console.log(pubKeyPreBase)
+      console.log(pubPreBase)
       console.log('Public Key Base 64')
       console.log(publicKeyForNetwork)
     }
@@ -313,7 +299,7 @@ generateWallet = async function (noUI = false) {
       const typeNumber = 4;
       const errorCorrectionLevel = 'L';
       const qrPriv = qrcode(typeNumber, errorCorrectionLevel);
-      qrPriv.addData('pivx:' + privateKeyForTransactions);
+      qrPriv.addData(privateKeyForTransactions);
       qrPriv.make();
       domPrivateQr.innerHTML = qrPriv.createImgTag();
       domPrivateQr.firstChild.style.borderRadius = '8px';

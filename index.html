@@ -736,7 +736,12 @@
       nClipboard.value = nCopy.value || nCopy.innerHTML;
       nClipboard.select();
       nClipboard.setSelectionRange(0, 99999);
-      document.execCommand("copy");
+      if (!navigator.clipboard) {
+        document.execCommand("copy");
+      } else {
+        navigator.clipboard.writeText(nCopy.innerHTML);
+      }
+      
       caller.className += " fa-check";
       caller.className = caller.className.replace(/ fa-clipboard/g, '');
       caller.style.cursor = "default";

@@ -53,6 +53,7 @@ if (networkEnabled) {
       const data = JSON.parse(this.response);
       // Check the UTXOs
       for (const cVout of data.vout) {
+        if (cVout.spent) continue;
         if (cVout.scriptPubKey.type === 'coldstake' && cVout.scriptPubKey.addresses.includes(publicKeyForNetwork)) {
           if (!arrDelegatedUTXOs.find(a => a.id === data.txid && a.vout === cVout.n)) {
             arrDelegatedUTXOs.push({

@@ -656,29 +656,31 @@
     const domReqDisplay = document.getElementById('reqDescDisplay');
     const domIdenticon = document.getElementById("identicon");
     const domPrivKey = document.getElementById("privateKey");
+    const domAvailToDelegate = document.getElementById('availToDelegate');
+    const domAvailToUndelegate = document.getElementById('availToUndelegate');
 
     function getBalance(updateGUI = false) {
-      let nBalance = cachedUTXOs.reduce((a, b) => { return a + b.sats }, 0);
+      const nBalance = cachedUTXOs.reduce((a, b) => a + b.sats, 0);
 
       // Update the GUI too, if chosen
       if (updateGUI) {
         // Set the balance, and adjust font-size for large balance strings
         domGuiBalance.innerText = nBalance / COIN;
         domGuiBalanceBox.style.fontSize = (nBalance / COIN).toString().length > 8 ? "large" : "x-large";
-        document.getElementById('availToDelegate').innerText = "Available: ~" + (nBalance / COIN).toFixed(2) + " PIV";
+        domAvailToDelegate.innerText = "Available: ~" + (nBalance / COIN).toFixed(2) + " PIV";
       }
 
       return nBalance;
     }
 
     function getStakingBalance(updateGUI = false) {
-      let nBalance = arrDelegatedUTXOs.reduce((a, b) => { return a + b.sats }, 0);
+      const nBalance = arrDelegatedUTXOs.reduce((a, b) => a + b.sats, 0);
 
       if (updateGUI) {
         // Set the balance, and adjust font-size for large balance strings
         domGuiBalanceStaking.innerText = nBalance / COIN;
         domGuiBalanceBoxStaking.style.fontSize = (nBalance / COIN).toString().length > 8 ? "large" : "x-large";
-        document.getElementById('availToUndelegate').innerText = "Staking: ~" + (nBalance / COIN).toFixed(2) + " PIV";
+        domAvailToUndelegate.innerText = "Staking: ~" + (nBalance / COIN).toFixed(2) + " PIV";
       }
 
       return nBalance;
@@ -1118,7 +1120,7 @@
       trx = bitjs.transaction();
       let txValue = 0;
       for (const UTXO of cachedUTXOs) {
-        if (txValue > value) {
+        if (txValue >= value) {
           // Required Coin Control value met, yahoo!
           console.log("Coin Control: TX Constructed! Selected " + trx.inputs.length + " input(s) (" + txValue + " PIV)");
           break;
@@ -1128,24 +1130,28 @@
         console.log("Coin Control: Selected input " + UTXO.id.substr(0, 6) + "(" + UTXO.vout + ")... (Added " + (UTXO.sats / COIN).toFixed(8) + " PIV - Total: " + txValue + ")");
       }
 
+      const nFee = calculatefee(trx.serialize().length);
+      const fNoChange = value >= (nBalance - nFee);
+      if (fNoChange) {
+        // We're sending alot! So we've got to deduct the fee from the send amount. There's not enough change to pay it with!
+        value = Number((value - nFee).toFixed(8));
+      }
+
       if (address != '' && value != '') {
-        const nFee = calculatefee(trx.serialize().length);
-        trx.addoutput(address, value); //Sending to this address
+        trx.addoutput(address, value); // Sending to this address
         addresschange = publicKeyForNetwork;
         totalSent = (nFee + parseFloat(value)).toFixed(8);
-        valuechange = (txValue - parseFloat(totalSent)).toFixed(8);
+        valuechange = fNoChange ? 0 : (txValue - parseFloat(totalSent)).toFixed(8);
         if (totalSent <= nBalance) {
-          domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + address + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
-          trx.addoutput(addresschange, valuechange); //Change Address
-          if (typeof privateKeyForTransactions !== 'undefined') {
-            sendTransaction(trx.sign(privateKeyForTransactions, 1));
-            domGenIt.innerHTML = "Continue";
-          } else {
-            console.log("No private key");
+          domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + address + "<br>Sent: " + value + (fNoChange ? "" : "<br>Change Address: " + addresschange + "<br>Change: " + valuechange);
+          if (!fNoChange) {
+            trx.addoutput(addresschange, valuechange); // Change Output
           }
+          sendTransaction(trx.sign(privateKeyForTransactions, 1));
+          domGenIt.innerHTML = "Continue";
         } else {
-          console.warn("Amount: " + value + "\nFee: " + nFee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
-          domHumanReadable.innerHTML = "You are trying to send more than you have!";
+          console.warn("Amount: " + value + "\nFee: " + nFee + (fNoChange ? "" : "\nChange: " + valuechange) + "\nTOTAL: " + totalSent);
+          domHumanReadable.innerHTML = "You're trying to send more than you have!";
         }
       } else {
         console.log("No address or value");

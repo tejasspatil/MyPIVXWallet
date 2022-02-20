@@ -4,7 +4,6 @@ var networkEnabled = true;
 //Users need not look below here.
 //------------------------------
 var publicKeyForNetwork;
-var trx;
 var privateKeyForTransactions;
 var walletAlreadyMade = 0;
 

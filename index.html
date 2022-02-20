@@ -926,20 +926,20 @@
       if (value > nBalance) return alert("Balance is too small! (" + nBalance + " - " + value + " = " + (nBalance - value).toFixed(8) + ")");
       console.log("Constructing TX of value: " + value + " PIV");
       // Loop our cached UTXOs and construct a TX
-      trx = bitjs.transaction();
+      const cTx = bitjs.transaction();
       let txValue = 0;
       for (const UTXO of arrDelegatedUTXOs) {
         if (txValue > value) {
           // Required Coin Control value met, yahoo!
-          console.log("Coin Control: TX Constructed! Selected " + trx.inputs.length + " input(s) (" + txValue + " PIV)");
+          console.log("Coin Control: TX Constructed! Selected " + cTx.inputs.length + " input(s) (" + txValue + " PIV)");
           break;
         }
-        trx.addinput(UTXO.id, UTXO.vout, UTXO.script);
+        cTx.addinput(UTXO.id, UTXO.vout, UTXO.script);
         txValue += UTXO.sats / COIN;
         console.log("Coin Control: Selected CS input " + UTXO.id.substr(0, 6) + "(" + UTXO.vout + ")... (Added " + (UTXO.sats / COIN).toFixed(8) + " PIV - Total: " + txValue + ")");
       }
-      const nFee = calculatefee(trx.serialize().length);
-      trx.addoutput(publicKeyForNetwork, value);
+      const nFee = calculatefee(cTx.serialize().length);
+      cTx.addoutput(publicKeyForNetwork, value);
       addresschange = publicKeyForNetwork;
       totalSent = (nFee + value).toFixed(8);
       valuechange = (txValue - parseFloat(totalSent)).toFixed(8);
@@ -954,14 +954,14 @@
             askForCSAddr(true);
             return alert('Now that you\'ve set a Cold Staking address, please re-try your undelegation!');
           }
-          trx.addcoldstakingoutput(publicKeyForNetwork, cachedColdStakeAddr, valuechange);
+          cTx.addcoldstakingoutput(publicKeyForNetwork, cachedColdStakeAddr, valuechange);
           console.log('Re-delegated delegation spend change!');
         } else {
           // Not enough change to cold stake, so we'll just unstake everything
-          trx.addoutput(addresschange, valuechange);
+          cTx.addoutput(addresschange, valuechange);
           console.log('Spent all CS dust into redeem address!');
         }
-        sendTransaction(trx.sign(privateKeyForTransactions, 1, 'coldstake'), "Delegation successfully spent! Please wait for confirmations.");
+        sendTransaction(cTx.sign(privateKeyForTransactions, 1, 'coldstake'), "Delegation successfully spent! Please wait for confirmations.");
         domGenIt.innerHTML = "Continue";
       } else {
         console.warn("Amount: " + value + "\nFee: " + nFee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
@@ -1005,27 +1005,27 @@
       if (value > nBalance) return alert("Balance is too small! (" + nBalance + " - " + value + " = " + (nBalance - value).toFixed(8) + ")");
       console.log("Constructing TX of value: " + value + " PIV");
       // Loop our cached UTXOs and construct a TX
-      trx = bitjs.transaction();
+      const cTx = bitjs.transaction();
       let txValue = 0;
       for (const UTXO of cachedUTXOs) {
         if (txValue > value) {
           // Required Coin Control value met, yahoo!
-          console.log("Coin Control: TX Constructed! Selected " + trx.inputs.length + " input(s) (" + txValue + " PIV)");
+          console.log("Coin Control: TX Constructed! Selected " + cTx.inputs.length + " input(s) (" + txValue + " PIV)");
           break;
         }
-        trx.addinput(UTXO.id, UTXO.vout, UTXO.script);
+        cTx.addinput(UTXO.id, UTXO.vout, UTXO.script);
         txValue += UTXO.sats / COIN;
         console.log("Coin Control: Selected input " + UTXO.id.substr(0, 6) + "(" + UTXO.vout + ")... (Added " + (UTXO.sats / COIN).toFixed(8) + " PIV - Total: " + txValue + ")");
       }
-      const nFee = calculatefee(trx.serialize().length);
-      trx.addcoldstakingoutput(publicKeyForNetwork, coldAddr, value);
+      const nFee = calculatefee(cTx.serialize().length);
+      cTx.addcoldstakingoutput(publicKeyForNetwork, coldAddr, value);
       addresschange = publicKeyForNetwork;
       totalSent = (nFee + parseFloat(value)).toFixed(8);
       valuechange = (txValue - parseFloat(totalSent)).toFixed(8);
       if (totalSent <= nBalance) {
         domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
-        trx.addoutput(addresschange, valuechange); //Change Address
-        sendTransaction(trx.sign(privateKeyForTransactions, 1), "Delegation successful, please wait for confirmations, enjoy your staking!");
+        cTx.addoutput(addresschange, valuechange); //Change Address
+        sendTransaction(cTx.sign(privateKeyForTransactions, 1), "Delegation successful, please wait for confirmations, enjoy your staking!");
         domGenIt.innerHTML = "Continue";
       } else {
         console.warn("Amount: " + value + "\nFee: " + nFee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
@@ -1045,27 +1045,27 @@
       if (value > nBalance) return alert("Balance is too small! (" + nBalance + " - " + value + " = " + (nBalance - value).toFixed(8) + ")");
       console.log("Constructing TX of value: " + value + " PIV");
       // Loop our cached UTXOs and construct a TX
-      trx = bitjs.transaction();
+      const cTx = bitjs.transaction();
       let txValue = 0;
       for (const UTXO of cachedUTXOs) {
         if (txValue > value) {
           // Required Coin Control value met, yahoo!
-          console.log("Coin Control: TX Constructed! Selected " + trx.inputs.length + " input(s) (" + txValue + " PIV)");
+          console.log("Coin Control: TX Constructed! Selected " + cTx.inputs.length + " input(s) (" + txValue + " PIV)");
           break;
         }
-        trx.addinput(UTXO.id, UTXO.vout, UTXO.script);
+        cTx.addinput(UTXO.id, UTXO.vout, UTXO.script);
         txValue += UTXO.sats / COIN;
         console.log("Coin Control: Selected input " + UTXO.id.substr(0, 6) + "(" + UTXO.vout + ")... (Added " + (UTXO.sats / COIN).toFixed(8) + " PIV - Total: " + txValue + ")");
       }
-      const nFee = calculatefee(trx.serialize().length);
-      trx.addpreimageoutput(hex, value);
+      const nFee = calculatefee(cTx.serialize().length);
+      cTx.addpreimageoutput(hex, value);
       addresschange = publicKeyForNetwork;
       totalSent = (nFee + parseFloat(value)).toFixed(8);
       valuechange = (txValue - parseFloat(totalSent)).toFixed(8);
       if (totalSent <= nBalance) {
         domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
-        trx.addoutput(addresschange, valuechange); //Change Address
-        sendTransaction(trx.sign(privateKeyForTransactions, 1));
+        cTx.addoutput(addresschange, valuechange); //Change Address
+        sendTransaction(cTx.sign(privateKeyForTransactions, 1));
         domGenIt.innerHTML = "Continue";
       } else {
         console.warn("Amount: " + value + "\nFee: " + nFee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
@@ -1082,7 +1082,7 @@
           alert("Please import/create your wallet before sending transactions!");
         return;
       }
-      let address = domAddress1s.value;
+      const address = domAddress1s.value;
       let value = Number(domValue1s.value);
       if (domGenIt.innerHTML === 'Continue') {
         domGenIt.innerHTML = 'Send Transaction';
@@ -1097,20 +1097,20 @@
       if (value > nBalance) return alert("Balance is too small! (" + nBalance + " - " + value + " = " + (nBalance - value).toFixed(8) + ")");
       console.log("Constructing TX of value: " + value + " PIV");
       // Loop our cached UTXOs and construct a TX
-      trx = bitjs.transaction();
+      const cTx = bitjs.transaction();
       let txValue = 0;
       for (const UTXO of cachedUTXOs) {
         if (txValue >= value) {
           // Required Coin Control value met, yahoo!
-          console.log("Coin Control: TX Constructed! Selected " + trx.inputs.length + " input(s) (" + txValue + " PIV)");
+          console.log("Coin Control: TX Constructed! Selected " + cTx.inputs.length + " input(s) (" + txValue + " PIV)");
           break;
         }
-        trx.addinput(UTXO.id, UTXO.vout, UTXO.script);
+        cTx.addinput(UTXO.id, UTXO.vout, UTXO.script);
         txValue += UTXO.sats / COIN;
         console.log("Coin Control: Selected input " + UTXO.id.substr(0, 6) + "(" + UTXO.vout + ")... (Added " + (UTXO.sats / COIN).toFixed(8) + " PIV - Total: " + txValue + ")");
       }
 
-      const nFee = calculatefee(trx.serialize().length);
+      const nFee = calculatefee(cTx.serialize().length);
       const fNoChange = value >= (nBalance - nFee);
       if (fNoChange) {
         // We're sending alot! So we've got to deduct the fee from the send amount. There's not enough change to pay it with!
@@ -1118,16 +1118,16 @@
       }
 
       if (address != '' && value != '') {
-        trx.addoutput(address, value); // Sending to this address
+        cTx.addoutput(address, value); // Sending to this address
         addresschange = publicKeyForNetwork;
         totalSent = (nFee + parseFloat(value)).toFixed(8);
         valuechange = fNoChange ? 0 : (txValue - parseFloat(totalSent)).toFixed(8);
         if (totalSent <= nBalance) {
           domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + address + "<br>Sent: " + value + (fNoChange ? "" : "<br>Change Address: " + addresschange + "<br>Change: " + valuechange);
           if (!fNoChange) {
-            trx.addoutput(addresschange, valuechange); // Change Output
+            cTx.addoutput(addresschange, valuechange); // Change Output
           }
-          sendTransaction(trx.sign(privateKeyForTransactions, 1));
+          sendTransaction(cTx.sign(privateKeyForTransactions, 1));
           domGenIt.innerHTML = "Continue";
         } else {
           console.warn("Amount: " + value + "\nFee: " + nFee + (fNoChange ? "" : "\nChange: " + valuechange) + "\nTOTAL: " + totalSent);
@@ -1139,20 +1139,19 @@
     }
     function createRawTransaction() {
       //advanced transaction creation and signing
-      var trx = bitjs.transaction();
-      var txid = document.getElementById("prevTrxHash").value;
-      var index = document.getElementById("index").value;
-      var script = document.getElementById("script").value;
-      trx.addinput(txid, index, script);
+      const cTx = bitjs.transaction();
+      const txid = document.getElementById("prevTrxHash").value;
+      const index = document.getElementById("index").value;
+      const script = document.getElementById("script").value;
+      cTx.addinput(txid, index, script);
       var address = document.getElementById("address1").value;
       var value = document.getElementById("value1").value;
-      trx.addoutput(address, value);
-      var address = document.getElementById("address2").value;
-      var value = document.getElementById("value2").value;
-      trx.addoutput(address, value);
-      var wif = document.getElementById("wif").value;
-      var textArea = document.getElementById("rawTrx");
-      textArea.value = trx.sign(wif, 1); //SIGHASH_ALL DEFAULT 1
+      cTx.addoutput(address, value);
+      address = document.getElementById("address2").value;
+      value = document.getElementById("value2").value;
+      cTx.addoutput(address, value);
+      const wif = document.getElementById("wif").value;
+      document.getElementById("rawTrx").value = cTx.sign(wif, 1); //SIGHASH_ALL DEFAULT 1
     }
     function openTab(evt, tabName) {
       var i, tabcontent, tablinks;

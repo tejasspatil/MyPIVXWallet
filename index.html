@@ -678,8 +678,8 @@
 
       if (updateGUI) {
         // Set the balance, and adjust font-size for large balance strings
-        domGuiBalanceStaking.innerText = nBalance / COIN;
-        domGuiBalanceBoxStaking.style.fontSize = (nBalance / COIN).toString().length > 8 ? "large" : "x-large";
+        domGuiBalanceStaking.innerText = Math.floor(nBalance / COIN);
+        domGuiBalanceBoxStaking.style.fontSize = Math.floor(nBalance / COIN).toString().length >= 4 ? "large" : "x-large";
         domAvailToUndelegate.innerText = "Staking: ~" + (nBalance / COIN).toFixed(2) + " PIV";
       }
 

@@ -877,13 +877,9 @@
         }
 
         // GUI Updater
-        let lastAttempts = 0;
         domVanityUiButtonTxt.innerText = 'Stop (Searched ' + attempts.toLocaleString('en-GB') + ' keys)';
         vanUiUpdater = setInterval(() => {
-          if (attempts > lastAttempts) {
-            lastAttempts = attempts;
             domVanityUiButtonTxt.innerText = 'Stop (Searched ' + attempts.toLocaleString('en-GB') + ' keys)';
-          }
         }, 200);
 
         function checkResult(data) {
@@ -899,12 +895,8 @@
       }
     }
     function toggleDropDown(id) {
-      var openClosed = document.getElementById(id).style.display;
-      if (openClosed === 'block') {
-        document.getElementById(id).style.display = 'none';
-      } else {
-        document.getElementById(id).style.display = 'block';
-      }
+      const domID = document.getElementById(id);
+      domID.style.display = domID.style.display === 'block' ? 'none' : 'block';
     }
     function loadUnspendInputs() {
       if (publicKeyForNetwork) {
@@ -969,12 +961,8 @@
           trx.addoutput(addresschange, valuechange);
           console.log('Spent all CS dust into redeem address!');
         }
-        if (typeof privateKeyForTransactions !== 'undefined') {
-          sendTransaction(trx.sign(privateKeyForTransactions, 1, 'coldstake'), "Delegation successfully spent! Please wait for confirmations.");
-          domGenIt.innerHTML = "Continue";
-        } else {
-          console.log("No private key");
-        }
+        sendTransaction(trx.sign(privateKeyForTransactions, 1, 'coldstake'), "Delegation successfully spent! Please wait for confirmations.");
+        domGenIt.innerHTML = "Continue";
       } else {
         console.warn("Amount: " + value + "\nFee: " + nFee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
         alert('You are trying to undelegate more than you have, don\'t forget blockchain fees! Removing ~0.001 PIV will do fine.');
@@ -1037,12 +1025,8 @@
       if (totalSent <= nBalance) {
         domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
         trx.addoutput(addresschange, valuechange); //Change Address
-        if (typeof privateKeyForTransactions !== 'undefined') {
-          sendTransaction(trx.sign(privateKeyForTransactions, 1), "Delegation successful, please wait for confirmations, enjoy your staking!");
-          domGenIt.innerHTML = "Continue";
-        } else {
-          console.log("No private key");
-        }
+        sendTransaction(trx.sign(privateKeyForTransactions, 1), "Delegation successful, please wait for confirmations, enjoy your staking!");
+        domGenIt.innerHTML = "Continue";
       } else {
         console.warn("Amount: " + value + "\nFee: " + nFee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
         alert('You are trying to delegate more than you have, don\'t forget blockchain fees! Removing ~0.001 PIV will do fine.');
@@ -1081,12 +1065,8 @@
       if (totalSent <= nBalance) {
         domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
         trx.addoutput(addresschange, valuechange); //Change Address
-        if (typeof privateKeyForTransactions !== 'undefined') {
-          sendTransaction(trx.sign(privateKeyForTransactions, 1));
-          domGenIt.innerHTML = "Continue";
-        } else {
-          console.log("No private key");
-        }
+        sendTransaction(trx.sign(privateKeyForTransactions, 1));
+        domGenIt.innerHTML = "Continue";
       } else {
         console.warn("Amount: " + value + "\nFee: " + nFee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
         domHumanReadable.innerHTML = "You are trying to send more than you have!";

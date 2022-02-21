@@ -63,9 +63,13 @@
 		pubkeyBytes.unshift(0x04);
 
 		if (bitjs.compressed == true) {
-			const pubCompressed = EllipticCurve.integerToBytes(x,32)
-			pubCompressed.unshift(y.isEven() ? 2 : 3);
-			return Crypto.util.bytesToHex(pubCompressed);
+			const publicKeyBytesCompressed = EllipticCurve.integerToBytes(x,32)
+			if (y.isEven()) {
+				publicKeyBytesCompressed.unshift(0x02)
+			} else {
+				publicKeyBytesCompressed.unshift(0x03)
+			}
+			return Crypto.util.bytesToHex(publicKeyBytesCompressed);
 		} else {
 			return Crypto.util.bytesToHex(pubkeyBytes);
 		}

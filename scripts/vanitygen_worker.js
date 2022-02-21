@@ -82,8 +82,6 @@ function writeToUint8(arr, bytes, pos = 0) {
 }
 
 // Generation Constants + Pre-allocations
-const pubCompressedLen = 33;                              // (int) Length of compressed pubkey
-const pubCompressed = new Uint8Array(pubCompressedLen);   // (Uint8) Pre-allocated array for a compressed pubkey
 const pubHashNetLen = 21;                                 // (int) Length of net-encoded pubkey hash
 const pubHashNet = new Uint8Array(pubHashNetLen);         // (Uint8) Pre-allocated array for a pubkey hash
 const pubPreBaseLen = 25;                                 // (int) Length of pre-base58 pubkey
@@ -96,13 +94,14 @@ while (true) {
     getSafeRand(pkBytes);
 
     // Public Key Derivation
-    let nPubkey = nSecp256k1.getPublicKey(pkBytes).slice(1, 65);
-    const pubY = new BN(nPubkey.slice(32), 16);
-    pubCompressed[0] = pubY.isEven() ? 2 : 3;
-    writeToUint8(pubCompressed, nPubkey.slice(0, 32), 1);
+    let nPubkey = Crypto.util.bytesToHex(nSecp256k1.getPublicKey(pkBytes)).substr(2);
+    const pubY = new BN(nPubkey.substr(64), 16);
+    nPubkey = nPubkey.substr(0, 64);
+    const publicKeyBytesCompressed = Crypto.util.hexToBytes(nPubkey);
+    publicKeyBytesCompressed.unshift(pubY.isEven() ? 0x02 : 0x03);
     // First pubkey SHA-256 hash
     const pubKeyHashing = new jsSHA(0, 0, { "numRounds": 1 });
-    pubKeyHashing.update(pubCompressed);
+    pubKeyHashing.update(publicKeyBytesCompressed);
     // RIPEMD160 hash
     const pubKeyHashRipemd160 = ripemd160(pubKeyHashing.getHash(0));
     // Network Encoding

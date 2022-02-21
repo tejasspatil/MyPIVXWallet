@@ -2,12 +2,12 @@
 const PUBKEY_ADDRESS = 30;
 const SECRET_KEY     = 212;
 
-importScripts('libs/noble-secp256k1.js', 'libs/bn.js', 'libs/crypto-min.js', 'libs/crypto-sha256-hmac.js', 'libs/crypto-sha256.js', 'libs/jsbn.js', 'libs/ripemd160.js', 'libs/sha256.js');
+importScripts('libs/noble-secp256k1.js', 'libs/bn.js', 'libs/secp256k1.js', 'libs/crypto-min.js', 'libs/crypto-sha256-hmac.js', 'libs/crypto-sha256.js', 'libs/jsbn.js', 'libs/ripemd160.js', 'libs/sha256.js');
 
 const nSecp256k1 = nobleSecp256k1.default;
 
 // B58 Encoding Map
-const MAP = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".split('');;
+const MAP = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 // ByteArray to B58
 var to_b58 = function (
@@ -65,14 +65,14 @@ var from_b58 = function (
 }
 
 // Cryptographic Random-Gen
-function getSafeRand(b) {
-  const r = b || new Uint8Array(32);
+function getSafeRand() {
+  const r = new Uint8Array(32);
   crypto.getRandomValues(r);
   return r;
 }
 
 // Writes a sequence of Array-like bytes into a location within a Uint8Array
-function writeToUint8(arr, bytes, pos = 0) {
+function writeToUint8(arr, bytes, pos) {
   const len = arr.length;
   let i = 0;
   for (pos; pos<len; pos++) {
@@ -81,40 +81,39 @@ function writeToUint8(arr, bytes, pos = 0) {
   }
 }
 
-// Generation Constants + Pre-allocations
-const pubHashNetLen = 21;                                 // (int) Length of net-encoded pubkey hash
-const pubHashNet = new Uint8Array(pubHashNetLen);         // (Uint8) Pre-allocated array for a pubkey hash
-const pubPreBaseLen = 25;                                 // (int) Length of pre-base58 pubkey
-const pubPreBase = new Uint8Array(pubPreBaseLen);         // (Uint8) Pre-allocated array for a pre-base58 pubkey
-pubHashNet[0] = PUBKEY_ADDRESS;                           // Public key prefix  (1 byte)
-
-const pkBytes = new Uint8Array(32);
 while (true) {
-    // Generate Secure Random bytes
-    getSafeRand(pkBytes);
+    const pkBytes = getSafeRand();
 
     // Public Key Derivation
     let nPubkey = Crypto.util.bytesToHex(nSecp256k1.getPublicKey(pkBytes)).substr(2);
-    const pubY = new BN(nPubkey.substr(64), 16);
+    const pubY = Secp256k1.uint256(nPubkey.substr(64), 16);
     nPubkey = nPubkey.substr(0, 64);
     const publicKeyBytesCompressed = Crypto.util.hexToBytes(nPubkey);
-    publicKeyBytesCompressed.unshift(pubY.isEven() ? 0x02 : 0x03);
+    if (pubY.isEven()) {
+      publicKeyBytesCompressed.unshift(0x02);
+    } else {
+      publicKeyBytesCompressed.unshift(0x03);
+    }
     // First pubkey SHA-256 hash
     const pubKeyHashing = new jsSHA(0, 0, { "numRounds": 1 });
     pubKeyHashing.update(publicKeyBytesCompressed);
     // RIPEMD160 hash
     const pubKeyHashRipemd160 = ripemd160(pubKeyHashing.getHash(0));
     // Network Encoding
-    writeToUint8(pubHashNet, pubKeyHashRipemd160, 1);
+    const pubKeyHashNetworkLen = pubKeyHashRipemd160.length + 1;
+    const pubKeyHashNetwork = new Uint8Array(pubKeyHashNetworkLen);
+    pubKeyHashNetwork[0] = PUBKEY_ADDRESS;
+    writeToUint8(pubKeyHashNetwork, pubKeyHashRipemd160, 1);
     // Double SHA-256 hash
     const pubKeyHashingS = new jsSHA(0, 0, { "numRounds": 2 });
-    pubKeyHashingS.update(pubHashNet);
+    pubKeyHashingS.update(pubKeyHashNetwork);
     const pubKeyHashingSF = pubKeyHashingS.getHash(0);
     // Checksum
     const checksumPubKey = pubKeyHashingSF.slice(0, 4);
     // Public key pre-base58
-    writeToUint8(pubPreBase, pubHashNet, 0);
-    writeToUint8(pubPreBase, checksumPubKey, pubHashNetLen);
+    const pubKeyPreBase = new Uint8Array(pubKeyHashNetworkLen + checksumPubKey.length);
+    writeToUint8(pubKeyPreBase, pubKeyHashNetwork, 0);
+    writeToUint8(pubKeyPreBase, checksumPubKey, pubKeyHashNetworkLen);
 
-    postMessage({'pub': to_b58(pubPreBase), 'priv': pkBytes});
+    postMessage({'pub': to_b58(pubKeyPreBase), 'priv': pkBytes});
 }

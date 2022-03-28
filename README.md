@@ -1,6 +1,6 @@
-<h1 align="center">
+<h2 align="center">
   Send, Stake and Receive with PIVX's most universal wallet.
-</h1>
+</h2>
 
 ---
 
@@ -10,8 +10,7 @@
 
 ## Be your own Bank
 
-MPW is a completely [non-custodial](https://www.bitcoin.com/get-started/custodial-non-custodial-bitcoin-wallets/), client-side system, giving you absolute control over your funds, data, bandwidth and privacy... all of which are absolutely essential to easily-attainable self-sovereignty.<br>
-In a world of banking; be your own bank.
+MPW is a completely [non-custodial](https://www.bitcoin.com/get-started/custodial-non-custodial-bitcoin-wallets/), client-side system, giving you absolute control over your funds, data, bandwidth and privacy... all of which are essential to easily-attainable **self-sovereignty**.
 
 <br>
 
@@ -23,7 +22,7 @@ In a world of banking; be your own bank.
 
 ## Universal and Portable
 
-MPW is completely universal and portable, at both a user-experience level and protocol-level, MPW is interopable with much of the functionality within PIVX, while also being portable enough to run on almost any device in the world, if it can open a webpage, it can run MPW.
+MPW is completely universal and portable, at both a user-experience level & protocol-level, MPW is interopable with much of the functionality within PIVX, while also being portable enough to run on almost **any device in the world**.
 
 <br>
 
@@ -35,10 +34,8 @@ MPW is completely universal and portable, at both a user-experience level and pr
 
 ## Don't trust, Verify!
 
-MPW is completely free, open-source software (FOSS), with absolute transparency in security, features, down to every letter of code.
-Alongside total codebase availability, MPW allows you to totally bunker-down, with the ability to customize your experience in accordance to your principles and security desires.
-
-If you'd like, you may even run MPW offline, with the internet off, on the dark side of the moon, and you can generate transactions offline using our built-in UTXO tools, go ham, tinhat dudes!
+MPW is completely free, open-source software (FOSS), with absolute transparency in security, features, down to every letter of code.<br>
+Alongside total codebase availability, MPW allows you to totally bunker-down, with the ability to customize your experience in accordance to your principles & security desires.
 
 <br>
 
@@ -52,9 +49,7 @@ If you'd like, you may even run MPW offline, with the internet off, on the dark 
 
 MPW is built with love by [PIVX Labs](https://github.com/PIVX-Labs), a micro-DAO of [awesome people](https://github.com/PIVX-Labs/MyPIVXWallet/graphs/contributors) that build both FOSS and Proprietary software for the PIVX community to enjoy.
 
-The mission of PIVX Labs is to accelerate the adoption and growth of PIVX as a currency, through means of powerful and useful software and operations such as Merchant Availability schemes and promotions.
-
-Join the [PIVX Labs Discord](https://discord.gg/v57eCP4MMx) to meet us!
+The mission of PIVX Labs is to accelerate the adoption & growth of PIVX as a currency, using awesomeness. Join the [PIVX Labs Discord](https://discord.gg/v57eCP4MMx) to meet us!
 
 <br>
 

@@ -2,6 +2,10 @@
   Send, Stake and Receive with PIVX's most universal wallet.
 </h2>
 
+<p align="center">
+  <a href="https://mypivxwallet.org/">Production</a> (Stable) | <a href="https://pivx-labs.github.io/MyPIVXWallet/">Bleeding-Edge</a> (Unstable)
+</p>
+
 ---
 
 <br>

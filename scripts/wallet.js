@@ -56,7 +56,6 @@ var from_b58 = function (
   return new Uint8Array(b); //return the final byte array in Uint8Array format
 }
 
-if (debug) document.getElementById('Debug').innerHTML = "<b> DEBUG MODE </b>";
 document.getElementById('dcfooter').innerHTML = '© MIT 2022 - Built with 💜 by PIVX Labs - <b style=\'cursor:pointer\' onclick=\'openDonatePage()\'>Donate!</b><br><a href="https://github.com/PIVX-Labs/MyPIVXWallet">MyPIVXWallet</a>';
 // Wallet Import
 importWallet = function (newWif = false, raw = false) {
@@ -201,7 +200,6 @@ function getSafeRand() {
 }
 
 // Wallet Generation
-const strDebugKeyBytes = "FFE09E40CE1C5F7092801D2388347C552C408FC9056734E8273977E658BC201F";
 generateWallet = async function (noUI = false) {
   if (walletAlreadyMade != 0 && !noUI) {
     var walletConfirm = window.confirm("Do you really want to generate a new address? If you haven't saved the last private key the key will get lost forever and any funds with it.");
@@ -210,9 +208,7 @@ generateWallet = async function (noUI = false) {
   }
   if (walletConfirm) {
     walletAlreadyMade++;
-    const pkBytes = debug ?
-                    Crypto.util.hexToBytes(strDebugKeyBytes)
-                    : getSafeRand();
+    const pkBytes = getSafeRand();
     // Private Key Generation
     const pkNetBytesLen = pkBytes.length + 2;
     const pkNetBytes = new Uint8Array(pkNetBytesLen);

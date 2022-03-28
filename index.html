@@ -659,6 +659,7 @@
     const domGuiAddress = document.getElementById('guiAddress');
     const domGenIt = document.getElementById("genIt");
     const domHumanReadable = document.getElementById("HumanReadable");
+    const domTxOutput = document.getElementById("transactionFinal");
     const domReqDesc = document.getElementById('reqDesc');
     const domReqDisplay = document.getElementById('reqDescDisplay');
     const domIdenticon = document.getElementById("identicon");
@@ -951,7 +952,8 @@
       totalSent = (nFee + value).toFixed(8);
       valuechange = (txValue - parseFloat(totalSent)).toFixed(8);
       if (totalSent <= nBalance) {
-        domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
+        if (debug)
+          domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
         if (valuechange > 1.01) {
           // Enough change to resume cold staking, so we'll send the change back to the cold staking address
           // Ensure the user has an address set - if not, request one!
@@ -968,7 +970,7 @@
           cTx.addoutput(addresschange, valuechange);
           console.log('Spent all CS dust into redeem address!');
         }
-        sendTransaction(cTx.sign(privateKeyForTransactions, 1, 'coldstake'), "Delegation successfully spent! Please wait for confirmations.");
+        sendTransaction(cTx.sign(privateKeyForTransactions, 1, 'coldstake'), "<b>Delegation successfully spent!</b><br>Please wait for confirmations.");
         domGenIt.innerHTML = "Continue";
       } else {
         console.warn("Amount: " + value + "\nFee: " + nFee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
@@ -1030,9 +1032,10 @@
       totalSent = (nFee + parseFloat(value)).toFixed(8);
       valuechange = (txValue - parseFloat(totalSent)).toFixed(8);
       if (totalSent <= nBalance) {
-        domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
+        if (debug)
+          domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
         cTx.addoutput(addresschange, valuechange); //Change Address
-        sendTransaction(cTx.sign(privateKeyForTransactions, 1), "Delegation successful, please wait for confirmations, enjoy your staking!");
+        sendTransaction(cTx.sign(privateKeyForTransactions, 1), "<b>Delegation successful!</b><br>Please wait for confirmations, enjoy your staking!");
         domGenIt.innerHTML = "Continue";
       } else {
         console.warn("Amount: " + value + "\nFee: " + nFee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
@@ -1070,13 +1073,14 @@
       totalSent = (nFee + parseFloat(value)).toFixed(8);
       valuechange = (txValue - parseFloat(totalSent)).toFixed(8);
       if (totalSent <= nBalance) {
-        domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
+        if (debug)
+          domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
         cTx.addoutput(addresschange, valuechange); //Change Address
         sendTransaction(cTx.sign(privateKeyForTransactions, 1));
         domGenIt.innerHTML = "Continue";
       } else {
         console.warn("Amount: " + value + "\nFee: " + nFee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
-        domHumanReadable.innerHTML = "You are trying to send more than you have!";
+        createAlert('warning', 'You are trying to send more than you have!');
       }
     }
 
@@ -1084,15 +1088,16 @@
       if (!networkEnabled) return alert("Cannot create Simple Transactions in offline mode; this requires an explorer to sync your balance (UTXOs), please enable Networking to use this feature! Otherwise, use 'Advanced Transactions'");
       if (!publicKeyForNetwork) {
         if (hasEncryptedWallet())
-          alert("Please unlock your wallet before sending transactions!");
+          createAlert('warning', "Please unlock your wallet before sending transactions!");
         else
-          alert("Please import/create your wallet before sending transactions!");
+          createAlert('warning', "Please import/create your wallet before sending transactions!");
         return;
       }
       const address = domAddress1s.value;
       let value = Number(domValue1s.value);
       if (domGenIt.innerHTML === 'Continue') {
         domGenIt.innerHTML = 'Send Transaction';
+        domTxOutput.innerHTML = '';
         domHumanReadable.innerHTML = "";
         domValue1s.value = "";
         domAddress1s.value = "";
@@ -1130,7 +1135,8 @@
         totalSent = (nFee + parseFloat(value)).toFixed(8);
         valuechange = fNoChange ? 0 : (txValue - parseFloat(totalSent)).toFixed(8);
         if (totalSent <= nBalance) {
-          domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + address + "<br>Sent: " + value + (fNoChange ? "" : "<br>Change Address: " + addresschange + "<br>Change: " + valuechange);
+          if (debug)
+            domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + address + "<br>Sent: " + value + (fNoChange ? "" : "<br>Change Address: " + addresschange + "<br>Change: " + valuechange);
           if (!fNoChange) {
             cTx.addoutput(addresschange, valuechange); // Change Output
           }
@@ -1138,7 +1144,7 @@
           domGenIt.innerHTML = "Continue";
         } else {
           console.warn("Amount: " + value + "\nFee: " + nFee + (fNoChange ? "" : "\nChange: " + valuechange) + "\nTOTAL: " + totalSent);
-          domHumanReadable.innerHTML = "You're trying to send more than you have!";
+          createAlert('warning', "You're trying to send more than you have!");
         }
       } else {
         console.log("No address or value");

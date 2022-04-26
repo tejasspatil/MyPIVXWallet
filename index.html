@@ -712,31 +712,24 @@
 
     let audio = null;
     function playMusic() {
-      if (audio === null) {
-        audio = new Audio('assets/music.mp3');
-        audio.play();
-        startDisco();
-      } else
-      if (audio.paused) {
-        audio.play();
-        startDisco();
-      } else
-      if (audio.ended) {
-        audio.play();
+      if (audio === null)
+          audio = new Audio('assets/music.mp3');
+      if (audio.paused || audio.ended) {
         startDisco();
       } else {
-        audio.pause();
         stopDisco();
       }
     }
 
     function startDisco() {
+      audio.play();
       for (const domImg of document.getElementsByTagName('img')) {
         domImg.classList.add("discoFilter");
       }
     }
 
     function stopDisco() {
+      audio.pause();
       for (const domImg of document.getElementsByTagName('img')) {
           domImg.classList.remove("discoFilter");
         }

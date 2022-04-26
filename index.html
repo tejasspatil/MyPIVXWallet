@@ -667,6 +667,9 @@
     const domAvailToDelegate = document.getElementById('availToDelegate');
     const domAvailToUndelegate = document.getElementById('availToUndelegate');
 
+    // Alert DOM element
+    const domAlertPos = document.getElementsByClassName("alertPositioning")[0];
+
     function getBalance(updateGUI = false) {
       const nBalance = cachedUTXOs.reduce((a, b) => a + b.sats, 0);
 

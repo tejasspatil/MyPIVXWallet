@@ -3,15 +3,10 @@
 // Base58 Encoding Map
 const MAP_B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
-/* --- DOM CACHE --- */
-const domAlertPos = document.getElementsByClassName("alertPositioning")[0];
-
-
-
 /* --- UTILS --- */
 // Cryptographic Random-Gen
 function getSafeRand(nSize = 32) {
-    return window.crypto.getRandomValues(new Uint8Array(nSize));
+    return crypto.getRandomValues(new Uint8Array(nSize));
 }
 
 // Writes a sequence of Array-like bytes into a location within a Uint8Array

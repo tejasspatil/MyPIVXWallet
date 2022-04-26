@@ -11,12 +11,16 @@ function getSafeRand(nSize = 32) {
 
 // Writes a sequence of Array-like bytes into a location within a Uint8Array
 function writeToUint8(arr, bytes, pos) {
-    const len = arr.length;
-    let i = 0;
-    for (pos; pos<len; pos++) {
-        arr[pos] = bytes[i];
-        if (!Number.isSafeInteger(bytes[i++])) break;
+    const arrLen = arr.length;
+    // Sanity: ensure an overflow cannot occur, if one is detected, somewhere in MPW's state could be corrupted.
+    if ((arrLen - pos) - bytes.length < 0) {
+        const strERR = 'CRITICAL: Overflow detected (' + ((arrLen - pos) - bytes.length) + '), possible state corruption, backup and refresh advised.';
+        alert(strERR);
+        throw Error(strERR);
     }
+    let i = 0;
+    while (pos < arrLen)
+        arr[pos++] = bytes[i++];
 }
 
 

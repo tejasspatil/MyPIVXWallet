@@ -865,7 +865,7 @@
       } else {
         // Ensure the input is base58 compatible
         for (const char of domPrefix.value) {
-          if (!MAP.includes(char)) return alert("The character '" + char + "' is unsupported in addresses! (Not Base58 compatible)");
+          if (!MAP_B58.includes(char)) return alert("The character '" + char + "' is unsupported in addresses! (Not Base58 compatible)");
         }
         // We also don't want users to be mining addresses for years... so cap the letters to four until the generator is more optimized
         if (domPrefix.value.length > 6) return alert("This is a long name! This would take a LONG time to find, please choose a shorter name!");

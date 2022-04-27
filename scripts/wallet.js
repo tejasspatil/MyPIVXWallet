@@ -47,18 +47,13 @@ importWallet = function (newWif = false, raw = false) {
     const pubY = Secp256k1.uint256(nPubkey.substr(64), 16);
     nPubkey = nPubkey.substr(0, 64);
     const publicKeyBytesCompressed = Crypto.util.hexToBytes(nPubkey);
-    if (pubY.isEven()) {
-      publicKeyBytesCompressed.unshift(0x02);
-    } else {
-      publicKeyBytesCompressed.unshift(0x03);
-    }
+    publicKeyBytesCompressed.unshift(pubY.isEven() ? 0x02 : 0x03);
     // First pubkey SHA-256 hash
     const pubKeyHashing = new jsSHA(0, 0, { "numRounds": 1 });
     pubKeyHashing.update(publicKeyBytesCompressed);
     // RIPEMD160 hash
     const pubKeyHashRipemd160 = ripemd160(pubKeyHashing.getHash(0));
     // Network Encoding
-    const pubKeyHashNetworkLen = pubKeyHashRipemd160.length + 1;
     const pubKeyHashNetwork = new Uint8Array(pubKeyHashNetworkLen);
     pubKeyHashNetwork[0] = PUBKEY_ADDRESS;
     writeToUint8(pubKeyHashNetwork, pubKeyHashRipemd160, 1);
@@ -69,7 +64,7 @@ importWallet = function (newWif = false, raw = false) {
     // Checksum
     const checksumPubKey = pubKeyHashingSF.slice(0, 4);
     // Public key pre-base58
-    const pubKeyPreBase = new Uint8Array(pubKeyHashNetworkLen + checksumPubKey.length);
+    const pubKeyPreBase = new Uint8Array(pubPrebaseLen);
     writeToUint8(pubKeyPreBase, pubKeyHashNetwork, 0);
     writeToUint8(pubKeyPreBase, checksumPubKey, pubKeyHashNetworkLen);
     // Encode as Base58 human-readable network address
@@ -159,18 +154,13 @@ generateWallet = async function (noUI = false) {
     const pubY = Secp256k1.uint256(nPubkey.substr(64), 16);
     nPubkey = nPubkey.substr(0, 64);
     const publicKeyBytesCompressed = Crypto.util.hexToBytes(nPubkey);
-    if (pubY.isEven()) {
-      publicKeyBytesCompressed.unshift(0x02);
-    } else {
-      publicKeyBytesCompressed.unshift(0x03);
-    }
+    publicKeyBytesCompressed.unshift(pubY.isEven() ? 0x02 : 0x03);
     // First pubkey SHA-256 hash
     const pubKeyHashing = new jsSHA(0, 0, { "numRounds": 1 });
     pubKeyHashing.update(publicKeyBytesCompressed);
     // RIPEMD160 hash
     const pubKeyHashRipemd160 = ripemd160(pubKeyHashing.getHash(0));
     // Network Encoding
-    const pubKeyHashNetworkLen = pubKeyHashRipemd160.length + 1;
     const pubKeyHashNetwork = new Uint8Array(pubKeyHashNetworkLen);
     pubKeyHashNetwork[0] = PUBKEY_ADDRESS;
     writeToUint8(pubKeyHashNetwork, pubKeyHashRipemd160, 1);
@@ -181,7 +171,7 @@ generateWallet = async function (noUI = false) {
     // Checksum
     const checksumPubKey = pubKeyHashingSF.slice(0, 4);
     // Public key pre-base58
-    const pubKeyPreBase = new Uint8Array(pubKeyHashNetworkLen + checksumPubKey.length);
+    const pubKeyPreBase = new Uint8Array(pubPrebaseLen);
     writeToUint8(pubKeyPreBase, pubKeyHashNetwork, 0);
     writeToUint8(pubKeyPreBase, checksumPubKey, pubKeyHashNetworkLen);
     // Encode as Base58 human-readable network address

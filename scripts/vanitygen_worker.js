@@ -6,39 +6,35 @@ importScripts('misc.js', 'libs/noble-secp256k1.js', 'libs/bn.js', 'libs/secp256k
 
 const nSecp256k1 = nobleSecp256k1.default;
 
+const cKeypair = {
+  'pub':  '',
+  'priv': new Uint8Array()
+}
+
+// Precompute buffers
+const pubKeyHashNetwork = new Uint8Array(pubKeyHashNetworkLen);
+pubKeyHashNetwork[0] = PUBKEY_ADDRESS;
+const pubKeyPreBase = new Uint8Array(pubPrebaseLen);
 while (true) {
-    const pkBytes = getSafeRand();
+    cKeypair.priv = getSafeRand();
 
     // Public Key Derivation
-    let nPubkey = Crypto.util.bytesToHex(nSecp256k1.getPublicKey(pkBytes)).substr(2);
+    const nPubkey = Crypto.util.bytesToHex(nSecp256k1.getPublicKey(cKeypair.priv)).substr(2);
     const pubY = Secp256k1.uint256(nPubkey.substr(64), 16);
-    nPubkey = nPubkey.substr(0, 64);
-    const publicKeyBytesCompressed = Crypto.util.hexToBytes(nPubkey);
-    if (pubY.isEven()) {
-      publicKeyBytesCompressed.unshift(0x02);
-    } else {
-      publicKeyBytesCompressed.unshift(0x03);
-    }
-    // First pubkey SHA-256 hash
+    const publicKeyBytesCompressed = Crypto.util.hexToBytes(nPubkey.substr(0, 64));
+    publicKeyBytesCompressed.unshift(pubY.isEven() ? 0x02 : 0x03);
+    // First pubkey SHA-256 Hash
     const pubKeyHashing = new jsSHA(0, 0, { "numRounds": 1 });
     pubKeyHashing.update(publicKeyBytesCompressed);
-    // RIPEMD160 hash
-    const pubKeyHashRipemd160 = ripemd160(pubKeyHashing.getHash(0));
-    // Network Encoding
-    const pubKeyHashNetworkLen = pubKeyHashRipemd160.length + 1;
-    const pubKeyHashNetwork = new Uint8Array(pubKeyHashNetworkLen);
-    pubKeyHashNetwork[0] = PUBKEY_ADDRESS;
-    writeToUint8(pubKeyHashNetwork, pubKeyHashRipemd160, 1);
-    // Double SHA-256 hash
+    // RIPEMD160 Hash + Network Encoding
+    writeToUint8(pubKeyHashNetwork, ripemd160(pubKeyHashing.getHash(0)), 1);
+    // Double SHA-256 Hash
     const pubKeyHashingS = new jsSHA(0, 0, { "numRounds": 2 });
     pubKeyHashingS.update(pubKeyHashNetwork);
-    const pubKeyHashingSF = pubKeyHashingS.getHash(0);
-    // Checksum
-    const checksumPubKey = pubKeyHashingSF.slice(0, 4);
-    // Public key pre-base58
-    const pubKeyPreBase = new Uint8Array(pubKeyHashNetworkLen + checksumPubKey.length);
+    // Digest Hash, Slice Checksum & finish the prebase key
     writeToUint8(pubKeyPreBase, pubKeyHashNetwork, 0);
-    writeToUint8(pubKeyPreBase, checksumPubKey, pubKeyHashNetworkLen);
+    writeToUint8(pubKeyPreBase, (pubKeyHashingS.getHash(0)).slice(0, 4), pubKeyHashNetworkLen);
+    cKeypair.pub = to_b58(pubKeyPreBase);
 
-    postMessage({'pub': to_b58(pubKeyPreBase), 'priv': pkBytes});
+    postMessage(cKeypair);
 }

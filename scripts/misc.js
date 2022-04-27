@@ -1,5 +1,10 @@
 'use strict';
 
+/* MPW constants */
+const pubKeyHashNetworkLen = 21;
+const pubChksum = 4;
+const pubPrebaseLen = pubKeyHashNetworkLen + pubChksum;
+
 // Base58 Encoding Map
 const MAP_B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 

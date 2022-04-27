@@ -396,10 +396,10 @@
                   <!-- IMPORT WALLET -->
                   <input class="hide-element" type="text" id="clipboard">
                   <div id='importWallet' style='display: none;'>
-                    <input type="text" id='privateKey' placeholder="Private Key">
-                    <button class="pivx-button-big" onclick="importWallet()">
+                    <input type="password" id='privateKey' placeholder="Private Key">
+                    <button class="pivx-button-big" onclick="guiImportWallet()">
                                   <span class="buttoni-icon"><i class="fas fa-file-upload fa-tiny-margin"></i></span>
-                                  <span class="buttoni-text">Import Wallet</span>
+                                  <span class="buttoni-text" id="importWalletText">Import Wallet</span>
                                   <span class="buttoni-arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M23.328 16.707L13.121 26.914a.5.5 0 01-.707 0l-2.828-2.828a.5.5 0 010-.707L16.964 16 9.586 8.621a.5.5 0 010-.707l2.828-2.828a.5.5 0 01.707 0l10.207 10.207a1 1 0 010 1.414z"></path></svg></span>
                         </button>
                   </div>
@@ -654,6 +654,7 @@
     const domGenVanityWallet = document.getElementById('generateVanityWallet');
     const domAccessWallet = document.getElementById('accessWallet');
     const domImportWallet = document.getElementById('importWallet');
+    const domImportWalletText = document.getElementById('importWalletText');
     const domAccessWalletBtn = document.getElementById('accessWalletBtn');
     const domVanityUiButtonTxt = document.getElementById("vanButtonText");
     const domGenKeyWarning = document.getElementById('genKeyWarning');
@@ -796,14 +797,20 @@
       domPrefix.value = PUBKEY_PREFIX;
       domPrefix.style.display = 'none';
       if (toggle === "Access My Wallet") {
-        if (!hasEncryptedWallet()) {
-          // No local wallet found
-            domImportWallet.style.display = 'block';
-            domAccessWalletBtn.style.display = 'none';
-            return;
-        }
+        domImportWallet.style.display = 'block';
+        domAccessWalletBtn.style.display = 'none';
         // We have a local wallet! Display the decryption prompt
-        decryptWallet().then(hasWallet => {
+        if (hasEncryptedWallet())
+          domPrivKey.placeholder = 'Enter your wallet password';
+          domImportWalletText.innerText = 'Unlock Wallet';
+      } else {
+        domGenerateWallet.style.display = 'block';
+      }
+    }
+
+    function guiImportWallet() {
+      if (hasEncryptedWallet()) {
+        decryptWallet(domPrivKey.value).then(hasWallet => {
           if (hasWallet) {
             hideAllWalletOptions();
           } else {
@@ -813,7 +820,7 @@
           domImportWallet.style.display = 'block';
         });
       } else {
-        domGenerateWallet.style.display = 'block';
+        importWallet();
       }
     }
 

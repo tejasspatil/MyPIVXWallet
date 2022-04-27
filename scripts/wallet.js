@@ -280,14 +280,14 @@ encryptWallet = async function () {
   domGenKeyWarning.style.display = 'none';
 }
 
-decryptWallet = async function () {
+decryptWallet = async function (strPassword = '') {
   // Check if there's any encrypted WIF available, if so, prompt to decrypt it
   let encWif = localStorage.getItem("encwif");
   if (!encWif || encWif.length < 1) {
     console.log("No local encrypted wallet found!");
     return false;
   }
-  let decWif = await decrypt(encWif);
+  let decWif = await decrypt(encWif, strPassword);
   if (!decWif || decWif === "decryption failed!") {
     if (decWif === "decryption failed!")
       alert("Incorrect password!");

@@ -270,9 +270,9 @@ async function benchmark(quantity) {
   console.log("Time taken to generate " + i + " addresses: " + (nEndTime - nStartTime).toFixed(2) + 'ms');
 }
 
-encryptWallet = async function () {
+encryptWallet = async function (strPassword = '') {
   // Encrypt the wallet WIF with AES-GCM and a user-chosen password - suitable for browser storage
-  let encWIF = await encrypt(privateKeyForTransactions);
+  let encWIF = await encrypt(privateKeyForTransactions, strPassword);
   if (typeof encWIF !== "string") return false;
   // Set the encrypted wallet in localStorage
   localStorage.setItem("encwif", encWIF);

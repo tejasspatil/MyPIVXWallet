@@ -6,8 +6,8 @@ const base64_to_buf = (b64) =>
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 
-async function encrypt(data) {
-  const password = window.prompt("Please enter your wallet encryption password");
+async function encrypt(data, strPassword) {
+  const password = strPassword || window.prompt("Please enter your wallet encryption password");
   if (typeof password !== "string") return false;
   const encryptedData = await encryptData(data, password);
   console.log("Encrypted: '" + encryptedData + "'");

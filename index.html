@@ -59,6 +59,10 @@
 
       const COIN = 1e8;
 
+      /* Internal tweaking parameters */
+      // A new encryption password must be 'at least' this long.
+      const MIN_PASS_LENGTH = 6;
+
       // Cool stuff
       const donationAddress = "DLabsktzGMnsK5K9uRTMCF6NoYNY6ET4Bb";
   </script>
@@ -278,18 +282,22 @@
 
               <!-- WARNING -->
              <div id='genKeyWarning' style='display: none;' class="alert alert-danger col-md-12" role="alert">
-                <div>
-                     <p><b>WARNING:</b> if you don't save your private key you will lose access to your funds!<br>
-                  Would you like to encrypt & save your wallet in your browser?<br></p>
+                <div style="max-width: 100% !important;">
+                  <p id="encryptWarningText" class="center-text">
+                    <b>WARNING</b><br>
+                    If you don't save your private key you will lose access to your funds!<br>
+                    Would you like to encrypt & save your wallet in your browser?
+                  </p>
                 </div>
-                  <button class="pivx-button-big" onclick="encryptWallet()">
-                              <span class="buttoni-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M85.967 10.65l-32.15-9.481a13.466 13.466 0 00-7.632 0l-32.15 9.48C11.661 11.351 10 13.567 10 16.042v26.623c0 12.321 3.67 24.186 10.609 34.31 6.774 9.885 16.204 17.49 27.264 21.99a5.612 5.612 0 004.251 0c11.061-4.5 20.491-12.104 27.266-21.99C86.329 66.85 90 54.985 90 42.664V16.042a5.656 5.656 0 00-4.033-5.392zM69 68.522C69 70.907 67.03 72 64.584 72H34.092C31.646 72 30 70.907 30 68.522v-23.49C30 42.647 31.646 41 34.092 41H37v-9.828C37 24.524 41.354 18.5 49.406 18.5 57.37 18.5 62 24.066 62 31.172V41h2.584C67.03 41 69 42.647 69 45.032v23.49zM58 41v-9.828c0-4.671-3.708-8.472-8.5-8.472-4.791 0-8.5 3.8-8.5 8.472V41h17z"></path></svg></span>
-
-                              <span class="buttoni-text">Encrypt Wallet</span>
-
-                              <span class="buttoni-arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M23.328 16.707L13.121 26.914a.5.5 0 01-.707 0l-2.828-2.828a.5.5 0 010-.707L16.964 16 9.586 8.621a.5.5 0 010-.707l2.828-2.828a.5.5 0 01.707 0l10.207 10.207a1 1 0 010 1.414z"></path></svg></span>
-                    </button>
-
+                <div id="encryptPassword" style="display: none !important; max-width: 100% !important; max-width: 100% !important;">
+                  <input class="center-text" style="width: 100%; font-family: monospace;" type="password" id="newPassword" placeholder="Enter Password">
+                  <input class="center-text" style="width: 100%; font-family: monospace;" type="password" id="newPasswordRetype" placeholder="Re-type Password">
+                </div>
+                  <button class="pivx-button-big" onclick="guiEncryptWallet()" style="float: none;margin: 0 auto;display: block;">
+                    <span class="buttoni-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M85.967 10.65l-32.15-9.481a13.466 13.466 0 00-7.632 0l-32.15 9.48C11.661 11.351 10 13.567 10 16.042v26.623c0 12.321 3.67 24.186 10.609 34.31 6.774 9.885 16.204 17.49 27.264 21.99a5.612 5.612 0 004.251 0c11.061-4.5 20.491-12.104 27.266-21.99C86.329 66.85 90 54.985 90 42.664V16.042a5.656 5.656 0 00-4.033-5.392zM69 68.522C69 70.907 67.03 72 64.584 72H34.092C31.646 72 30 70.907 30 68.522v-23.49C30 42.647 31.646 41 34.092 41H37v-9.828C37 24.524 41.354 18.5 49.406 18.5 57.37 18.5 62 24.066 62 31.172V41h2.584C67.03 41 69 42.647 69 45.032v23.49zM58 41v-9.828c0-4.671-3.708-8.472-8.5-8.472-4.791 0-8.5 3.8-8.5 8.472V41h17z"></path></svg></span>
+                    <span class="buttoni-text" id="encryptButton">Set Password</span>
+                    <span class="buttoni-arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M23.328 16.707L13.121 26.914a.5.5 0 01-.707 0l-2.828-2.828a.5.5 0 010-.707L16.964 16 9.586 8.621a.5.5 0 010-.707l2.828-2.828a.5.5 0 01.707 0l10.207 10.207a1 1 0 010 1.414z"></path></svg></span>
+                  </button>
               </div>
               <!-- // WARNING -->
               <br>
@@ -658,6 +666,11 @@
     const domAccessWalletBtn = document.getElementById('accessWalletBtn');
     const domVanityUiButtonTxt = document.getElementById("vanButtonText");
     const domGenKeyWarning = document.getElementById('genKeyWarning');
+    const domEncryptWarningTxt = document.getElementById('encryptWarningText');
+    const domEncryptBtnTxt = document.getElementById('encryptButton');
+    const domEncryptPasswordBox = document.getElementById('encryptPassword');
+    const domEncryptPasswordFirst = document.getElementById('newPassword');
+    const domEncryptPasswordSecond = document.getElementById('newPasswordRetype');
     const domGuiAddress = document.getElementById('guiAddress');
     const domGenIt = document.getElementById("genIt");
     const domHumanReadable = document.getElementById("HumanReadable");
@@ -825,6 +838,24 @@
       }
     }
 
+    function guiEncryptWallet() {
+      // Show our inputs if we haven't already
+      if (domEncryptPasswordBox.style.display === 'none') {
+        // Return the display to it's class form
+        domEncryptPasswordBox.style.display = '';
+        domEncryptBtnTxt.innerText = 'Finish Encryption';
+      } else {
+        // Fetch our inputs, ensure they're of decent entropy + match eachother
+        const strPass = domEncryptPasswordFirst.value,
+              strPassRetype = domEncryptPasswordSecond.value;
+        if (strPass.length < MIN_PASS_LENGTH) return createAlert('warning', 'That password is a little short!<br>' +
+                                                                            'Use at least <b>' + MIN_PASS_LENGTH + ' characters.</b>', 4000);
+        if (strPass !== strPassRetype) return createAlert('warning', 'Your passwords don\'t match!', 2250);
+        encryptWallet(strPass);
+        createAlert('success', '<b>You\'re Secured! 🔐</b><br>Nice stuff, Armoured PIVian!', 5500);
+      }
+    }
+
     function checkVanity() {
       // Loosely check if the vanity address is valid
       if (!domPrefix.value.length) return domPrefix.value = PUBKEY_PREFIX;
@@ -916,15 +947,15 @@
     function undelegateGUI() {
       // Verify the amount
       const nAmount = Number(document.getElementById('undelegateAmount').value);
-      if (nAmount < 0.01) return alert('Minimum amount is 0.01 PIV!');
+      if (nAmount < 0.01) return createAlert('warning', 'Minimum amount is 0.01 PIV!', 2000);
       undelegate(nAmount);
     }
     function undelegate(value) {
       if (!publicKeyForNetwork) {
         if (hasEncryptedWallet())
-          alert("Please unlock your wallet before sending transactions!");
+          createAlert('warning', "Please unlock your wallet before sending transactions!", 3000);
         else
-          alert("Please import/create your wallet before sending transactions!");
+          createAlert('warning', "Please import/create your wallet before sending transactions!", 3250);
         return;
       }
 
@@ -959,7 +990,7 @@
           // Sanity
           if (cachedColdStakeAddr.length !== 34 || !cachedColdStakeAddr.startsWith('S')) {
             askForCSAddr(true);
-            return alert('Now that you\'ve set a Cold Staking address, please re-try your undelegation!');
+            return createAlert('success', '<b>Staking Address set!</b><br>Now go ahead and unstake!');
           }
           cTx.addcoldstakingoutput(publicKeyForNetwork, cachedColdStakeAddr, valuechange);
           console.log('Re-delegated delegation spend change!');
@@ -986,17 +1017,17 @@
       return false;
     }
     function delegateGUI() {
-      // Ensure the user has an address set - if not, request one!
-      if (!askForCSAddr()) return;
-
       // Verify the amount
       const nAmount = Number(document.getElementById('delegateAmount').value);
-      if (nAmount < 1) return alert('Minimum Staking amount is 1 PIV!');
+      if (nAmount < 1) return createAlert('warning', 'Minimum Staking amount is 1 PIV!', 2000);
+
+      // Ensure the user has an address set - if not, request one!
+      if (!askForCSAddr()) return;      
 
       // Sanity
       if (cachedColdStakeAddr.length !== 34 || !cachedColdStakeAddr.startsWith('S')) {
         askForCSAddr(true);
-        return alert('Now that you\'ve set a Cold Staking address, please re-try your delegation!');
+        return createAlert('success', '<b>Staking Address set!</b><br>Now go ahead and stake!');
       }
       delegate(nAmount, cachedColdStakeAddr);
     }
@@ -1078,7 +1109,7 @@
         domGenIt.innerHTML = "Continue";
       } else {
         console.warn("Amount: " + value + "\nFee: " + nFee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
-        createAlert('warning', 'You are trying to send more than you have!');
+        createAlert('warning', 'You are trying to send more than you have!', 2500);
       }
     }
 
@@ -1086,9 +1117,9 @@
       if (!networkEnabled) return alert("Cannot create Simple Transactions in offline mode; this requires an explorer to sync your balance (UTXOs), please enable Networking to use this feature! Otherwise, use 'Advanced Transactions'");
       if (!publicKeyForNetwork) {
         if (hasEncryptedWallet())
-          createAlert('warning', "Please unlock your wallet before sending transactions!");
+          createAlert('warning', "Please unlock your wallet before sending transactions!", 2500);
         else
-          createAlert('warning', "Please import/create your wallet before sending transactions!");
+          createAlert('warning', "Please import/create your wallet before sending transactions!", 2500);
         return;
       }
       const address = domAddress1s.value;
@@ -1142,7 +1173,7 @@
           domGenIt.innerHTML = "Continue";
         } else {
           console.warn("Amount: " + value + "\nFee: " + nFee + (fNoChange ? "" : "\nChange: " + valuechange) + "\nTOTAL: " + totalSent);
-          createAlert('warning', "You're trying to send more than you have!");
+          createAlert('warning', "You're trying to send more than you have!", 2500);
         }
       } else {
         console.log("No address or value");

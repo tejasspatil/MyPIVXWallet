@@ -83,17 +83,22 @@ const from_b58 = function (S) {
 /* --- NOTIFICATIONS --- */
 // Alert - Do NOT display arbitrary / external errors, the use of `.innerHTML` allows for input styling at this cost.
 // Supported types: success, info, warning
-function createAlert(type, message) {
+function createAlert(type, message, timeout = 0) {
     const domAlert = document.createElement("div");
     domAlert.className = "alertpop " + type;
     // Message
     domAlert.innerHTML = message;
-    // On Click: Delete alert from DOM after close animation
-    domAlert.addEventListener("click", () => {
+    domAlert.destroy = () => {
+        // Fully destroy timers + DOM elements, no memory leaks!
+        clearTimeout(domAlert.timer);
         domAlert.style.opacity = "0";
         setTimeout(() => {
             domAlert.remove();
         }, 600);
-    });
+    }
+    // On Click: Delete alert from DOM after close animation.
+    domAlert.addEventListener("click", domAlert.destroy);
+    // On Timeout: Delete alert from DOM after a period of inactive time.
+    if (timeout > 0) domAlert.timer = setTimeout(domAlert.destroy, timeout);
     domAlertPos.appendChild(domAlert);
 }

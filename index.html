@@ -800,9 +800,10 @@
         domImportWallet.style.display = 'block';
         domAccessWalletBtn.style.display = 'none';
         // We have a local wallet! Display the decryption prompt
-        if (hasEncryptedWallet())
+        if (hasEncryptedWallet()) {
           domPrivKey.placeholder = 'Enter your wallet password';
           domImportWalletText.innerText = 'Unlock Wallet';
+        }
       } else {
         domGenerateWallet.style.display = 'block';
       }

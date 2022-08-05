@@ -77,7 +77,7 @@ importWallet = function (newWif = false, raw = false) {
     publicKeyForNetwork = to_b58(pubKeyPreBase);
     
     // Reaching here: the deserialisation was a full cryptographic success, so a wallet is now imported!
-    fWalletLoaded++;
+    fWalletLoaded = true;
 
     // Display Text
     domGuiAddress.innerHTML = publicKeyForNetwork;
@@ -135,7 +135,6 @@ generateWallet = async function (noUI = false) {
   const strImportConfirm = "Do you really want to import a new address? If you haven't saved the last private key, the wallet will be LOST forever.";
   const walletConfirm = fWalletLoaded && !noUI ? window.confirm(strImportConfirm) : true;
   if (walletConfirm) {
-    fWalletLoaded++;
     const pkBytes = getSafeRand();
     // Private Key Generation
     const pkNetBytesLen = pkBytes.length + 2;
@@ -182,6 +181,8 @@ generateWallet = async function (noUI = false) {
     writeToUint8(pubKeyPreBase, checksumPubKey, pubKeyHashNetworkLen);
     // Encode as Base58 human-readable network address
     publicKeyForNetwork = to_b58(pubKeyPreBase);
+
+    fWalletLoaded = true;
 
     // Debug Console
     if (debug) {

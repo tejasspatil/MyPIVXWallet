@@ -9,7 +9,7 @@ var networkEnabled = true;
 // Global Keystore / Wallet Information
 var publicKeyForNetwork;
 var privateKeyForTransactions;
-var walletAlreadyMade = 0;
+var fWalletLoaded = false;
 
 // --- DOM Cache
 const domNetwork = document.getElementById('Network');

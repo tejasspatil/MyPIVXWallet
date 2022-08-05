@@ -3,20 +3,16 @@ document.getElementById('dcfooter').innerHTML = '© MIT 2022 - Built with 💜 b
 
 // Wallet Import
 importWallet = function (newWif = false, raw = false) {
-  if (walletAlreadyMade != 0) {
-    var walletConfirm = window.confirm("Do you really want to import a new address? If you haven't saved the last private key, the key will get LOST forever alongside ANY funds with it.");
-  } else {
-    walletConfirm = true;
-  }
+  const strImportConfirm = "Do you really want to import a new address? If you haven't saved the last private key, the wallet will be LOST forever.";
+  const walletConfirm = fWalletLoaded ? window.confirm(strImportConfirm) : true;
   if (walletConfirm) {
-    walletAlreadyMade++;
     if (raw) {
       const pkNetBytesLen = newWif.length + 2;
       const pkNetBytes = new Uint8Array(pkNetBytesLen);
       // Network Encoding
-      pkNetBytes[0] = SECRET_KEY;           // Private key prefix (1 byte)
-      writeToUint8(pkNetBytes, newWif, 1);  // Private key bytes  (32 bytes)
-      pkNetBytes[pkNetBytesLen - 1] = 1;    // Leading digit      (1 byte)
+      pkNetBytes[0] = SECRET_KEY;          // Private key prefix (1 byte)
+      writeToUint8(pkNetBytes, newWif, 1); // Private key bytes  (32 bytes)
+      pkNetBytes[pkNetBytesLen - 1] = 1;   // Leading digit      (1 byte)
       // Double SHA-256 hash
       const shaObj = new jsSHA(0, 0, { "numRounds": 2 });
       shaObj.update(pkNetBytes);
@@ -43,8 +39,18 @@ importWallet = function (newWif = false, raw = false) {
       console.log(Crypto.util.bytesToHex(privkeyBytes));
     }
     // Public Key Derivation
-    let nPubkey = Crypto.util.bytesToHex(nSecp256k1.getPublicKey(privkeyBytes)).substr(2);
-    const pubY = Secp256k1.uint256(nPubkey.substr(64), 16);
+    let nPubkey = '';
+    let pubY;
+    try {
+      // Incase of an invalid/malformed/incompatible private key: catch and display a nice error!
+      nPubkey = Crypto.util.bytesToHex(nSecp256k1.getPublicKey(privkeyBytes)).substr(2);
+      pubY = Secp256k1.uint256(nPubkey.substr(64), 16);
+    } catch (e) {
+      console.error(e);
+      createAlert('warning', '<b>Failed to import!</b> Invalid private key.' +
+                             '<br>Double-check where your key came from!',
+                             6000);
+    }
     nPubkey = nPubkey.substr(0, 64);
     const publicKeyBytesCompressed = Crypto.util.hexToBytes(nPubkey);
     publicKeyBytesCompressed.unshift(pubY.isEven() ? 0x02 : 0x03);
@@ -69,6 +75,9 @@ importWallet = function (newWif = false, raw = false) {
     writeToUint8(pubKeyPreBase, checksumPubKey, pubKeyHashNetworkLen);
     // Encode as Base58 human-readable network address
     publicKeyForNetwork = to_b58(pubKeyPreBase);
+    
+    // Reaching here: the deserialisation was a full cryptographic success, so a wallet is now imported!
+    fWalletLoaded++;
 
     // Display Text
     domGuiAddress.innerHTML = publicKeyForNetwork;
@@ -123,13 +132,10 @@ importWallet = function (newWif = false, raw = false) {
 
 // Wallet Generation
 generateWallet = async function (noUI = false) {
-  if (walletAlreadyMade != 0 && !noUI) {
-    var walletConfirm = window.confirm("Do you really want to generate a new address? If you haven't saved the last private key the key will get lost forever and any funds with it.");
-  } else {
-    walletConfirm = true;
-  }
+  const strImportConfirm = "Do you really want to import a new address? If you haven't saved the last private key, the wallet will be LOST forever.";
+  const walletConfirm = fWalletLoaded && !noUI ? window.confirm(strImportConfirm) : true;
   if (walletConfirm) {
-    walletAlreadyMade++;
+    fWalletLoaded++;
     const pkBytes = getSafeRand();
     // Private Key Generation
     const pkNetBytesLen = pkBytes.length + 2;

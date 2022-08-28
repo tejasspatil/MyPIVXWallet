@@ -11,19 +11,19 @@ function networkError() {
 if (networkEnabled) {
   var getBlockCount = function() {
     var request = new XMLHttpRequest();
-    request.open('GET', "https://stakecubecoin.net/pivx/blocks", true);
+    request.open('GET', "https://zkbitcoin.com/api/v2/api", true);
     request.onerror = networkError;
     request.onload = function () {
-      const data = Number(this.response);
+      const data = JSON.parse(this.response);
       // If the block count has changed, refresh all of our data!
       domBalanceReload.className = domBalanceReload.className.replace(/ playAnim/g, "");
       domBalanceReloadStaking.className = domBalanceReloadStaking.className.replace(/ playAnim/g, "");
-      if (data > cachedBlockCount) {
-        console.log("New block detected! " + cachedBlockCount + " --> " + data);
+      if (data.backend.blocks > cachedBlockCount) {
+        console.log("New block detected! " + cachedBlockCount + " --> " + data.backend.blocks);
         if (publicKeyForNetwork)
           getUnspentTransactions();
       }
-      cachedBlockCount = data;
+      cachedBlockCount = data.backend.blocks;
     }
     request.send();
   }
@@ -60,7 +60,7 @@ if (networkEnabled) {
   var searchUTXO = function () {
     if (!arrUTXOsToSearch.length) return;
     var request = new XMLHttpRequest()
-    request.open('GET', "https://stakecubecoin.net/pivx/api/tx-specific/" + arrUTXOsToSearch[0].txid, true);
+    request.open('GET', "https://zkbitcoin.com/api/v2/tx-specific/" + arrUTXOsToSearch[0].txid, true);
     request.onerror = networkError;
     request.onload = function () {
       const data = JSON.parse(this.response);
@@ -88,7 +88,7 @@ if (networkEnabled) {
   var getDelegatedUTXOs = function () {
     if (arrUTXOsToSearch.length) return;
     var request = new XMLHttpRequest()
-    request.open('GET', "https://stakecubecoin.net/pivx/api/utxo/" + publicKeyForNetwork, true);
+    request.open('GET', "https://zkbitcoin.com/api/v2/utxo/" + publicKeyForNetwork, true);
     request.onerror = networkError;
     request.onload = function () {
       arrUTXOsToSearch = JSON.parse(this.response);
@@ -100,25 +100,27 @@ if (networkEnabled) {
 
 var sendTransaction = function (hex, msg = '') {
     var request = new XMLHttpRequest();
-    request.open('GET', 'https://stakecubecoin.net/pivx/submittx?tx=' + hex, true);
+    request.open('GET', 'https://zkbitcoin.com/api/v2/sendtx/' + hex, true);
     request.onerror = networkError;
-    request.onload = function () {
-        const data = this.response;
-        if (data.length === 64) {
-            console.log('Transaction sent! ' + data);
+    request.onreadystatechange = function () {
+        if (!this.response || (!this.status === 200 && !this.status === 400)) return;
+        if (this.readyState !== 4) return;
+        const data = JSON.parse(this.response);
+        if (data.result && data.result.length === 64) {
+            console.log('Transaction sent! ' + data.result);
             if (domAddress1s.value !== donationAddress)
-                domTxOutput.innerHTML = ('<h4 style="color:green; font-family:mono !important;">' + data + '</h4>');
+                domTxOutput.innerHTML = ('<h4 style="color:green; font-family:mono !important;">' + data.result + '</h4>');
             else
-                domTxOutput.innerHTML = ('<h4 style="color:green">Thank you for supporting MyPIVXWallet! 💜💜💜<br><span style="font-family:mono !important">' + data + '</span></h4>');
+                domTxOutput.innerHTML = ('<h4 style="color:green">Thank you for supporting MyPIVXWallet! 💜💜💜<br><span style="font-family:mono !important">' + data.result + '</span></h4>');
             domSimpleTXs.style.display = 'none';
             domAddress1s.value = '';
             domValue1s.innerHTML = '';
             createAlert('success', msg || 'Transaction sent!', msg ? (1250 + (msg.length * 50)) : 1500);
         } else {
-            console.log('Error sending transaction: ' + data);
+            console.log('Error sending transaction: ' + data.result);
             createAlert('warning', 'Transaction Failed!', 1250);
             // Attempt to parse and prettify JSON (if any), otherwise, display the raw output.
-            let strError = data;
+            let strError = data.error;
             try {
                 strError = JSON.stringify(JSON.parse(data), null, 4);
                 console.log('parsed');

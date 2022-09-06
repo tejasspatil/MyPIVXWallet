@@ -4,6 +4,15 @@
 var debug = false;
 var networkEnabled = true;
 
+// A list of Labs-trusted explorers
+const arrExplorers = [
+    // Display name      Blockbook-compatible API base    
+    { name: "zkBitcoin", url: "https://zkbitcoin.com" },
+    { name: "rockdev",   url: "https://explorer.rockdev.org" }
+]
+
+var cExplorer = arrExplorers[0];
+
 // Users need not look below here.
 // ------------------------------
 // Global Keystore / Wallet Information
@@ -20,6 +29,15 @@ domNetwork.innerHTML = '<b> Network:</b> ' + (networkEnabled ? 'Enabled' : 'Disa
 domDebug.innerText = debug ? '<b>DEBUG MODE ON</b>' : '';
 
 // --- Settings Functions
+function setExplorer(explorer) {
+    cExplorer = explorer;
+    createAlert('success', '<b>Switched explorer!</b><br>Now using ' + cExplorer.name, 3500);
+}
+// Hook up the 'explorer' select UI
+document.getElementById('explorer').onchange = function(evt) {
+    setExplorer(arrExplorers.find(a => a.url === evt.target.value));
+}
+
 function toggleDebug() {
     debug = !debug;
     domDebug.innerHTML = debug ? '<b>DEBUG MODE ON</b>' : '';
@@ -42,3 +60,16 @@ function disableNetwork() {
     if (networkEnabled) return !toggleNetwork();
     return false;
 }
+
+// Once the DOM is ready; plug-in any settings to the UI
+addEventListener('DOMContentLoaded', () => {
+    const domExplorerSelect = document.getElementById('explorer');
+
+    // Add each trusted explorer into the UI selector
+    for (const explorer of arrExplorers) {
+        const opt = document.createElement('option');
+        opt.value = explorer.url;
+        opt.innerHTML = explorer.name;
+        domExplorerSelect.appendChild(opt);
+    }
+});

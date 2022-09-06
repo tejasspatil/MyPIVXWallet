@@ -11,7 +11,7 @@ function networkError() {
 if (networkEnabled) {
   var getBlockCount = function() {
     var request = new XMLHttpRequest();
-    request.open('GET', "https://zkbitcoin.com/api/v2/api", true);
+    request.open('GET', cExplorer.url + "/api/v2/api", true);
     request.onerror = networkError;
     request.onload = function () {
       const data = JSON.parse(this.response);
@@ -34,7 +34,7 @@ if (networkEnabled) {
     if (!arrUTXOsToValidate.length) return;
 
     const request = new XMLHttpRequest();
-    request.open('GET', "https://zkbitcoin.com/api/v2/tx-specific/" + arrUTXOsToValidate[0].txid, true);
+    request.open('GET', cExplorer.url + "/api/v2/tx-specific/" + arrUTXOsToValidate[0].txid, true);
     request.onerror = networkError;
 
     request.onload = function() {
@@ -83,7 +83,7 @@ if (networkEnabled) {
     if (arrUTXOsToValidate.length) return;
 
     const request = new XMLHttpRequest()
-    request.open('GET', "https://zkbitcoin.com/api/v2/utxo/" + publicKeyForNetwork, true);
+    request.open('GET', cExplorer.url + "/api/v2/utxo/" + publicKeyForNetwork, true);
     request.onerror = networkError;
     request.onload = function() {
       arrUTXOsToValidate = JSON.parse(this.response);
@@ -96,7 +96,7 @@ if (networkEnabled) {
 
 var sendTransaction = function(hex, msg = '') {
     const request = new XMLHttpRequest();
-    request.open('GET', 'https://zkbitcoin.com/api/v2/sendtx/' + hex, true);
+    request.open('GET', cExplorer.url + "/api/v2/sendtx/" + hex, true);
     request.onerror = networkError;
     request.onreadystatechange = function () {
         if (!this.response || (!this.status === 200 && !this.status === 400)) return;

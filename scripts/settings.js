@@ -31,6 +31,7 @@ domDebug.innerText = debug ? '<b>DEBUG MODE ON</b>' : '';
 // --- Settings Functions
 function setExplorer(explorer) {
     cExplorer = explorer;
+    enableNetwork();
     createAlert('success', '<b>Switched explorer!</b><br>Now using ' + cExplorer.name, 3500);
 }
 // Hook up the 'explorer' select UI

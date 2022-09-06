@@ -123,7 +123,7 @@ importWallet = function (newWif = false, raw = false) {
     }
     // Load UTXOs from explorer
     if (networkEnabled)
-      getUnspentTransactions();
+      getUTXOs();
     
     // Hide all wallet starter options
     hideAllWalletOptions();
@@ -222,9 +222,7 @@ generateWallet = async function (noUI = false) {
       domGenKeyWarning.style.display = 'block';
       domPrivateTxt.value = privateKeyForTransactions;
       domGuiAddress.innerHTML = publicKeyForNetwork;
-      // New address... so there definitely won't be a balance
-      domGuiBalance.innerHTML = "0";
-      domGuiBalanceBox.style.fontSize = "x-large";
+
       // QR Codes
       const typeNumber = 4;
       const errorCorrectionLevel = 'L';
@@ -245,12 +243,17 @@ generateWallet = async function (noUI = false) {
       domModalQR.firstChild.style.height = "auto";
       domModalQR.firstChild.style.imageRendering = "crisp-edges";
       document.getElementById('clipboard').value = publicKeyForNetwork;
+
       // Update identicon
       domIdenticon.dataset.jdenticonValue = publicKeyForNetwork;
       jdenticon();
       domGuiWallet.style.display = 'block';
       viewPrivKey = false;
       hideAllWalletOptions();
+
+      // Refresh the balance UI (why? because it'll also display any 'get some funds!' alerts)
+      getBalance(true);
+      getStakingBalance(true);
     }
     return { 'pubkey': publicKeyForNetwork, 'privkey': privateKeyForTransactions };
   }

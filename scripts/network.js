@@ -21,85 +21,81 @@ if (networkEnabled) {
       if (data.backend.blocks > cachedBlockCount) {
         console.log("New block detected! " + cachedBlockCount + " --> " + data.backend.blocks);
         if (publicKeyForNetwork)
-          getUnspentTransactions();
+          getUTXOs();
       }
       cachedBlockCount = data.backend.blocks;
     }
     request.send();
   }
 
-  var getUnspentTransactions = function () {
-    var request = new XMLHttpRequest()
-    request.open('GET', "https://chainz.cryptoid.info/pivx/api.dws?q=unspent&active=" + publicKeyForNetwork + "&key=fb4fd0981734", true)
-    request.onerror = networkError;
-    request.onload = function () {
-      const data = JSON.parse(this.response);
-      cachedUTXOs = [];
-      if (!data.unspent_outputs || data.unspent_outputs.length === 0) {
-        console.log('No unspent Transactions');
-        document.getElementById("errorNotice").innerHTML = '<div class="alert alert-danger" role="alert"><h4>Note:</h4><h5>You don\'t have any funds, get some coins first!</h5></div>';
-      } else {
-        document.getElementById("errorNotice").innerHTML = '';
-        // Standardize the API UTXOs into a simplified MPW format
-        data.unspent_outputs.map(cUTXO => cachedUTXOs.push({
-          'id': cUTXO.tx_hash,
-          'vout': cUTXO.tx_ouput_n,
-          'sats': cUTXO.value,
-          'script': cUTXO.script
-        }));
-        // Update the GUI with the newly cached UTXO set
-        getBalance(true);
-      }
-    }
-    request.send();
-    // In parallel, fetch Cold Staking UTXOs
-    getDelegatedUTXOs();
-  }
+  var arrUTXOsToValidate = [];
+  var acceptUTXO = () => {
+    // Cancel if the queue is empty: no wasting precious bandwidth & CPU cycles!
+    if (!arrUTXOsToValidate.length) return;
 
-  var arrUTXOsToSearch = [];
-  var searchUTXO = function () {
-    if (!arrUTXOsToSearch.length) return;
-    var request = new XMLHttpRequest()
-    request.open('GET', "https://zkbitcoin.com/api/v2/tx-specific/" + arrUTXOsToSearch[0].txid, true);
+    const request = new XMLHttpRequest();
+    request.open('GET', "https://zkbitcoin.com/api/v2/tx-specific/" + arrUTXOsToValidate[0].txid, true);
     request.onerror = networkError;
-    request.onload = function () {
+
+    request.onload = function() {
       const data = JSON.parse(this.response);
-      // Check the UTXOs
+
       for (const cVout of data.vout) {
+        // TODO: Determine if this is useful or not? I don't remember what this is, or why I added it.
         if (cVout.spent) continue;
-        if (cVout.scriptPubKey.type === 'coldstake' && cVout.scriptPubKey.addresses.includes(publicKeyForNetwork)) {
-          if (!arrDelegatedUTXOs.find(a => a.id === data.txid && a.vout === cVout.n)) {
-            arrDelegatedUTXOs.push({
-              'id': data.txid,
-              'vout': cVout.n,
-              'sats': Number(cVout.value * COIN),
-              'script': cVout.scriptPubKey.hex
-            });
-          }
+
+        // Search for our address
+        if (!cVout.scriptPubKey.addresses) continue;
+        if (!cVout.scriptPubKey.addresses.includes(publicKeyForNetwork)) continue;
+
+        // Convert to MPW format
+        const cUTXO = {
+          'id': data.txid,
+          'vout': cVout.n,
+          'sats': cVout.value * COIN,
+          'script': cVout.scriptPubKey.hex
+        }
+
+        // Determine the UTXO type, and use it accordingly
+        if (cVout.scriptPubKey.type === 'pubkeyhash') {
+          // P2PKH type (Pay-To-Pub-Key-Hash)
+          cachedUTXOs.push(cUTXO);
+        } else
+        if (cVout.scriptPubKey.type === 'coldstake') {
+          // Cold Stake type
+          arrDelegatedUTXOs.push(cUTXO);
         }
       }
-      arrUTXOsToSearch.shift();
+
+      // Shift the queue and update the UI
+      getBalance(true);
       getStakingBalance(true);
-      if (arrUTXOsToSearch.length) searchUTXO();
+      
+      // Loop validation until queue is empty
+      arrUTXOsToValidate.shift();
+      if (arrUTXOsToValidate.length) acceptUTXO();
     }
     request.send();
   }
 
-  var getDelegatedUTXOs = function () {
-    if (arrUTXOsToSearch.length) return;
-    var request = new XMLHttpRequest()
+  var getUTXOs = () => {
+    // Don't fetch UTXOs if we're already scanning for them!
+    if (arrUTXOsToValidate.length) return;
+
+    const request = new XMLHttpRequest()
     request.open('GET', "https://zkbitcoin.com/api/v2/utxo/" + publicKeyForNetwork, true);
     request.onerror = networkError;
-    request.onload = function () {
-      arrUTXOsToSearch = JSON.parse(this.response);
-      arrDelegatedUTXOs = [];
-      searchUTXO();
+    request.onload = function() {
+      arrUTXOsToValidate = JSON.parse(this.response);
+      // Clear our UTXOs and begin accepting refreshed ones (TODO: build an efficient 'set merge' algo)
+      cachedUTXOs = []; arrDelegatedUTXOs = [];
+      acceptUTXO();
     }
     request.send();
   }
 
-var sendTransaction = function (hex, msg = '') {
-    var request = new XMLHttpRequest();
+var sendTransaction = function(hex, msg = '') {
+    const request = new XMLHttpRequest();
     request.open('GET', 'https://zkbitcoin.com/api/v2/sendtx/' + hex, true);
     request.onerror = networkError;
     request.onreadystatechange = function () {

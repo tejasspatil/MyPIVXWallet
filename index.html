@@ -489,7 +489,7 @@
               <br>
               <!-- // PIVX TITLE SECTION -->
 
-              <div id='errorNotice' class="col-md-12 float-left"></div>
+              <div id='sendNotice' class="col-md-12 float-left"></div>
               <div class="col-md-12">
                 <p id="communication" class="center-text">Please <b>AVOID</b> sending to Shielded addresses using this wallet - this functionality is currently unsupported.</p>
               </div>
@@ -645,6 +645,7 @@
     const domGuiBalanceStaking = document.getElementById("guiBalanceStaking");
     const domGuiBalanceBoxStaking = document.getElementById("guiBalanceBoxStaking");
     const domTxTab = document.getElementById("txTab");
+    const domsendNotice = document.getElementById("sendNotice");
     const domSimpleTXs = document.getElementById("simpleTransactions");
     const domSimpleTXsDropdown = document.getElementById("simpleTransactionsDropdown");
     const domAddress1s = document.getElementById("address1s");
@@ -693,6 +694,9 @@
         const nLen = (nBalance / COIN).toString().length;
         domGuiBalance.innerText = (nBalance / COIN).toFixed(nLen >= 4 ? 0 : 2);
         domAvailToDelegate.innerText = "Available: ~" + (nBalance / COIN).toFixed(2) + " PIV";
+        
+        // Add a notice to the Send page if balance is lacking
+        domsendNotice.innerHTML = nBalance ? '' : '<div class="alert alert-danger" role="alert"><h4>Note:</h4><h5>You don\'t have any funds, get some coins first!</h5></div>';
       }
 
       return nBalance;
@@ -936,7 +940,7 @@
     }
     function loadUnspendInputs() {
       if (publicKeyForNetwork) {
-        getUnspentTransactions();
+        getUTXOs();
         domSimpleTXs.style.display = 'block';
         domGenIt.style.display = 'block';
       } else {

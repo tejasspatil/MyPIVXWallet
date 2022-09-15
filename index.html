@@ -1227,6 +1227,7 @@
     // A safety mechanism enabled if the user attempts to leave without encrypting/saving their keys
     const beforeUnloadListener = (evt) => {
       evt.preventDefault();
+      createAlert("warning", "<b>Save your wallet!</b><br>Dashboard ➜ Set Password", 10000);
       // Most browsers ignore this nowadays, but still, keep it 'just incase'
       return evt.returnValue = "Please ENCRYPT and/or BACKUP your keys before leaving, or you may lose them!";
     };

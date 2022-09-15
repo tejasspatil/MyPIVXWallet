@@ -22,6 +22,9 @@ importWallet = function (newWif = false, raw = false) {
       writeToUint8(keyWithChecksum, pkNetBytes, 0);
       writeToUint8(keyWithChecksum, checksum, pkNetBytesLen);
       newWif = to_b58(keyWithChecksum);
+
+      // A raw import likely means non-user owned key (i.e: created via VanityGen), thus, we assume safety first and add an exit blocking listener
+      addEventListener("beforeunload", beforeUnloadListener, {capture: true});
     }
     // Wallet Import Format to Private Key
     const privkeyWIF = newWif || domPrivKey.value;
@@ -254,7 +257,12 @@ generateWallet = async function (noUI = false) {
       // Refresh the balance UI (why? because it'll also display any 'get some funds!' alerts)
       getBalance(true);
       getStakingBalance(true);
+      
+      // Add a listener to block page unloads until we are sure the user has saved their keys, safety first!
+      addEventListener("beforeunload", beforeUnloadListener, {capture: true});
     }
+
+    // Return the keypair
     return { 'pubkey': publicKeyForNetwork, 'privkey': privateKeyForTransactions };
   }
 }
@@ -278,6 +286,8 @@ encryptWallet = async function (strPassword = '') {
   localStorage.setItem("encwif", encWIF);
   // Hide the encryption warning
   domGenKeyWarning.style.display = 'none';
+  // Remove the exit blocker, we can annoy the user less knowing the key is safe in their localstorage!
+  removeEventListener("beforeunload", beforeUnloadListener, {capture: true});
 }
 
 decryptWallet = async function (strPassword = '') {

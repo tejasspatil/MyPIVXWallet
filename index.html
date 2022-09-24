@@ -93,8 +93,8 @@
             <!-- SIDE NAVBAR -->
             <div class="form-inline my-2 my-lg-0">
               <ul class="navbar-nav mr-auto ptr">
-                <li class="nav-item"><a class="nav-link tablinks active" id="Network"></a></li>
-                <li class="nav-item"><a class="nav-link tablinks active" id="Debug"></a></li>
+                <li class="nav-item"><a class="nav-link tablinks active" id="Network" onclick="toggleNetwork()"></a></li>
+                <li class="nav-item"><a class="nav-link tablinks active" id="Debug" onclick="toggleDebug()"></a></li>
               </ul>
             </div>
 
@@ -510,7 +510,7 @@
                   <br>
                   <div id='HumanReadable'></div>
                   <br>
-                  <button class="pivx-button-big" onclick="createSimpleTransation()">
+                  <button class="pivx-button-big" onclick="createTxGUI()">
                               <span class="buttoni-icon"><i class="fas fa-paper-plane fa-tiny-margin"></i></span>
                               <span class="buttoni-text" id="genIt">Send Transaction</span>
                               <span class="buttoni-arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M23.328 16.707L13.121 26.914a.5.5 0 01-.707 0l-2.828-2.828a.5.5 0 010-.707L16.964 16 9.586 8.621a.5.5 0 010-.707l2.828-2.828a.5.5 0 01.707 0l10.207 10.207a1 1 0 010 1.414z"></path></svg></span>
@@ -926,37 +926,24 @@
         }
       }
     }
+
     function toggleDropDown(id) {
       const domID = document.getElementById(id);
       domID.style.display = domID.style.display === 'block' ? 'none' : 'block';
     }
-    function loadUnspendInputs() {
-      if (publicKeyForNetwork) {
-        getUTXOs();
-        domSimpleTXs.style.display = 'block';
-        domGenIt.style.display = 'block';
-      } else {
-        alert("You need a wallet to transact with! Please import a wallet via the 'Dashboard --> Access my wallet' menu");
-      }
-    }
+
     function undelegateGUI() {
       // Verify the amount
       const nAmount = Number(document.getElementById('undelegateAmount').value);
       if (nAmount < 0.01) return createAlert('warning', 'Minimum amount is 0.01 PIV!', 2000);
       undelegate(nAmount);
     }
-    function undelegate(value) {
-      if (!publicKeyForNetwork) {
-        if (hasEncryptedWallet())
-          createAlert('warning', "Please unlock your wallet before sending transactions!", 3000);
-        else
-          createAlert('warning', "Please import/create your wallet before sending transactions!", 3250);
-        return;
-      }
 
-      let nBalance = getStakingBalance() / COIN;
+    function undelegate(value) {
+      if (!hasWalletUnlocked(true)) return;
 
       // Construct a TX and fetch Cold inputs
+      const nBalance = getStakingBalance() / COIN;
       const cTx = bitjs.transaction();
       const cCoinControl = chooseUTXOs(cTx, value * COIN, 0, true);
       if (!cCoinControl.success) return alert(cCoinControl.msg);
@@ -995,6 +982,7 @@
         alert('You are trying to undelegate more than you have, don\'t forget blockchain fees! Removing ~0.001 PIV will do fine.');
       }
     }
+
     function askForCSAddr(force = false) {
       if (force) cachedColdStakeAddr = null;
       if (cachedColdStakeAddr === "" || cachedColdStakeAddr === null) {
@@ -1005,6 +993,7 @@
       }
       return false;
     }
+
     function delegateGUI() {
       // Verify the amount
       const nAmount = Number(document.getElementById('delegateAmount').value);
@@ -1020,16 +1009,12 @@
       }
       delegate(nAmount, cachedColdStakeAddr);
     }
+
     function delegate(value, coldAddr) {
-      if (!publicKeyForNetwork) {
-        if (hasEncryptedWallet())
-          alert("Please unlock your wallet before sending transactions!");
-        else
-          alert("Please import/create your wallet before sending transactions!");
-        return;
-      }
-      let nBalance = getBalance() / COIN;
+      if (!hasWalletUnlocked(true)) return;
+
       // Construct a TX and fetch Standard inputs
+      const nBalance = getBalance() / COIN;
       const cTx = bitjs.transaction();
       const cCoinControl = chooseUTXOs(cTx, value * COIN, 0, false);
       if (!cCoinControl.success) return alert(cCoinControl.msg);
@@ -1055,16 +1040,10 @@
     }
 
     function preimage(value, hex) {
-      if (!publicKeyForNetwork) {
-        if (hasEncryptedWallet())
-          alert("Please unlock your wallet before sending transactions!");
-        else
-          alert("Please import/create your wallet before sending transactions!");
-        return;
-      }
-      let nBalance = getBalance() / COIN;
-      if (value > nBalance) return alert("Balance is too small! (" + nBalance + " - " + value + " = " + (nBalance - value).toFixed(8) + ")");
+      if (!hasWalletUnlocked(true)) return;
+
       // Construct a TX and fetch Standard inputs
+      let nBalance = getBalance() / COIN;
       const cTx = bitjs.transaction();
       const cCoinControl = chooseUTXOs(cTx, value * COIN, 0, false);
       if (!cCoinControl.success) return alert(cCoinControl.msg);
@@ -1126,15 +1105,9 @@
       return ccSuccess(cCoinControl);
     }
 
-    function createSimpleTransation() {
-      if (!networkEnabled) return alert("Cannot create Simple Transactions in offline mode; this requires an explorer to sync your balance (UTXOs), please enable Networking to use this feature! Otherwise, use 'Advanced Transactions'");
-      if (!publicKeyForNetwork) {
-        if (hasEncryptedWallet())
-          createAlert('warning', "Please unlock your wallet before sending transactions!", 2500);
-        else
-          createAlert('warning', "Please import/create your wallet before sending transactions!", 2500);
-        return;
-      }
+    function createTxGUI() {
+      if (!hasWalletUnlocked(true)) return;
+
       const address = domAddress1s.value;
       let value = Number(domValue1s.value);
       if (domGenIt.innerHTML === 'Continue') {
@@ -1202,6 +1175,7 @@
       const wif = document.getElementById("wif").value;
       document.getElementById("rawTrx").value = cTx.sign(wif, 1); //SIGHASH_ALL DEFAULT 1
     }
+
     function openTab(evt, tabName) {
       var i, tabcontent, tablinks;
       tabcontent = document.getElementsByClassName("tabcontent");
@@ -1224,7 +1198,7 @@
 
     function refreshChainData() {
       // If in offline mode: don't sync ANY data or connect to the internet
-      if (!networkEnabled) return console.warn("Offline mode: For your security, the wallet will avoid ALL internet requests in offline mode.");
+      if (!networkEnabled) return console.warn("Offline mode active: For your security, the wallet will avoid ALL internet requests.");
 
       // Update identicon
       domIdenticon.dataset.jdenticonValue = publicKeyForNetwork;

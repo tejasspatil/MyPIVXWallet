@@ -310,3 +310,17 @@ decryptWallet = async function (strPassword = '') {
 hasEncryptedWallet = function () {
   return localStorage.getItem("encwif") ? true : false;
 }
+
+hasWalletUnlocked = function (fIncludeNetwork = false) {
+  if (fIncludeNetwork && !networkEnabled)
+    return createAlert('warning', "<b>Offline Mode is active!</b><br>Please disable Offline Mode for automatic transactions", 5500);
+  if (!publicKeyForNetwork) {
+    if (hasEncryptedWallet())
+      createAlert('warning', "Please unlock your wallet before sending transactions!", 3500);
+    else
+      createAlert('warning', "Please import/create your wallet before sending transactions!", 3500);
+    return false;
+  } else {
+    return true;
+  }
+}

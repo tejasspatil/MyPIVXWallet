@@ -955,26 +955,20 @@
       }
 
       let nBalance = getStakingBalance() / COIN;
-      if (value > nBalance) return alert("Balance is too small! (" + nBalance + " - " + value + " = " + (nBalance - value).toFixed(8) + ")");
-      console.log("Constructing TX of value: " + value + " PIV");
-      // Loop our cached UTXOs and construct a TX
+
+      // Construct a TX and fetch Cold inputs
       const cTx = bitjs.transaction();
-      let txValue = 0;
-      for (const UTXO of arrDelegatedUTXOs) {
-        if (txValue > value) {
-          // Required Coin Control value met, yahoo!
-          console.log("Coin Control: TX Constructed! Selected " + cTx.inputs.length + " input(s) (" + txValue + " PIV)");
-          break;
-        }
-        cTx.addinput(UTXO.id, UTXO.vout, UTXO.script);
-        txValue += UTXO.sats / COIN;
-        console.log("Coin Control: Selected CS input " + UTXO.id.substr(0, 6) + "(" + UTXO.vout + ")... (Added " + (UTXO.sats / COIN).toFixed(8) + " PIV - Total: " + txValue + ")");
-      }
+      const cCoinControl = chooseUTXOs(cTx, value * COIN, 0, true);
+      if (!cCoinControl.success) return alert(cCoinControl.msg);
+
+      // Compute fee
       const nFee = calculatefee(cTx.serialize().length);
+
+      // The primary Cold-to-Public output
       cTx.addoutput(publicKeyForNetwork, value);
       addresschange = publicKeyForNetwork;
       totalSent = (nFee + value).toFixed(8);
-      valuechange = (txValue - parseFloat(totalSent)).toFixed(8);
+      valuechange = ((cCoinControl.nValue / COIN) - parseFloat(totalSent)).toFixed(8);
       if (totalSent <= nBalance) {
         if (debug)
           domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
@@ -1035,26 +1029,19 @@
         return;
       }
       let nBalance = getBalance() / COIN;
-      if (value > nBalance) return alert("Balance is too small! (" + nBalance + " - " + value + " = " + (nBalance - value).toFixed(8) + ")");
-      console.log("Constructing TX of value: " + value + " PIV");
-      // Loop our cached UTXOs and construct a TX
+      // Construct a TX and fetch Standard inputs
       const cTx = bitjs.transaction();
-      let txValue = 0;
-      for (const UTXO of cachedUTXOs) {
-        if (txValue > value) {
-          // Required Coin Control value met, yahoo!
-          console.log("Coin Control: TX Constructed! Selected " + cTx.inputs.length + " input(s) (" + txValue + " PIV)");
-          break;
-        }
-        cTx.addinput(UTXO.id, UTXO.vout, UTXO.script);
-        txValue += UTXO.sats / COIN;
-        console.log("Coin Control: Selected input " + UTXO.id.substr(0, 6) + "(" + UTXO.vout + ")... (Added " + (UTXO.sats / COIN).toFixed(8) + " PIV - Total: " + txValue + ")");
-      }
+      const cCoinControl = chooseUTXOs(cTx, value * COIN, 0, false);
+      if (!cCoinControl.success) return alert(cCoinControl.msg);
+
+      // Compute fee
       const nFee = calculatefee(cTx.serialize().length);
+
+      // The primary Standard-to-Cold output
       cTx.addcoldstakingoutput(publicKeyForNetwork, coldAddr, value);
       addresschange = publicKeyForNetwork;
       totalSent = (nFee + parseFloat(value)).toFixed(8);
-      valuechange = (txValue - parseFloat(totalSent)).toFixed(8);
+      valuechange = ((cCoinControl.nValue / COIN) - parseFloat(totalSent)).toFixed(8);
       if (totalSent <= nBalance) {
         if (debug)
           domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
@@ -1077,25 +1064,19 @@
       }
       let nBalance = getBalance() / COIN;
       if (value > nBalance) return alert("Balance is too small! (" + nBalance + " - " + value + " = " + (nBalance - value).toFixed(8) + ")");
-      console.log("Constructing TX of value: " + value + " PIV");
-      // Loop our cached UTXOs and construct a TX
+      // Construct a TX and fetch Standard inputs
       const cTx = bitjs.transaction();
-      let txValue = 0;
-      for (const UTXO of cachedUTXOs) {
-        if (txValue > value) {
-          // Required Coin Control value met, yahoo!
-          console.log("Coin Control: TX Constructed! Selected " + cTx.inputs.length + " input(s) (" + txValue + " PIV)");
-          break;
-        }
-        cTx.addinput(UTXO.id, UTXO.vout, UTXO.script);
-        txValue += UTXO.sats / COIN;
-        console.log("Coin Control: Selected input " + UTXO.id.substr(0, 6) + "(" + UTXO.vout + ")... (Added " + (UTXO.sats / COIN).toFixed(8) + " PIV - Total: " + txValue + ")");
-      }
+      const cCoinControl = chooseUTXOs(cTx, value * COIN, 0, false);
+      if (!cCoinControl.success) return alert(cCoinControl.msg);
+
+      // Compute fee
       const nFee = calculatefee(cTx.serialize().length);
+
+      // The primary output
       cTx.addpreimageoutput(hex, value);
       addresschange = publicKeyForNetwork;
       totalSent = (nFee + parseFloat(value)).toFixed(8);
-      valuechange = (txValue - parseFloat(totalSent)).toFixed(8);
+      valuechange = ((cCoinControl.nValue / COIN) - parseFloat(totalSent)).toFixed(8);
       if (totalSent <= nBalance) {
         if (debug)
           domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
@@ -1106,6 +1087,43 @@
         console.warn("Amount: " + value + "\nFee: " + nFee + "\nChange: " + valuechange + "\nTOTAL: " + totalSent);
         createAlert('warning', 'You are trying to send more than you have!', 2500);
       }
+    }
+
+    // Coin Control response formats
+    function ccError    (msg = '') { return { success: false, msg } };
+    function ccSuccess  (data)     { return { success: true, ...data } };
+
+    function chooseUTXOs(cTx, nTotalSatsRequired = 0, nMinInputSize = 0, fColdOnly = false) {
+      console.log("Constructing TX of value: " + (nTotalSatsRequired / COIN) + " PIV");
+
+      // Select the UTXO type bucket
+      const arrUTXOs = fColdOnly ? arrDelegatedUTXOs : cachedUTXOs;
+
+      // Select and return UTXO pointers (filters applied)
+      const cCoinControl = { nValue: 0, nChange: 0, arrSelectedUTXOs: [] }
+      for (const cUTXO of arrUTXOs) {
+        // Have we met the required sats threshold?
+        if (cCoinControl.nValue > nTotalSatsRequired) {
+          // Required Coin Control value met, yahoo!
+          console.log("Coin Control: TX Constructed! Selected " + cCoinControl.arrSelectedUTXOs.length + " input(s) (" + (cCoinControl.nValue / COIN) + " PIV)");
+          break;
+        }
+        // Does the UTXO meet size requirements?
+        if (cUTXO.sats < nMinInputSize) continue;
+        
+        // Push UTXO and cache new total value
+        cCoinControl.arrSelectedUTXOs.push(cUTXO);
+        cCoinControl.nValue += cUTXO.sats;
+        console.log("Coin Control: Selected input " + cUTXO.id.substr(0, 6) + "(" + cUTXO.vout + ")... (Added " + (cUTXO.sats / COIN).toFixed(8) + " PIV - Total: " + (cCoinControl.nValue / COIN) + ")");
+      };
+
+      // If we don't have enough value: leave the cTx alone and return false
+      if (cCoinControl.nValue <= nTotalSatsRequired) return ccError("Balance is too small! (Missing " + (cCoinControl.nValue - nTotalSatsRequired).toLocaleString('en-gb') + " sats)");
+
+      // Reaching here: we have sufficient UTXOs, stuff them into the TX, calc final misc data and return!
+      for (const cUTXO of cCoinControl.arrSelectedUTXOs) cTx.addinput(cUTXO.id, cUTXO.vout, cUTXO.script);
+      cCoinControl.nChange = nTotalSatsRequired - cCoinControl.nValue;
+      return ccSuccess(cCoinControl);
     }
 
     function createSimpleTransation() {
@@ -1130,34 +1148,27 @@
         return;
       }
       let nBalance = getBalance() / COIN;
-      if (value > nBalance) return alert("Balance is too small! (" + nBalance + " - " + value + " = " + (nBalance - value).toFixed(8) + ")");
-      console.log("Constructing TX of value: " + value + " PIV");
-      // Loop our cached UTXOs and construct a TX
-      const cTx = bitjs.transaction();
-      let txValue = 0;
-      for (const UTXO of cachedUTXOs) {
-        if (txValue >= value) {
-          // Required Coin Control value met, yahoo!
-          console.log("Coin Control: TX Constructed! Selected " + cTx.inputs.length + " input(s) (" + txValue + " PIV)");
-          break;
-        }
-        cTx.addinput(UTXO.id, UTXO.vout, UTXO.script);
-        txValue += UTXO.sats / COIN;
-        console.log("Coin Control: Selected input " + UTXO.id.substr(0, 6) + "(" + UTXO.vout + ")... (Added " + (UTXO.sats / COIN).toFixed(8) + " PIV - Total: " + txValue + ")");
-      }
 
+      // Construct a TX and fetch Standard inputs
+      const cTx = bitjs.transaction();
+      const cCoinControl = chooseUTXOs(cTx, value * COIN, 0, false);
+      if (!cCoinControl.success) return alert(cCoinControl.msg);
+
+      // Compute fee
       const nFee = calculatefee(cTx.serialize().length);
+
+      // Compute change (or lack thereof)
       const fNoChange = value >= (nBalance - nFee);
       if (fNoChange) {
         // We're sending alot! So we've got to deduct the fee from the send amount. There's not enough change to pay it with!
         value = Number((value - nFee).toFixed(8));
       }
 
-      if (address != '' && value != '') {
+      if (address && value) {
         cTx.addoutput(address, value); // Sending to this address
         addresschange = publicKeyForNetwork;
         totalSent = (nFee + parseFloat(value)).toFixed(8);
-        valuechange = fNoChange ? 0 : (txValue - parseFloat(totalSent)).toFixed(8);
+        valuechange = fNoChange ? 0 : ((cCoinControl.nValue / COIN) - parseFloat(totalSent)).toFixed(8);
         if (totalSent <= nBalance) {
           if (debug)
             domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + address + "<br>Sent: " + value + (fNoChange ? "" : "<br>Change Address: " + addresschange + "<br>Change: " + valuechange);
@@ -1174,6 +1185,7 @@
         console.log("No address or value");
       }
     }
+
     function createRawTransaction() {
       //advanced transaction creation and signing
       const cTx = bitjs.transaction();

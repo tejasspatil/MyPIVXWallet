@@ -38,33 +38,25 @@ if (networkEnabled) {
     request.onerror = networkError;
 
     request.onload = function() {
-      const data = JSON.parse(this.response);
+      // Fetch the single output of the UTXO
+      const cVout = JSON.parse(this.response).vout[arrUTXOsToValidate[0].vout];
 
-      for (const cVout of data.vout) {
-        // TODO: Determine if this is useful or not? I don't remember what this is, or why I added it.
-        if (cVout.spent) continue;
+      // Convert to MPW format
+      const cUTXO = {
+        'id': arrUTXOsToValidate[0].txid,
+        'vout': cVout.n,
+        'sats': cVout.value * COIN,
+        'script': cVout.scriptPubKey.hex
+      }
 
-        // Search for our address
-        if (!cVout.scriptPubKey.addresses) continue;
-        if (!cVout.scriptPubKey.addresses.includes(publicKeyForNetwork)) continue;
-
-        // Convert to MPW format
-        const cUTXO = {
-          'id': data.txid,
-          'vout': cVout.n,
-          'sats': cVout.value * COIN,
-          'script': cVout.scriptPubKey.hex
-        }
-
-        // Determine the UTXO type, and use it accordingly
-        if (cVout.scriptPubKey.type === 'pubkeyhash') {
-          // P2PKH type (Pay-To-Pub-Key-Hash)
-          cachedUTXOs.push(cUTXO);
-        } else
-        if (cVout.scriptPubKey.type === 'coldstake') {
-          // Cold Stake type
-          arrDelegatedUTXOs.push(cUTXO);
-        }
+      // Determine the UTXO type, and use it accordingly
+      if (cVout.scriptPubKey.type === 'pubkeyhash') {
+        // P2PKH type (Pay-To-Pub-Key-Hash)
+        cachedUTXOs.push(cUTXO);
+      } else
+      if (cVout.scriptPubKey.type === 'coldstake') {
+        // Cold Stake type
+        arrDelegatedUTXOs.push(cUTXO);
       }
 
       // Shift the queue and update the UI

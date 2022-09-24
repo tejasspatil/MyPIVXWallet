@@ -86,7 +86,7 @@
               <li class="nav-item"><a id='start' class="nav-link tablinks" onclick="openTab(event, 'home')">Intro</a></li>
               <li class="nav-item"><a class="nav-link tablinks" onclick="openTab(event, 'keypair')">Dashboard</a></li>
               <li class="nav-item"><a id="txTab" class="nav-link tablinks" onclick="openTab(event, 'Transaction')">Send</a></li>
-              <li class="nav-item"><a id="txTab" class="nav-link tablinks" onclick="openTab(event, 'StakingTab')">Stake</a></li>
+              <li class="nav-item"><a id="stakeTab" class="nav-link tablinks" onclick="openTab(event, 'StakingTab')">Stake</a></li>
               <li class="nav-item"><a class="nav-link tablinks" onclick="openTab(event, 'Settings');">Settings</a></li>
             </ul>
 
@@ -502,7 +502,7 @@
                   <input class="center-text" style="width: 100%; font-family: monospace;" type="text" id="address1s">
                   <br>
                   <label>Amount</label><br>
-                  <input class="center-text" type="number" min="0" id="value1s">
+                  <input class="center-text" type="text" id="value1s">
                   <div id="reqDescDisplay" style="display: none;">
                     <label>Description (from the merchant)</label><br>
                     <input class="center-text" type="text" disabled id="reqDesc">
@@ -637,6 +637,7 @@
     const domGuiBalanceStaking = document.getElementById("guiBalanceStaking");
     const domGuiBalanceBoxStaking = document.getElementById("guiBalanceBoxStaking");
     const domTxTab = document.getElementById("txTab");
+    const domStakeTab = document.getElementById("stakeTab");
     const domsendNotice = document.getElementById("sendNotice");
     const domSimpleTXs = document.getElementById("simpleTransactions");
     const domSimpleTXsDropdown = document.getElementById("simpleTransactionsDropdown");
@@ -934,7 +935,7 @@
 
     function undelegateGUI() {
       // Verify the amount
-      const nAmount = Number(document.getElementById('undelegateAmount').value);
+      const nAmount = Number(document.getElementById('undelegateAmount').value.trim());
       if (nAmount < 0.01) return createAlert('warning', 'Minimum amount is 0.01 PIV!', 2000);
       undelegate(nAmount);
     }
@@ -953,12 +954,11 @@
 
       // The primary Cold-to-Public output
       cTx.addoutput(publicKeyForNetwork, value);
-      addresschange = publicKeyForNetwork;
       totalSent = (nFee + value).toFixed(8);
       valuechange = ((cCoinControl.nValue / COIN) - parseFloat(totalSent)).toFixed(8);
       if (totalSent <= nBalance) {
         if (debug)
-          domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
+          domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + publicKeyForNetwork + "<br>Change: " + valuechange;
         if (valuechange > 1.01) {
           // Enough change to resume cold staking, so we'll send the change back to the cold staking address
           // Ensure the user has an address set - if not, request one!
@@ -972,7 +972,7 @@
           console.log('Re-delegated delegation spend change!');
         } else {
           // Not enough change to cold stake, so we'll just unstake everything
-          cTx.addoutput(addresschange, valuechange);
+          cTx.addoutput(publicKeyForNetwork, valuechange);
           console.log('Spent all CS dust into redeem address!');
         }
         sendTransaction(cTx.sign(privateKeyForTransactions, 1, 'coldstake'), "<b>Delegation successfully spent!</b><br>Please wait for confirmations.");
@@ -986,7 +986,7 @@
     function askForCSAddr(force = false) {
       if (force) cachedColdStakeAddr = null;
       if (cachedColdStakeAddr === "" || cachedColdStakeAddr === null) {
-        cachedColdStakeAddr = prompt('Please provide a Cold Staking address (either from your own node, or a 3rd-party!)');
+        cachedColdStakeAddr = prompt('Please provide a Cold Staking address (either from your own node, or a 3rd-party!)').trim();
         if (cachedColdStakeAddr) return true;
       } else {
         return true;
@@ -996,7 +996,7 @@
 
     function delegateGUI() {
       // Verify the amount
-      const nAmount = Number(document.getElementById('delegateAmount').value);
+      const nAmount = Number(document.getElementById('delegateAmount').value.trim());
       if (nAmount < 1) return createAlert('warning', 'Minimum Staking amount is 1 PIV!', 2000);
 
       // Ensure the user has an address set - if not, request one!
@@ -1024,13 +1024,12 @@
 
       // The primary Standard-to-Cold output
       cTx.addcoldstakingoutput(publicKeyForNetwork, coldAddr, value);
-      addresschange = publicKeyForNetwork;
       totalSent = (nFee + parseFloat(value)).toFixed(8);
       valuechange = ((cCoinControl.nValue / COIN) - parseFloat(totalSent)).toFixed(8);
       if (totalSent <= nBalance) {
         if (debug)
-          domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
-        cTx.addoutput(addresschange, valuechange); //Change Address
+          domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + publicKeyForNetwork + "<br>Change: " + valuechange;
+        cTx.addoutput(publicKeyForNetwork, valuechange); //Change Address
         sendTransaction(cTx.sign(privateKeyForTransactions, 1), "<b>Delegation successful!</b><br>Please wait for confirmations, enjoy your staking!");
         domGenIt.innerHTML = "Continue";
       } else {
@@ -1053,13 +1052,12 @@
 
       // The primary output
       cTx.addpreimageoutput(hex, value);
-      addresschange = publicKeyForNetwork;
       totalSent = (nFee + parseFloat(value)).toFixed(8);
       valuechange = ((cCoinControl.nValue / COIN) - parseFloat(totalSent)).toFixed(8);
       if (totalSent <= nBalance) {
         if (debug)
-          domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + addresschange + "<br>Change: " + valuechange;
-        cTx.addoutput(addresschange, valuechange); //Change Address
+          domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + value + "<br>Change Address: " + publicKeyForNetwork + "<br>Change: " + valuechange;
+        cTx.addoutput(publicKeyForNetwork, valuechange); //Change Address
         sendTransaction(cTx.sign(privateKeyForTransactions, 1));
         domGenIt.innerHTML = "Continue";
       } else {
@@ -1082,7 +1080,7 @@
       const cCoinControl = { nValue: 0, nChange: 0, arrSelectedUTXOs: [] }
       for (const cUTXO of arrUTXOs) {
         // Have we met the required sats threshold?
-        if (cCoinControl.nValue > nTotalSatsRequired) {
+        if (cCoinControl.nValue >= nTotalSatsRequired) {
           // Required Coin Control value met, yahoo!
           console.log("Coin Control: TX Constructed! Selected " + cCoinControl.arrSelectedUTXOs.length + " input(s) (" + (cCoinControl.nValue / COIN) + " PIV)");
           break;
@@ -1097,7 +1095,7 @@
       };
 
       // If we don't have enough value: leave the cTx alone and return false
-      if (cCoinControl.nValue <= nTotalSatsRequired) return ccError("Balance is too small! (Missing " + (cCoinControl.nValue - nTotalSatsRequired).toLocaleString('en-gb') + " sats)");
+      if (cCoinControl.nValue < nTotalSatsRequired) return ccError("Balance is too small! (Missing " + (cCoinControl.nValue - nTotalSatsRequired).toLocaleString('en-gb') + " sats)");
 
       // Reaching here: we have sufficient UTXOs, stuff them into the TX, calc final misc data and return!
       for (const cUTXO of cCoinControl.arrSelectedUTXOs) cTx.addinput(cUTXO.id, cUTXO.vout, cUTXO.script);
@@ -1108,8 +1106,7 @@
     function createTxGUI() {
       if (!hasWalletUnlocked(true)) return;
 
-      const address = domAddress1s.value;
-      let value = Number(domValue1s.value);
+      // Clear the inputs on 'Continue'
       if (domGenIt.innerHTML === 'Continue') {
         domGenIt.innerHTML = 'Send Transaction';
         domTxOutput.innerHTML = '';
@@ -1120,43 +1117,52 @@
         domReqDisplay.style.display = 'none';
         return;
       }
-      let nBalance = getBalance() / COIN;
+
+      // Sanity check the address
+      const address = domAddress1s.value.trim();
+      // If Staking address: redirect to staking page
+      if (address.startsWith("S")) {
+        createAlert('warning', 'Here, use the <b>Stake</b> screen, not the Send screen!', 7500);
+        return domStakeTab.click();
+      }
+      if (address.length !== 34)              return createAlert('warning', '<b>Invalid PIVX address!<b><br>Bad length (' + address.length + ')', 2500);
+      if (!address.startsWith(PUBKEY_PREFIX)) return createAlert('warning', '<b>Invalid PIVX address!<b><br>Bad prefix ' + address[0] + ' (Should start with ' + PUBKEY_PREFIX + ')', 3500);
+  
+      // Sanity check the amount
+      let nValue = Number(domValue1s.value.trim()) * COIN;
+      if (nValue <= 0 || isNaN(nValue))  return createAlert('warning', '<b>Invalid amount!</b><br>You can\'t send \'nothing\'!', 2500);
+      if (!Number.isSafeInteger(nValue)) return createAlert('warning', '<b>Invalid amount!</b><br>8 decimal limit exceeded', 2500);
 
       // Construct a TX and fetch Standard inputs
+      const nBalance = getBalance();
       const cTx = bitjs.transaction();
-      const cCoinControl = chooseUTXOs(cTx, value * COIN, 0, false);
+      const cCoinControl = chooseUTXOs(cTx, nValue, 0, false);
       if (!cCoinControl.success) return alert(cCoinControl.msg);
 
       // Compute fee
-      const nFee = calculatefee(cTx.serialize().length);
+      const nFee = calculatefee(cTx.serialize().length) * COIN;
 
       // Compute change (or lack thereof)
-      const fNoChange = value >= (nBalance - nFee);
+      const fNoChange = nValue >= (nBalance - nFee);
+      let nChange = 0;
       if (fNoChange) {
         // We're sending alot! So we've got to deduct the fee from the send amount. There's not enough change to pay it with!
-        value = Number((value - nFee).toFixed(8));
+        nValue -= nFee;
+      } else {
+        // Change output
+        nChange = cCoinControl.nValue - (nFee + nValue);
+        cTx.addoutput(publicKeyForNetwork, nChange / COIN);
       }
 
-      if (address && value) {
-        cTx.addoutput(address, value); // Sending to this address
-        addresschange = publicKeyForNetwork;
-        totalSent = (nFee + parseFloat(value)).toFixed(8);
-        valuechange = fNoChange ? 0 : ((cCoinControl.nValue / COIN) - parseFloat(totalSent)).toFixed(8);
-        if (totalSent <= nBalance) {
-          if (debug)
-            domHumanReadable.innerHTML = "Balance: " + nBalance.toFixed(8) + "<br>Fee: " + nFee + "<br>To: " + address + "<br>Sent: " + value + (fNoChange ? "" : "<br>Change Address: " + addresschange + "<br>Change: " + valuechange);
-          if (!fNoChange) {
-            cTx.addoutput(addresschange, valuechange); // Change Output
-          }
-          sendTransaction(cTx.sign(privateKeyForTransactions, 1));
-          domGenIt.innerHTML = "Continue";
-        } else {
-          console.warn("Amount: " + value + "\nFee: " + nFee + (fNoChange ? "" : "\nChange: " + valuechange) + "\nTOTAL: " + totalSent);
-          createAlert('warning', "You're trying to send more than you have!", 2500);
-        }
-      } else {
-        console.log("No address or value");
-      }
+      // Primary output (receiver)
+      cTx.addoutput(address, nValue / COIN);
+      
+      // Debug-only verbose response
+      if (debug) domHumanReadable.innerHTML = "Balance: " + (nBalance / COIN) + "<br>Fee: " + (nFee / COIN) + "<br>To: " + address + "<br>Sent: " + (nValue / COIN) + (fNoChange ? "" : "<br>Change Address: " + publicKeyForNetwork + "<br>Change: " + (nChange / COIN));
+      
+      // Sign and broadcast!
+      sendTransaction(cTx.sign(privateKeyForTransactions, 1));
+      domGenIt.innerHTML = "Continue";
     }
 
     function createRawTransaction() {
@@ -1200,12 +1206,10 @@
       // If in offline mode: don't sync ANY data or connect to the internet
       if (!networkEnabled) return console.warn("Offline mode active: For your security, the wallet will avoid ALL internet requests.");
 
-      // Update identicon
-      domIdenticon.dataset.jdenticonValue = publicKeyForNetwork;
-      jdenticon();
       // Play reload anim
       domBalanceReload.className += " playAnim";
       domBalanceReloadStaking.className += " playAnim";
+
       // Fetch block count + UTXOs
       getBlockCount();
     }

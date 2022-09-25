@@ -45,7 +45,7 @@ if (networkEnabled) {
       const cUTXO = {
         'id': arrUTXOsToValidate[0].txid,
         'vout': cVout.n,
-        'sats': cVout.value * COIN,
+        'sats': Math.round(cVout.value * COIN),
         'script': cVout.scriptPubKey.hex
       }
 
@@ -119,8 +119,8 @@ var sendTransaction = function(hex, msg = '') {
     request.send();
 }
 
-  var calculatefee = function (bytes) {
+  var getFee = function (bytes) {
     // TEMPORARY: Hardcoded fee per-byte
-    return (bytes * 50) / COIN; // 50 sat/byte
+    return bytes * 50; // 50 sat/byte
   }
 }

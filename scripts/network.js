@@ -16,12 +16,11 @@ if (networkEnabled) {
     request.onload = function () {
       const data = JSON.parse(this.response);
       // If the block count has changed, refresh all of our data!
-      domBalanceReload.className = domBalanceReload.className.replace(/ playAnim/g, "");
-      domBalanceReloadStaking.className = domBalanceReloadStaking.className.replace(/ playAnim/g, "");
+      domBalanceReload.classList.remove("playAnim");
+      domBalanceReloadStaking.classList.remove("playAnim");
       if (data.backend.blocks > cachedBlockCount) {
         console.log("New block detected! " + cachedBlockCount + " --> " + data.backend.blocks);
-        if (publicKeyForNetwork)
-          getUTXOs();
+        getUTXOs();
       }
       cachedBlockCount = data.backend.blocks;
     }

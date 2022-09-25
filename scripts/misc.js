@@ -90,7 +90,7 @@ const from_b58 = function (S) {
 // Supported types: success, info, warning
 function createAlert(type, message, timeout = 0) {
     const domAlert = document.createElement("div");
-    domAlert.className = "alertpop " + type;
+    domAlert.classList.add("alertpop " + type);
     // Message
     domAlert.innerHTML = message;
     domAlert.destroy = () => {

@@ -331,7 +331,7 @@
                                     <b id="guiAddress">~</b>
                                     <b id="guiQRButton">
                                         <i data-toggle="modal" data-target="#qrModal" class="fas fa-qrcode fa-stacked-ptr"></i>
-                                        <i onclick="toClipboard('guiAddress', 'guiAddressCopy')" id="guiAddressCopy" class="fas fa-clipboard fa-stacked-ptr"></i>
+                                        <i onclick="toClipboard('guiAddress', this)" id="guiAddressCopy" class="fas fa-clipboard fa-stacked-ptr"></i>
                                     </b>
                                 </div>
                             </div>
@@ -412,7 +412,7 @@
                   </div>
                   <!-- // IMPORT WALLET -->
 
-                  <button class="pivx-button-big" id="accessWalletBtn" onclick="toggleWallet()">
+                  <button class="pivx-button-big" id="accessWalletBtn" onclick="accessOrImportWallet()">
                               <span class="buttoni-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 70"><path d="M3.497 25.717C1.401 25.588 0 23.847 0 21.753v-2.535c0-.775.149-1.593.925-1.593h22.719c2.173 0 3.941 1.861 3.941 4.034 0 2.174-1.769 3.988-3.941 3.988l-20.207.048c-.02 0 .08.023.06.022z"></path><path d="M5.229 69.625C4.455 69.625 4 68.494 4 67.719V38.661c0-1.911 1.447-3.731 3.258-3.989.175-.029.285-.047.483-.047h21.525c7.137 0 12.751-5.86 12.751-13.027 0-7.096-5.528-12.841-12.586-13.177-.002 0-.671.016-1.41.016l-20.335.066C5.529 8.373 4 6.652 4 4.558V2.023C4 1.247 4.407.625 5.183.625h24.059c11.57 0 20.654 9.546 20.706 21.104 0 9.378-6.307 17.727-15.337 20.311-1.622.445-3.122.705-4.735.778L12 42.842v22.485c0 2.156-2.141 4.298-4.235 4.298H5.229z"></path></svg></span>
 
                               <span class="buttoni-text" id='wToggle'>Access My Wallet</span>
@@ -675,6 +675,10 @@
     const domAvailToDelegate = document.getElementById('availToDelegate');
     const domAvailToUndelegate = document.getElementById('availToUndelegate');
 
+    // Aggregate menu screens and links for faster switching
+    const arrDomScreens = document.getElementsByClassName("tabcontent");
+    const arrDomScreenLinks = document.getElementsByClassName("tablinks");
+
     // Alert DOM element
     const domAlertPos = document.getElementsByClassName("alertPositioning")[0];
 
@@ -736,25 +740,30 @@
       }
     }
 
-    function toClipboard(element, caller) {
-      let nCopy = document.getElementById(element);
-      caller = document.getElementById(caller);
-      let nClipboard = document.getElementById('clipboard');
-      nClipboard.value = nCopy.value || nCopy.innerHTML;
-      nClipboard.select();
-      nClipboard.setSelectionRange(0, 99999);
+    function toClipboard(source, caller) {
+      // Fetch the text/value source
+      const domCopy = document.getElementById(source);
+
+      // Use an invisible textbox as the clipboard source
+      const domClipboard = document.getElementById('clipboard');
+      domClipboard.value = domCopy.value || domCopy.innerHTML;
+      domClipboard.select();
+      domClipboard.setSelectionRange(0, 99999);
+
+      // Browser-dependent clipboard execution
       if (!navigator.clipboard) {
         document.execCommand("copy");
       } else {
-        navigator.clipboard.writeText(nCopy.innerHTML);
+        navigator.clipboard.writeText(domCopy.innerHTML);
       }
-      
-      caller.className += " fa-check";
-      caller.className = caller.className.replace(/ fa-clipboard/g, '');
+
+      // Display a temporary checkmark response
+      caller.classList.add("fa-check");
+      caller.classList.remove("fa-clipboard");
       caller.style.cursor = "default";
       setTimeout(() => {
-        caller.className += " fa-clipboard";
-        caller.className = caller.className.replace(/ fa-check/g, '');
+        caller.classList.add("fa-clipboard");
+        caller.classList.remove("fa-check");
         caller.style.cursor = "pointer";
       }, 1000);
     }
@@ -771,8 +780,7 @@
     function toggleKeyView() {
       viewPrivKey = !viewPrivKey;
       domGuiViewKey.innerHTML     = viewPrivKey  ? 'Privkey QR' : 'Pubkey QR';
-      domPrivateTxt.style.display = viewPrivKey  ? 'block' : 'none';
-      domPrivateQr.style.display  = viewPrivKey  ? 'block' : 'none';
+      domPrivateTxt.style.display = domPrivateQr.style.display = viewPrivKey  ? 'block' : 'none';
       domPublicQr.style.display   = !viewPrivKey ? 'block' : 'none';
     }
 
@@ -780,48 +788,40 @@
       // Hide and Reset the Vanity address input
       domPrefix.value = PUBKEY_PREFIX;
       domPrefix.style.display = 'none';
-      // Hide 'generate wallet'
+
+      // Hide all "*Wallet" buttons
       domGenerateWallet.style.display = 'none';
-      // Hide 'import wallet'
       domImportWallet.style.display = 'none';
-      // Hide 'vanity wallet'
       domGenVanityWallet.style.display = 'none';
-      // Hide 'access wallet'
       domAccessWallet.style.display = 'none';
     }
 
-    function toggleWallet() {
-      var toggle = domWalletToggle.innerHTML;
+    function accessOrImportWallet() {
       // Hide and Reset the Vanity address input
       domPrefix.value = PUBKEY_PREFIX;
       domPrefix.style.display = 'none';
-      if (toggle === "Access My Wallet") {
-        domImportWallet.style.display = 'block';
-        domAccessWalletBtn.style.display = 'none';
-        // We have a local wallet! Display the decryption prompt
-        if (hasEncryptedWallet()) {
-          domPrivKey.placeholder = 'Enter your wallet password';
-          domImportWalletText.innerText = 'Unlock Wallet';
-        }
-      } else {
-        domGenerateWallet.style.display = 'block';
+
+      // Show Import button, hide access button
+      domImportWallet.style.display = 'block';
+      domAccessWalletBtn.style.display = 'none';
+
+      // If we have a local wallet, display the decryption prompt
+      if (hasEncryptedWallet()) {
+        domPrivKey.placeholder = 'Enter your wallet password';
+        domImportWalletText.innerText = 'Unlock Wallet';
+        domPrivKey.focus();
       }
     }
 
-    function guiImportWallet() {
-      if (hasEncryptedWallet()) {
-        decryptWallet(domPrivKey.value).then(hasWallet => {
-          if (hasWallet) {
-            hideAllWalletOptions();
-          } else {
-            domGenerateWallet.style.display = 'block';
-          }
-        }).catch(e => {
-          domImportWallet.style.display = 'block';
-        });
-      } else {
-        importWallet();
-      }
+    async function guiImportWallet() {
+      // If we don't have a DB wallet: prompt an import
+      if (!hasEncryptedWallet()) return importWallet();
+
+      // Prompt for decryption of the existing wallet
+      const fHasWallet = await decryptWallet(domPrivKey.value);
+
+      // If the wallet was successfully loaded, hide all options and load the dash!
+      if (fHasWallet) hideAllWalletOptions();
     }
 
     function guiEncryptWallet() {
@@ -877,6 +877,7 @@
         domGenKeyWarning.style.display = 'none';
         domPrivateTxt.innerHTML = "~";
         domGuiAddress.innerHTML = "~";
+        domPrefix.focus();
       } else {
         // Ensure the input is base58 compatible
         for (const char of domPrefix.value) {
@@ -1162,35 +1163,38 @@
     }
 
     function createRawTransaction() {
-      //advanced transaction creation and signing
+      // Prepare a TX
       const cTx = bitjs.transaction();
       const txid = document.getElementById("prevTrxHash").value;
       const index = document.getElementById("index").value;
       const script = document.getElementById("script").value;
+
+      // Primary input
       cTx.addinput(txid, index, script);
-      var address = document.getElementById("address1").value;
-      var value = document.getElementById("value1").value;
-      cTx.addoutput(address, value);
-      address = document.getElementById("address2").value;
-      value = document.getElementById("value2").value;
-      cTx.addoutput(address, value);
+
+      // Primary output
+      const strAddress = document.getElementById("address1").value;
+      const nValue = document.getElementById("value1").value;
+      cTx.addoutput(strAddress, nValue);
+
+      // Change output
+      const strChange = document.getElementById("address2").value;
+      const nChangeValue = document.getElementById("value2").value;
+      cTx.addoutput(strChange, nChangeValue);
+
+      // Sign via WIF key
       const wif = document.getElementById("wif").value;
       document.getElementById("rawTrx").value = cTx.sign(wif, 1); //SIGHASH_ALL DEFAULT 1
     }
 
     function openTab(evt, tabName) {
-      var i, tabcontent, tablinks;
-      tabcontent = document.getElementsByClassName("tabcontent");
-      for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-      }
-      tablinks = document.getElementsByClassName("tablinks");
-      for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-      }
+      // Hide all screens and deactivate link highlights
+      for (const domScreen of arrDomScreens) domScreen.style.display = "none";
+      for (const domLink of arrDomScreenLinks) domLink.classList.remove("active");
+
+      // Show and activate the given screen
       document.getElementById(tabName).style.display = "block";
-      if (!evt.currentTarget.className.includes("active"))
-        evt.currentTarget.className += " active";
+      evt.currentTarget.classList.add("active");
 
       // Close the navbar if it's not already closed
       if (!domNavbarToggler.className.includes("collapsed"))
@@ -1201,10 +1205,11 @@
     function refreshChainData() {
       // If in offline mode: don't sync ANY data or connect to the internet
       if (!networkEnabled) return console.warn("Offline mode active: For your security, the wallet will avoid ALL internet requests.");
+      if (!publicKeyForNetwork) return;
 
       // Play reload anim
-      domBalanceReload.className += " playAnim";
-      domBalanceReloadStaking.className += " playAnim";
+      domBalanceReload.classList.add("playAnim");
+      domBalanceReloadStaking.classList.add("playAnim");
 
       // Fetch block count + UTXOs
       getBlockCount();
@@ -1220,26 +1225,24 @@
 
     window.onload = (() => {
       // Configure Identicon
-      jdenticon.configure({
-        saturation: {
-          color: 0.8
-        }
-      });
+      jdenticon.configure();
+
       // Configure payment processor
       if (requestTo && requestAmount) {
         // Open 'Create Transaction' menu
         domTxTab.click();
         if (domSimpleTXs.style.display === 'none')
           domSimpleTXsDropdown.click();
+
         // Pre-fill inputs
         domAddress1s.value = requestTo;
         domValue1s.value   = requestAmount;
+
         // Payment request 'desc' is optional
         if (urlParams.has('desc')) {
           domReqDisplay.style.display = 'block';
           domReqDesc.value = urlParams.get('desc');
         } else {
-          domReqDesc.value = '';
           domReqDisplay.style.display = 'none';
         }
       }

@@ -209,31 +209,32 @@ async function benchmark(quantity) {
 
 encryptWallet = async function (strPassword = '') {
   // Encrypt the wallet WIF with AES-GCM and a user-chosen password - suitable for browser storage
-  let encWIF = await encrypt(privateKeyForTransactions, strPassword);
-  if (typeof encWIF !== "string") return false;
+  let strEncWIF = await encrypt(privateKeyForTransactions, strPassword);
+  if (!strEncWIF) return false;
+
   // Set the encrypted wallet in localStorage
-  localStorage.setItem("encwif", encWIF);
+  localStorage.setItem("encwif", strEncWIF);
+
   // Hide the encryption warning
   domGenKeyWarning.style.display = 'none';
+
   // Remove the exit blocker, we can annoy the user less knowing the key is safe in their localstorage!
   removeEventListener("beforeunload", beforeUnloadListener, {capture: true});
 }
 
 decryptWallet = async function (strPassword = '') {
-  // Check if there's any encrypted WIF available, if so, prompt to decrypt it
-  let encWif = localStorage.getItem("encwif");
-  if (!encWif || encWif.length < 1) {
-    console.log("No local encrypted wallet found!");
-    return false;
+  // Check if there's any encrypted WIF available
+  const strEncWIF = localStorage.getItem("encwif");
+  if (!strEncWIF || strEncWIF.length < 1) return false;
+
+  // Prompt to decrypt it via password
+  const strDecWIF = await decrypt(strEncWIF, strPassword);
+  if (!strDecWIF || strDecWIF === "decryption failed!") {
+    if (strDecWIF) return alert("Incorrect password!");
+  } else {
+    importWallet(strDecWIF);
+    return true;
   }
-  let decWif = await decrypt(encWif, strPassword);
-  if (!decWif || decWif === "decryption failed!") {
-    if (decWif === "decryption failed!")
-      alert("Incorrect password!");
-    return false;
-  }
-  importWallet(decWif);
-  return true;
 }
 
 hasEncryptedWallet = function () {
@@ -244,11 +245,7 @@ hasWalletUnlocked = function (fIncludeNetwork = false) {
   if (fIncludeNetwork && !networkEnabled)
     return createAlert('warning', "<b>Offline Mode is active!</b><br>Please disable Offline Mode for automatic transactions", 5500);
   if (!publicKeyForNetwork) {
-    if (hasEncryptedWallet())
-      createAlert('warning', "Please unlock your wallet before sending transactions!", 3500);
-    else
-      createAlert('warning', "Please import/create your wallet before sending transactions!", 3500);
-    return false;
+      return createAlert('warning', "Please " + (hasEncryptedWallet() ? "unlock " : "import/create") + " your wallet before sending transactions!", 3500);
   } else {
     return true;
   }

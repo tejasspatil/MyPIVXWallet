@@ -117,4 +117,4 @@ function createQR(strData = '', domImg) {
     cQR.make();
     domImg.innerHTML = cQR.createImgTag();
     domImg.firstChild.style.borderRadius = '8px';
-  }
+}

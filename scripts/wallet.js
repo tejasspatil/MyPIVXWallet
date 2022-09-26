@@ -1,5 +1,3 @@
-document.getElementById('dcfooter').innerHTML = '© MIT 2022 - Built with 💜 by PIVX Labs - <b style=\'cursor:pointer\' onclick=\'openDonatePage()\'>Donate!</b><br><a href="https://github.com/PIVX-Labs/MyPIVXWallet">MyPIVXWallet</a>';
-
 // Generate a new private key OR encode an existing private key from raw bytes
 generateOrEncodePrivkey = function (pkBytesToEncode) {
   // Private Key Generation

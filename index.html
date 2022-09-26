@@ -588,33 +588,19 @@
     <!--
       Alert
     -->
-    <div class="alertPositioning">
-    </div>
+    <div class="alertPositioning"></div>
     <footer id="foot">
         <div class="footer">
-          <div id='dcfooter'></div>
+          <div id='dcfooter'>© MIT 2022 - Built with 💜 by PIVX Labs - <b style='cursor:pointer' onclick='openDonatePage()'>Donate!</b><br><a href="https://github.com/PIVX-Labs/MyPIVXWallet">MyPIVXWallet</a></div>
         </div>
     </footer>
   </div>
-  <script type="text/javascript" src="scripts/libs/aes-gcm.js"></script>
-  <script type="text/javascript" src="scripts/libs/crypto-min.js"></script>
-  <script type="text/javascript" src="scripts/libs/crypto-sha256.js"></script>
-  <script type="text/javascript" src="scripts/libs/crypto-sha256-hmac.js"></script>
-  <script type="text/javascript" src="scripts/libs/ripemd160.js"></script>
-  <script type="text/javascript" src="scripts/libs/jsbn.js"></script>
-  <script type="text/javascript" src="scripts/libs/ellipticcurve.js"></script>
-  <script type="text/javascript" src="scripts/libs/script.js"></script>
-  <script type="text/javascript" src="scripts/libs/qrcode.js"></script>
-  <script type="text/javascript" src="scripts/libs/sha256.js"></script>
-  <script type="text/javascript" src="scripts/libs/bn.js"></script>
-  <script type="text/javascript" src="scripts/libs/secp256k1.js"></script>
-  <script type="text/javascript" src="scripts/libs/noble-secp256k1.js"></script>
 
+  <!-- Load frontend-level components -->
   <script type="text/javascript" src="scripts/settings.js"></script>
   <script type="text/javascript" src="scripts/misc.js"></script>
   <script type="text/javascript" src="scripts/wallet.js"></script>
   <script type="text/javascript" src="scripts/network.js"></script>
-  <script type="text/javascript" src="scripts/bitTrx.js"></script>
 
   <script>
     // WALLET STATE DATA
@@ -622,8 +608,6 @@
     let arrDelegatedUTXOs = [];
     let cachedBlockCount = 0;
     let cachedColdStakeAddr = "";
-
-    const nSecp256k1 = nobleSecp256k1.default;
 
     // Cached DOM elements
     const domStart = document.getElementById("start");
@@ -1222,5 +1206,26 @@
   </script>
 
 </body>
+
+<!-- Load complex backend-level components last -->
+<script type="text/javascript" src="scripts/libs/aes-gcm.js"></script>
+<script type="text/javascript" src="scripts/libs/crypto-min.js"></script>
+<script type="text/javascript" src="scripts/libs/crypto-sha256.js"></script>
+<script type="text/javascript" src="scripts/libs/crypto-sha256-hmac.js"></script>
+<script type="text/javascript" src="scripts/libs/ripemd160.js"></script>
+<script type="text/javascript" src="scripts/libs/jsbn.js"></script>
+<script type="text/javascript" src="scripts/libs/ellipticcurve.js"></script>
+<script type="text/javascript" src="scripts/libs/script.js"></script>
+<script type="text/javascript" src="scripts/libs/qrcode.js"></script>
+<script type="text/javascript" src="scripts/libs/sha256.js"></script>
+<script type="text/javascript" src="scripts/libs/bn.js"></script>
+<script type="text/javascript" src="scripts/libs/secp256k1.js"></script>
+<script type="text/javascript" src="scripts/libs/noble-secp256k1.js"></script>
+<script type="text/javascript" src="scripts/bitTrx.js"></script>
+
+<script>
+  // Throw the Secp256k1 lib as a global after import
+  const nSecp256k1 = nobleSecp256k1.default;
+</script>
 
 </html>

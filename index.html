@@ -1034,37 +1034,6 @@
       domGenIt.innerHTML = "Continue";
     }
 
-    function preimage(nValue, hex) {
-      if (!hasWalletUnlocked(true)) return;
-
-      // Construct a TX and fetch Standard inputs
-      let nBalance = getBalance();
-      const cTx = bitjs.transaction();
-      const cCoinControl = chooseUTXOs(cTx, nValue, 0, false);
-      if (!cCoinControl.success) return alert(cCoinControl.msg);
-
-      // Compute fee and change (or lack thereof)
-      const nFee = getFee(cTx.serialize().length);
-      const nChange = cCoinControl.nValue - (nFee + nValue);
-      if (nChange > 0) {
-        // Change output
-        cTx.addoutput(publicKeyForNetwork, nChange / COIN);
-      } else {
-        // We're sending alot! So we deduct the fee from the send amount. There's not enough change to pay it with!
-        nValue -= nFee;
-      }
-
-      // The primary output
-      cTx.addpreimageoutput(hex, nValue / COIN);
-
-      // Debug-only verbose response
-      if (debug) domHumanReadable.innerHTML = "Balance: " + (nBalance / COIN) + "<br>Fee: " + (nFee / COIN) + "<br>To: " + address + "<br>Sent: " + (nValue / COIN) + (nChange > 0 ? "<br>Change Address: " + publicKeyForNetwork + "<br>Change: " + (nChange / COIN) : "");
-
-      // Sign and broadcast!
-      sendTransaction(cTx.sign(privateKeyForTransactions, 1));
-      domGenIt.innerHTML = "Continue";
-    }
-
     // Coin Control response formats
     function ccError    (msg = '') { return { success: false, msg } };
     function ccSuccess  (data)     { return { success: true, ...data } };

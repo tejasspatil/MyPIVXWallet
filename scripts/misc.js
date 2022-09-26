@@ -90,7 +90,8 @@ const from_b58 = function (S) {
 // Supported types: success, info, warning
 function createAlert(type, message, timeout = 0) {
     const domAlert = document.createElement("div");
-    domAlert.classList.add("alertpop " + type);
+    domAlert.classList.add("alertpop");
+    domAlert.classList.add(type);
     // Message
     domAlert.innerHTML = message;
     domAlert.destroy = () => {
@@ -107,3 +108,13 @@ function createAlert(type, message, timeout = 0) {
     if (timeout > 0) domAlert.timer = setTimeout(domAlert.destroy, timeout);
     domAlertPos.appendChild(domAlert);
 }
+
+// Generates and sets a QRCode image from a string and dom element
+function createQR(strData = '', domImg) {
+    // QRCode class consists of 'typeNumber' & 'errorCorrectionLevel'
+    const cQR = qrcode(4, 'L');
+    cQR.addData(strData);
+    cQR.make();
+    domImg.innerHTML = cQR.createImgTag();
+    domImg.firstChild.style.borderRadius = '8px';
+  }

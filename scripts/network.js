@@ -27,10 +27,13 @@ if (networkEnabled) {
     request.send();
   }
 
-  var arrUTXOsToValidate = [];
+  var arrUTXOsToValidate = [], nTimeSyncStart = 0;
   var acceptUTXO = () => {
     // Cancel if the queue is empty: no wasting precious bandwidth & CPU cycles!
-    if (!arrUTXOsToValidate.length) return;
+    if (!arrUTXOsToValidate.length) {
+      // If allowed by settings: submit a sync performance measurement to Labs Analytics
+      return submitAnalytics('time_to_sync', { time: (Date.now() / 1000) - nTimeSyncStart, explorer: cExplorer.name });
+    }
 
     const request = new XMLHttpRequest();
     request.open('GET', cExplorer.url + "/api/v2/tx-specific/" + arrUTXOsToValidate[0].txid, true);
@@ -64,7 +67,7 @@ if (networkEnabled) {
       
       // Loop validation until queue is empty
       arrUTXOsToValidate.shift();
-      if (arrUTXOsToValidate.length) acceptUTXO();
+      acceptUTXO();
     }
     request.send();
   }
@@ -80,7 +83,10 @@ if (networkEnabled) {
       arrUTXOsToValidate = JSON.parse(this.response);
       // Clear our UTXOs and begin accepting refreshed ones (TODO: build an efficient 'set merge' algo)
       cachedUTXOs = []; arrDelegatedUTXOs = [];
-      acceptUTXO();
+      if (arrUTXOsToValidate.length) {
+        nTimeSyncStart = Date.now() / 1000;
+        acceptUTXO();
+      }
     }
     request.send();
   }
@@ -103,6 +109,9 @@ var sendTransaction = function(hex, msg = '') {
             domAddress1s.value = '';
             domValue1s.innerHTML = '';
             createAlert('success', msg || 'Transaction sent!', msg ? (1250 + (msg.length * 50)) : 1500);
+
+            // If allowed by settings: submit a simple 'tx' ping to Labs Analytics
+            submitAnalytics('transaction');
         } else {
             console.log('Error sending transaction: ' + data.result);
             createAlert('warning', 'Transaction Failed!', 1250);
@@ -122,4 +131,31 @@ var sendTransaction = function(hex, msg = '') {
     // TEMPORARY: Hardcoded fee per-byte
     return bytes * 50; // 50 sat/byte
   }
+}
+
+// PIVX Labs Analytics: if you are a user, you can disable this FULLY via the Settings.
+// ... if you're a developer, we ask you to keep these stats to enhance upstream development,
+// ... but you are free to completely strip MPW of any analytics, if you wish, no hard feelings.
+var submitAnalytics = function (strType, cData = {}) {
+    if (!networkEnabled) return;
+
+    // Limit analytics here to prevent 'leakage' even if stats are implemented incorrectly or forced
+    let i = 0, arrAllowedKeys = [];
+    for (i; i < cAnalyticsLevel.stats.length; i++) {
+      const cStat = cAnalyticsLevel.stats[i];
+      arrAllowedKeys.push(cStatKeys.find(a => STATS[a] === cStat));
+    }
+
+    // Check if this 'stat type' was granted permissions
+    if (!arrAllowedKeys.includes(strType)) return false;
+
+    // Format
+    const cStats = {'type': strType, ...cData};
+
+    // Send to Labs Analytics
+    const request = new XMLHttpRequest();
+    request.open('POST', "https://scpscan.net/mpw/statistic", true);
+    request.setRequestHeader('Content-Type', 'application/json');
+    request.send(JSON.stringify(cStats));
+    return true;
 }

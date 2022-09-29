@@ -569,6 +569,14 @@
               </select>
               <br>
 
+              <label for="analytics">Choose your analytics contribution level:</label>
+              <br>
+              <select id="analytics" class="form-control" name="analytics">
+                <!-- Populated via JS at DOM load (settings.js) -->
+              </select>
+              <div id='analyticsDescriptor'></div>
+              <br>
+
               <button class="pivx-button-big" onclick="toggleDebug()">
                               <span class="buttoni-icon"><i class="fas fa-bug fa-tiny-margin"></i></span>
                               <span class="buttoni-text">Toggle Debug Mode</span>
@@ -658,6 +666,7 @@
     const domPrivKey = document.getElementById("privateKey");
     const domAvailToDelegate = document.getElementById('availToDelegate');
     const domAvailToUndelegate = document.getElementById('availToUndelegate');
+    const domAnalyticsDescriptor = document.getElementById('analyticsDescriptor');
 
     // Aggregate menu screens and links for faster switching
     const arrDomScreens = document.getElementsByClassName("tabcontent");
@@ -1199,6 +1208,9 @@
           domReqDisplay.style.display = 'none';
         }
       }
+
+      // If allowed by settings: submit a simple 'hit' (app load) to Labs Analytics
+      submitAnalytics('hit');
     });
 
     setInterval(refreshChainData, 15000);

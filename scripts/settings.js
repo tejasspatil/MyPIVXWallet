@@ -6,9 +6,9 @@ var networkEnabled = true;
 
 // A list of Labs-trusted explorers
 const arrExplorers = [
-    // Display name      Blockbook-compatible API base    
-    { name: "zkBitcoin", url: "https://zkbitcoin.com" },
-    { name: "rockdev",   url: "https://explorer.rockdev.org" }
+    // Display name      Blockbook-compatible API base
+    { name: "rockdev",   url: "https://explorer.rockdev.org" },
+    { name: "zkBitcoin", url: "https://zkbitcoin.com" }
 ]
 
 var cExplorer = arrExplorers[0];
@@ -131,9 +131,9 @@ addEventListener('DOMContentLoaded', () => {
     const strSettingExplorer = localStorage.getItem('explorer');
     const strSettingAnalytics = localStorage.getItem('analytics');
 
-    // For any that exist: load them
-    if (strSettingExplorer) setExplorer(arrExplorers.find(a => a.url === strSettingExplorer), true);
-    if (strSettingAnalytics) setAnalytics(cAnalyticsLevel = arrAnalytics.find(a => a.name === strSettingAnalytics), true);
+    // For any that exist: load them, or use the defaults
+    setExplorer(arrExplorers.find(a => a.url === strSettingExplorer) || cExplorer, true);
+    setAnalytics(cAnalyticsLevel = arrAnalytics.find(a => a.name === strSettingAnalytics) || cAnalyticsLevel, true);
 
     // And update the UI to reflect them
     domExplorerSelect.value = cExplorer.url;

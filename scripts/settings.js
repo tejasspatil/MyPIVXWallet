@@ -133,7 +133,16 @@ addEventListener('DOMContentLoaded', () => {
 
     // For any that exist: load them, or use the defaults
     setExplorer(arrExplorers.find(a => a.url === strSettingExplorer) || cExplorer, true);
-    setAnalytics(cAnalyticsLevel = arrAnalytics.find(a => a.name === strSettingAnalytics) || cAnalyticsLevel, true);
+
+    // Honour the "Do Not Track" header by default
+    if (!strSettingAnalytics && navigator.doNotTrack === "1") {
+        // Disabled
+        setAnalytics(arrAnalytics[0], true);
+        domAnalyticsDescriptor.innerHTML = '<h6 style="color:#dcdf6b;font-family:mono !important;"><pre style="color: inherit;">Analytics disabled to honour "Do Not Track" browser setting, you may manually enable if desired, though!</pre></h6>';
+    } else {
+        // Load from storage, or use defaults
+        setAnalytics(cAnalyticsLevel = arrAnalytics.find(a => a.name === strSettingAnalytics) || cAnalyticsLevel, true);
+    }
 
     // And update the UI to reflect them
     domExplorerSelect.value = cExplorer.url;

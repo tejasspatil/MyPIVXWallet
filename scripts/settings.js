@@ -37,11 +37,13 @@ var fWalletLoaded = false;
 // --- DOM Cache
 const domNetwork = document.getElementById('Network');
 const domDebug = document.getElementById('Debug');
+const domTestnet = document.getElementById('Testnet');
 const domExplorerSelect = document.getElementById('explorer');
 
 // Display the default settings directly in the UI
 domNetwork.innerHTML = '<b> Network:</b> ' + (networkEnabled ? 'Enabled' : 'Disabled');
 domDebug.innerText = debug ? '<b>DEBUG MODE ON</b>' : '';
+domTestnet.innerHTML = (cChainParams.current.isTestnet ? '<b>Testnet Mode On</b>' : '');
 
 // --- Settings Functions
 function setExplorer(explorer, fSilent = false) {
@@ -76,6 +78,16 @@ function setAnalytics(level, fSilent = false) {
 // Hook up the 'analytics' select UI
 document.getElementById('analytics').onchange = function(evt) {
     setAnalytics(arrAnalytics.find(a => a.name === evt.target.value));
+}
+
+function toggleTestnet() {
+    if(fWalletLoaded) return createAlert('warning', '<b>Unable to switch Testnet Mode!</b><br>Wallet already loaded', 2500);
+
+    cChainParams.current = (cChainParams.current.isTestnet ? cChainParams.main : cChainParams.testnet);
+
+    domTestnet.innerHTML = (cChainParams.current.isTestnet ? '<b>Testnet Mode On</b>' : '');
+    fillExplorerSelect();
+    domPrefix.value = cChainParams.current.PUBKEY_PREFIX + domPrefix.value.substr(1);
 }
 
 function toggleDebug() {

@@ -121,6 +121,7 @@
             <!-- SIDE NAVBAR -->
             <div class="form-inline my-2 my-lg-0">
               <ul class="navbar-nav mr-auto ptr">
+                <li class="nav-item"><a class="nav-link tablinks active" id="Testnet" onclick="toggleTestnet()"></a></li>
                 <li class="nav-item"><a class="nav-link tablinks active" id="Network" onclick="toggleNetwork()"></a></li>
                 <li class="nav-item"><a class="nav-link tablinks active" id="Debug" onclick="toggleDebug()"></a></li>
               </ul>
@@ -615,6 +616,11 @@
                               <span class="buttoni-text">Toggle Networking Mode</span>
                               <span class="buttoni-arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M23.328 16.707L13.121 26.914a.5.5 0 01-.707 0l-2.828-2.828a.5.5 0 010-.707L16.964 16 9.586 8.621a.5.5 0 010-.707l2.828-2.828a.5.5 0 01.707 0l10.207 10.207a1 1 0 010 1.414z"></path></svg></span>
               </button>
+              <button class="pivx-button-big" onclick="toggleTestnet()">
+                              <span class="buttoni-icon"><i class="fas fa-network-wired fa-tiny-margin"></i></span>
+                              <span class="buttoni-text">Toggle Testnet Mode</span>
+                              <span class="buttoni-arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M23.328 16.707L13.121 26.914a.5.5 0 01-.707 0l-2.828-2.828a.5.5 0 010-.707L16.964 16 9.586 8.621a.5.5 0 010-.707l2.828-2.828a.5.5 0 01.707 0l10.207 10.207a1 1 0 010 1.414z"></path></svg></span>
+              </button>
 
             </div>
           </div>
@@ -835,8 +841,8 @@
     }
 
     async function guiImportWallet() {
-      // If we don't have a DB wallet: prompt an import
-      if (!hasEncryptedWallet()) return importWallet();
+      // If we don't have a DB wallet or in Testnet mode: prompt an import
+      if (!hasEncryptedWallet() || cChainParams.current.isTestnet) return importWallet();
 
       // Prompt for decryption of the existing wallet
       const fHasWallet = await decryptWallet(domPrivKey.value);
@@ -846,6 +852,9 @@
     }
 
     function guiEncryptWallet() {
+      // Disable wallet encryption in testnet mode
+      if (cChainParams.current.isTestnet) return createAlert('warning', "<b>Testnet Mode is ON!</b><br>Wallet encryption disabled", 2500);
+
       // Show our inputs if we haven't already
       if (domEncryptPasswordBox.style.display === 'none') {
         // Return the display to it's class form
@@ -1208,7 +1217,8 @@
     // A safety mechanism enabled if the user attempts to leave without encrypting/saving their keys
     const beforeUnloadListener = (evt) => {
       evt.preventDefault();
-      createAlert("warning", "<b>Save your wallet!</b><br>Dashboard ➜ Set Password", 10000);
+      // Disable Save your wallet warning on unload
+      if( !cChainParams.current.isTestnet ) createAlert("warning", "<b>Save your wallet!</b><br>Dashboard ➜ Set Password", 10000);
       // Most browsers ignore this nowadays, but still, keep it 'just incase'
       return evt.returnValue = "Please ENCRYPT and/or BACKUP your keys before leaving, or you may lose them!";
     };

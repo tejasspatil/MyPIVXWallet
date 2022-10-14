@@ -129,7 +129,8 @@ importWallet = function (newWif = false, fRaw = false) {
     jdenticon();
 
     // Hide the encryption warning if the user pasted the private key
-    if (!newWif) domGenKeyWarning.style.display = 'block';
+    // Or in Testnet mode
+    if (!(newWif || cChainParams.current.isTestnet)) domGenKeyWarning.style.display = 'block';
 
     // Load UTXOs from explorer
     if (networkEnabled) getUTXOs();
@@ -154,7 +155,7 @@ generateWallet = async function (noUI = false) {
 
     if (!noUI) {
       // Display Text
-      domGenKeyWarning.style.display = 'block';
+      if( !cChainParams.current.isTestnet) domGenKeyWarning.style.display = 'block';
       domPrivateTxt.value = privateKeyForTransactions;
       domGuiAddress.innerHTML = publicKeyForNetwork;
 

@@ -550,7 +550,7 @@ input::-moz-focus-inner {
     display: block;
     margin: 0 auto;
     width: 85% !important;
-    height: 460px !important;
+    height: 800px !important;
     ;
     background: rgba(72, 2, 125, 0.60);
     border: 1px solid #a366ff;
@@ -575,6 +575,15 @@ input::-moz-focus-inner {
     justify-content: space-evenly;
     min-height: 200px;
     width: 100%;
+}
+
+.staking-rewards-header {
+    height: 15%;
+}
+.staking-rewards-list {
+    overflow: auto;
+    font-size: large;
+    height: 85%;
 }
 
 #staking-rectangle {

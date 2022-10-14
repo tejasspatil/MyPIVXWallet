@@ -448,7 +448,7 @@
                       <h3 id="stake-title" class="noselect">Staking &nbsp;&nbsp;<span id="balanceReloadStaking" class="reload noselect" onclick="refreshChainData()">&#x21bb;</span></h3>
                     </div>
                 </div>
-            </div>
+              </div>
               <br>
               <div class="staking-banner-bottom">
                 <div class="stake-box large-box col-md-4">
@@ -475,9 +475,22 @@
                 </div>
               </div>
               <!-- STAKING FEATURES -->
+	      <div class="stake-box large-box col-md-4">
+		<div id="staking-rewards-title" class="staking-rewards-header">
+		  <h5> Staking Rewards </h5>
+		</div>
+		<div class="staking-rewards-list">
+		  <div id="staking-rewards-content">
+		  </div>
+		  <button type="button" class="" onclick="updateStakingRewardsGUI()">
+		    <span class="buttoni-icon"><i class="fas fa-sync fa-tiny-margin"></i></span>
+                    <span class="buttoni-text">Load more</span>
+		  </button>
+		</div>
               </div>
+	      </div>
             </div>
-
+	    
 
 
             <div id="Transaction" class="tabcontent">
@@ -614,6 +627,7 @@
     // WALLET STATE DATA
     let cachedUTXOs = [];
     let arrDelegatedUTXOs = [];
+    let stakingRewards = [];
     let cachedBlockCount = 0;
     let cachedColdStakeAddr = "";
 
@@ -667,6 +681,8 @@
     const domAvailToDelegate = document.getElementById('availToDelegate');
     const domAvailToUndelegate = document.getElementById('availToUndelegate');
     const domAnalyticsDescriptor = document.getElementById('analyticsDescriptor');
+    const domStakingRewardsList = document.getElementById('staking-rewards-content');
+    const domStakingRewardsTitle = document.getElementById('staking-rewards-title');
 
     // Aggregate menu screens and links for faster switching
     const arrDomScreens = document.getElementsByClassName("tabcontent");
@@ -700,9 +716,20 @@
         domGuiBalanceStaking.innerText = Math.floor(nBalance / COIN);
         domGuiBalanceBoxStaking.style.fontSize = Math.floor(nBalance / COIN).toString().length >= 4 ? "large" : "x-large";
         domAvailToUndelegate.innerText = "Staking: ~" + (nBalance / COIN).toFixed(2) + " PIV";
+	updateStakingRewardsGUI();
       }
 
       return nBalance;
+    }
+
+    async function updateStakingRewardsGUI() {
+	const blockHeight = stakingRewards.length == 0 ? 0 : stakingRewards[stakingRewards.length - 1].blockHeight;
+	stakingRewards = [].concat(stakingRewards, await getStakingRewards(blockHeight));
+	domStakingRewardsList.innerHTML = ""
+	for (let reward of stakingRewards) 
+	    domStakingRewardsList.innerHTML += `${new Date(reward.time * 1000).toLocaleDateString()} <b>+${reward.amount} PIV</b><br>`;
+	const total = stakingRewards.reduce((total, reward) => total + reward.amount, 0)
+	domStakingRewardsTitle.innerHTML = `Staking Rewards: >${total} PIV`;
     }
 
     // URL-Query request processing

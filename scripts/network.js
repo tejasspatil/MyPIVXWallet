@@ -131,7 +131,35 @@ var sendTransaction = function(hex, msg = '') {
     // TEMPORARY: Hardcoded fee per-byte
     return bytes * 50; // 50 sat/byte
   }
+
+    var getStakingRewards = function(blockHeight = 0) {
+	return new Promise((res, rej) => {
+	    const request = new XMLHttpRequest();
+	    const tempKey = "D78YYuvxa8XnUSWsd9JUxR9zWSysHr1vJs";
+	    request.open('GET', `${cExplorer.url}/api/v2/address/${tempKey}?pageSize=50&details=txs&to=${blockHeight ? blockHeight - 1 : 0}`, true);
+	    request.onerror = () => { rej(); networkError(); };
+	    request.onreadystatechange = async function () {
+		if (!this.response || (!this.status === 200 && !this.status === 400)) return;
+		if (this.readyState !== 4) return;
+		const data = JSON.parse(this.response);
+		if(data) {
+		    res(data.transactions.filter((tx)=>{
+			return tx.vout[0].addresses[0] === "CoinStake TX"
+		    }).map((tx)=>{
+			return {
+			    time: tx.blockTime,
+			    blockHeight: tx.blockHeight,
+			    amount: (tx.vout[1].value - tx.vin[0].value) / 10**8,
+			};
+		    }));
+		}
+	    }
+	    request.send();
+	});
+    }
+    
 }
+
 
 // PIVX Labs Analytics: if you are a user, you can disable this FULLY via the Settings.
 // ... if you're a developer, we ask you to keep these stats to enhance upstream development,

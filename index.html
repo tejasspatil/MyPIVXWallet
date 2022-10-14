@@ -928,6 +928,7 @@
         while (arrWorkers.length < nThreads) {
           arrWorkers.push(new Worker("scripts/vanitygen_worker.js"));
           arrWorkers[arrWorkers.length - 1].onmessage = (event) => checkResult(event.data);
+          arrWorkers[arrWorkers.length - 1].postMessage(cChainParams.current.PUBKEY_ADDRESS);
         }
 
         // GUI Updater

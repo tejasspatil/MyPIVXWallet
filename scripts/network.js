@@ -131,7 +131,36 @@ var sendTransaction = function(hex, msg = '') {
     // TEMPORARY: Hardcoded fee per-byte
     return bytes * 50; // 50 sat/byte
   }
+
+    var getStakingRewards = function(blockHeight = 0) {
+	return new Promise((res, rej) => {
+	  if (!networkEnabled || publicKeyForNetwork == undefined) return res([]);
+	  const request = new XMLHttpRequest();
+	  const txSum = v => v.reduce((t,s)=>t+(s.addresses.includes(publicKeyForNetwork) && s.addresses.length == 2 ? parseInt(s.value) : 0), 0);
+	  request.open('GET', `${cExplorer.url}/api/v2/address/${publicKeyForNetwork}?pageSize=50&details=txs&to=${blockHeight ? blockHeight - 1 : 0}`, true);
+	  request.onerror = () => { rej(); networkError(); };
+	  request.onreadystatechange = async function () {
+	      if (!this.response || (!this.status === 200 && !this.status === 400)) return;
+	      if (this.readyState !== 4) return;
+	      const data = JSON.parse(this.response);
+	      if(data && data.transactions) {
+		  return res(data.transactions.filter((tx)=>{
+		      return tx.vout[0].addresses[0] === "CoinStake TX"
+		  }).map((tx)=>{
+		      console.log(tx)
+		      return {
+			  time: tx.blockTime,
+			  blockHeight: tx.blockHeight,
+			  amount: (txSum(tx.vout) - txSum(tx.vin)) / 10**8,
+		      };
+		  }).filter(tx=>tx.amount != 0));
+	      }
+	  }
+	  request.send();
+      });
+  }
 }
+
 
 // PIVX Labs Analytics: if you are a user, you can disable this FULLY via the Settings.
 // ... if you're a developer, we ask you to keep these stats to enhance upstream development,

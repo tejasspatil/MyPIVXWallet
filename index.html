@@ -192,7 +192,7 @@
                   <div class="col-md-11 pivx-feature-interior">
 
                     <div class="col-md-12 feature-icon">
-                      <img src="https://pivx.org/build/images/content/img_privacy.png" alt="P1IVX Privacy" class="smaller-feature">
+                      <img src="https://pivx.org/build/images/content/img_privacy.png" alt="PIVX Privacy" class="smaller-feature">
                     </div>
 
                     <h4>Don't trust, verify!</h4>
@@ -777,9 +777,7 @@
 
     let viewPrivKey = 0;
     function toggleKeyView(){
-      
-      viewPrivKey= (viewPrivKey+1)%3
-      
+      viewPrivKey = (viewPrivKey+1)%3
       switch(viewPrivKey){
         case 0:
         domGuiViewKey.innerHTML= "PubKey QR";
@@ -788,8 +786,8 @@
         domPublicQr.style.display ='block'
         domPrivateQr.style.display='none'
         domPrivateCipheredQr.style.display='none'
-        
           break;
+
         case 1:
         domGuiViewKey.innerHTML= "Ciphered QR"
         domPrivateTxt.style.display='none'
@@ -807,10 +805,9 @@
         domPrivateQr.style.display='block'
         domPrivateCipheredQr.style.display='none'
         break;
-        
       }
     }
-      
+
     function hideAllWalletOptions() {
       // Hide and Reset the Vanity address input
       domPrefix.value = PUBKEY_PREFIX;
@@ -841,18 +838,18 @@
     }
     function onPrivateKeyChanged(){
       if(hasEncryptedWallet()) return;
-      //Check whether the first character is + (hence it is not base58)
-      domPrivKeyPassword.hidden= domPrivKey.value.charAt(0)!=="+";
+      //Check whether the length of the string is 128 bytes (that's the length of ciphered plain texts)
+      domPrivKeyPassword.hidden= domPrivKey.value.length!==128;
     }
 
     async function guiImportWallet() {
-      const isEncrypted=domPrivKey.value.charAt(0)==="+"
+      const isEncrypted=domPrivKey.value.length===128;
   
       // If we don't have a DB wallet and the input is plain: prompt an import
       if (!hasEncryptedWallet() && !isEncrypted) return importWallet();
 
       // If we don't have a DB wallet and the input is ciphered: 
-      const privateKey = domPrivKey.value.slice(1);
+      const privateKey = domPrivKey.value
       const strPassword= domPrivKeyPassword.value;
       if(!hasEncryptedWallet() && isEncrypted){
         const strDecWIF = await decrypt(privateKey, strPassword);

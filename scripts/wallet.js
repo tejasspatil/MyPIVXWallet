@@ -104,13 +104,13 @@ importWallet = function (newWif = false, fRaw = false) {
     domPrivateTxt.value = privateKeyForTransactions;
     domGuiAddress.innerHTML = publicKeyForNetwork;
     domPrivateCipheredTxt.value="Set a password first";
-    if(hasEncryptedWallet()) domPrivateCipheredTxt.value= `+${localStorage.getItem("encwif")}`;
+    if(hasEncryptedWallet()) domPrivateCipheredTxt.value= localStorage.getItem("encwif");
     
     // Private Key QR
     createQR(privateKeyForTransactions, domPrivateQr);
     
     // Ciphered Private Key  QR 
-    if(hasEncryptedWallet()) createQR(`+${localStorage.getItem("encwif")}`, domPrivateCipheredQr,12);
+    if(hasEncryptedWallet()) createQR(localStorage.getItem("encwif"), domPrivateCipheredQr,12);
     
   
     // Address QR
@@ -228,9 +228,9 @@ encryptWallet = async function (strPassword = '') {
   removeEventListener("beforeunload", beforeUnloadListener, {capture: true});
 
   //Add the new ciphered text QR
-  domPrivateCipheredTxt.value= `+${localStorage.getItem("encwif")}`;
+  domPrivateCipheredTxt.value= localStorage.getItem("encwif");
   
-  createQR(`+${localStorage.getItem("encwif")}`, domPrivateCipheredQr,12);
+  createQR(localStorage.getItem("encwif"), domPrivateCipheredQr,12);
   
   
 }

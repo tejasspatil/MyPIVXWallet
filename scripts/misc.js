@@ -36,6 +36,7 @@ const to_b58 = function (B) {
     var d = [],    //the array for storing the stream of base58 digits
         s = "",    //the result string variable that will be returned
         i,         //the iterator variable for the byte input
+
         j,         //the iterator variable for the base58 digit array (d)
         c,         //the carry amount variable that is used to overflow from the current base58 digit to the next base58 digit
         n;         //a temporary placeholder variable for the current base58 digit
@@ -110,9 +111,9 @@ function createAlert(type, message, timeout = 0) {
 }
 
 // Generates and sets a QRCode image from a string and dom element
-function createQR(strData = '', domImg) {
+function createQR(strData = '', domImg,size=4) {
     // QRCode class consists of 'typeNumber' & 'errorCorrectionLevel'
-    const cQR = qrcode(4, 'L');
+    const cQR = qrcode(size, 'L');
     cQR.addData(strData);
     cQR.make();
     domImg.innerHTML = cQR.createImgTag();

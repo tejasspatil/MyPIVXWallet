@@ -110,9 +110,9 @@ function createAlert(type, message, timeout = 0) {
 }
 
 // Generates and sets a QRCode image from a string and dom element
-function createQR(strData = '', domImg) {
+function createQR(strData = '', domImg,size=4) {
     // QRCode class consists of 'typeNumber' & 'errorCorrectionLevel'
-    const cQR = qrcode(4, 'L');
+    const cQR = qrcode(size, 'L');
     cQR.addData(strData);
     cQR.make();
     domImg.innerHTML = cQR.createImgTag();

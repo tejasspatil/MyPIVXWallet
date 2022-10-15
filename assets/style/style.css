@@ -502,19 +502,20 @@ input::-moz-focus-inner {
     margin: 0;
     text-align: center;
 }
-
+#PrivateCipheredQR img,
 #PrivateQR img,
 #PublicQR img {
     width: 95px !important;
     height: 95px !important;
 }
-
+#PrivateCipheredTxt,
 #PrivateTxt {
     color: black;
     font-size: 12px !important;
     text-align: center;
     line-height: 20px;
 }
+
 
 /* -- Pubkey QR -- */
 
@@ -1095,7 +1096,7 @@ a {
     #genKeyWarning .pivx-button-big {
         margin-top: 20px;
     }
-
+    #PrivateCipheredQR img,
     #PrivateQR img,
     #PublicQR img {
         width: 90px !important;
@@ -1121,7 +1122,9 @@ a {
     #PrivateTxt {
         font-size: 25px;
     }
-
+    #PrivateCipheredTxt{
+        font-size: 25px;
+    }
     #PublicTxt {
         font-size: 25px;
     }
@@ -1133,7 +1136,9 @@ a {
     #PrivateTxt {
         font-size: 18px;
     }
-
+    #PrivateCipheredTxt{
+        font-size: 18px;
+    }
     #PublicTxt {
         font-size: 25px;
     }
@@ -1244,7 +1249,7 @@ a {
     #pubkey-box .pivx-button-big {
         width: 230px !important;
     }
-
+    #PrivateCipheredQR img,
     #PrivateQR img,
     #PublicQR img {
         width: 75px !important;
@@ -1283,6 +1288,9 @@ a {
 
     /* Main Wallet page */
     #PrivateTxt {
+        font-size: 17px;
+    }
+    #PrivateCipheredTxt{
         font-size: 17px;
     }
 
@@ -1372,6 +1380,9 @@ a {
 
     /* Main Wallet page */
     #PrivateTxt {
+        font-size: 13px;
+    }
+    #PrivateCipheredTxt{
         font-size: 13px;
     }
 
@@ -1484,6 +1495,9 @@ a {
 
     /* Main Wallet page */
     #PrivateTxt {
+        font-size: 8px;
+    }
+    #PrivateCipheredTxt{
         font-size: 8px;
     }
 

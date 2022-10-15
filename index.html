@@ -367,8 +367,10 @@
                             <div id="pubkey-padd">
                                 <div id="pubkey-box" class="col-md-4 desktop-pubkey">
                                   <div id="PrivateQR" class="margin-padded-qr" style="display: none;"><img src="" width="82" height="82"></div>
+                                  <div id="PrivateCipheredQR" class="margin-padded-qr" style="display: none;"><img src="" width="82" height="82"></div>
                                   <div id="PublicQR" class="margin-padded-qr" style="display: block;"><img src="" width="82" height="82"></div>
                                   <textarea id="PrivateTxt" style="display: none;" disabled="" class="form-control private-key-area"></textarea>
+                                  <textarea id="PrivateCipheredTxt" style="display: none;" disabled="" class="form-control private-key-area"></textarea>
                                   <button class="pivx-button-big" onclick="toggleKeyView()">
                                       <span class="buttoni-icon"><i class="far fa-eye fa-tiny-margin"></i></span>
                                       <span class="buttoni-text" id="guiViewKey">Pubkey QR</span>
@@ -432,7 +434,8 @@
                   <!-- IMPORT WALLET -->
                   <input class="hide-element" type="text" id="clipboard">
                   <div id='importWallet' style='display: none;'>
-                    <input type="password" id='privateKey' placeholder="Private Key">
+                    <input type="password" id='privateKey' placeholder="Private Key" oninput="onPrivateKeyChanged()">
+                    <input hidden type="password" id='privateKeyPassword' placeholder="Password"> <!-- I added this --> 
                     <button class="pivx-button-big" onclick="guiImportWallet()">
                                   <span class="buttoni-icon"><i class="fas fa-file-upload fa-tiny-margin"></i></span>
                                   <span class="buttoni-text" id="importWalletText">Import Wallet</span>
@@ -687,7 +690,9 @@
     const domValue1s = document.getElementById("value1s");
     const domGuiViewKey = document.getElementById('guiViewKey');
     const domPrivateTxt = document.getElementById('PrivateTxt');
+    const domPrivateCipheredTxt= document.getElementById('PrivateCipheredTxt')
     const domPrivateQr = document.getElementById('PrivateQR');
+    const domPrivateCipheredQr= document.getElementById('PrivateCipheredQR')
     const domPublicQr = document.getElementById('PublicQR');
     const domModalQR = document.getElementById('ModalQR');
     const domModalQrLabel = document.getElementById('ModalQRLabel');
@@ -714,6 +719,7 @@
     const domReqDisplay = document.getElementById('reqDescDisplay');
     const domIdenticon = document.getElementById("identicon");
     const domPrivKey = document.getElementById("privateKey");
+    const domPrivKeyPassword = document.getElementById("privateKeyPassword");
     const domAvailToDelegate = document.getElementById('availToDelegate');
     const domAvailToUndelegate = document.getElementById('availToUndelegate');
     const domAnalyticsDescriptor = document.getElementById('analyticsDescriptor');
@@ -835,12 +841,37 @@
       domValue1s.focus();
     }
 
-    let viewPrivKey = false;
-    function toggleKeyView() {
-      viewPrivKey = !viewPrivKey;
-      domGuiViewKey.innerHTML     = viewPrivKey  ? 'Privkey QR' : 'Pubkey QR';
-      domPrivateTxt.style.display = domPrivateQr.style.display = viewPrivKey  ? 'block' : 'none';
-      domPublicQr.style.display   = !viewPrivKey ? 'block' : 'none';
+    let viewPrivKey = 0;
+    function toggleKeyView(){
+      viewPrivKey = (viewPrivKey+1)%3
+      switch(viewPrivKey){
+        case 0:
+        domGuiViewKey.innerHTML= "PubKey QR";
+        domPrivateTxt.style.display= 'none';
+        domPrivateCipheredTxt.style.display='none';
+        domPublicQr.style.display ='block'
+        domPrivateQr.style.display='none'
+        domPrivateCipheredQr.style.display='none'
+          break;
+
+        case 1:
+        domGuiViewKey.innerHTML= "Ciphered QR"
+        domPrivateTxt.style.display='none'
+        domPrivateCipheredTxt.style.display='block';
+        domPublicQr.style.display ='none'
+        domPrivateQr.style.display='none'
+        domPrivateCipheredQr.style.display='block'
+          break;
+        
+        case 2:
+        domGuiViewKey.innerHTML= "Privkey QR";
+        domPrivateTxt.style.display='block'; 
+        domPrivateCipheredTxt.style.display='none';
+        domPublicQr.style.display ='none'
+        domPrivateQr.style.display='block'
+        domPrivateCipheredQr.style.display='none'
+        break;
+      }
     }
 
     function hideAllWalletOptions() {
@@ -871,11 +902,32 @@
         domPrivKey.focus();
       }
     }
+    function onPrivateKeyChanged(){
+      if(hasEncryptedWallet()) return;
+      //Check whether the length of the string is 128 bytes (that's the length of ciphered plain texts)
+      domPrivKeyPassword.hidden= domPrivKey.value.length!==128;
+    }
 
     async function guiImportWallet() {
-      // If we don't have a DB wallet or in Testnet mode: prompt an import
-      if (!hasEncryptedWallet() || cChainParams.current.isTestnet) return importWallet();
+      const isEncrypted=domPrivKey.value.length===128;
+      // If we are in testnet: prompt an import
+      if (cChainParams.current.isTestnet) return importWallet();
 
+      // If we don't have a DB wallet and the input is plain: prompt an import
+      if (!hasEncryptedWallet() && !isEncrypted) return importWallet();
+
+      // If we don't have a DB wallet and the input is ciphered: 
+      const privateKey = domPrivKey.value
+      const strPassword= domPrivKeyPassword.value;
+      if(!hasEncryptedWallet() && isEncrypted){
+        const strDecWIF = await decrypt(privateKey, strPassword);
+        if (!strDecWIF || strDecWIF === "decryption failed!") {
+          return createAlert('warning', '<b>Failed to import!</b> Invalid password',6000);
+        } else {
+          localStorage.setItem("encwif", privateKey);
+          return importWallet(strDecWIF);
+        }
+      }
       // Prompt for decryption of the existing wallet
       const fHasWallet = await decryptWallet(domPrivKey.value);
 

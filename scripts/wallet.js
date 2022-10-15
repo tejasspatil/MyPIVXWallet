@@ -103,10 +103,16 @@ importWallet = function (newWif = false, fRaw = false) {
     domGuiWallet.style.display = 'block';
     domPrivateTxt.value = privateKeyForTransactions;
     domGuiAddress.innerHTML = publicKeyForNetwork;
-
+    domPrivateCipheredTxt.value="Set a password first";
+    if(hasEncryptedWallet()) domPrivateCipheredTxt.value= localStorage.getItem("encwif");
+    
     // Private Key QR
     createQR(privateKeyForTransactions, domPrivateQr);
-
+    
+    // Ciphered Private Key  QR 
+    if(hasEncryptedWallet()) createQR(localStorage.getItem("encwif"), domPrivateCipheredQr,12);
+    
+  
     // Address QR
     createQR('pivx:' + publicKeyForNetwork, domPublicQr);
 
@@ -158,7 +164,7 @@ generateWallet = async function (noUI = false) {
       if( !cChainParams.current.isTestnet) domGenKeyWarning.style.display = 'block';
       domPrivateTxt.value = privateKeyForTransactions;
       domGuiAddress.innerHTML = publicKeyForNetwork;
-
+      domPrivateCipheredTxt.value="Set a password first";
       // Private Key QR
       createQR(privateKeyForTransactions, domPrivateQr);
 
@@ -221,6 +227,13 @@ encryptWallet = async function (strPassword = '') {
 
   // Remove the exit blocker, we can annoy the user less knowing the key is safe in their localstorage!
   removeEventListener("beforeunload", beforeUnloadListener, {capture: true});
+
+  //Add the new ciphered text QR
+  domPrivateCipheredTxt.value= localStorage.getItem("encwif");
+  
+  createQR(localStorage.getItem("encwif"), domPrivateCipheredQr,12);
+  
+  
 }
 
 decryptWallet = async function (strPassword = '') {

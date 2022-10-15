@@ -3,8 +3,8 @@
 	var bitjs = (typeof window === "undefined" ? self : window).bitjs = function () { };
 
 	/* public vars */
-	bitjs.pub  = PUBKEY_ADDRESS.toString(16);
-	bitjs.priv = SECRET_KEY.toString(16);
+	Object.defineProperty(bitjs, 'pub', { get() { return cChainParams.current.PUBKEY_ADDRESS.toString(16); } });
+	Object.defineProperty(bitjs, 'priv', { get() { return cChainParams.current.SECRET_KEY.toString(16); } });
 	bitjs.compressed = true;
 
 	/* convert a wif key back to a private key */

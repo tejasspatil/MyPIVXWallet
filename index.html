@@ -53,9 +53,37 @@
       // These below params share the same names as the CPP params, so finding and editing these is easy-peasy!
 
       /* chainparams */
-      const PUBKEY_PREFIX  = "D";
-      const PUBKEY_ADDRESS = 30;
-      const SECRET_KEY     = 212;
+      const cChainParams = {
+          current: null,
+          main: {
+              isTestnet      : false,
+              PUBKEY_PREFIX  : "D",
+              STAKING_PREFIX : "S",
+              PUBKEY_ADDRESS : 30,
+              SECRET_KEY     : 212,
+              // A list of Labs-trusted explorers
+              Explorers      : [
+                  // Display name      Blockbook-compatible API base
+                  { name: "rockdev",   url: "https://explorer.rockdev.org" },
+                  { name: "zkBitcoin", url: "https://zkbitcoin.com" }
+              ]
+          },
+          testnet: {
+              isTestnet      : true,
+              PUBKEY_PREFIX  : "y",  //FIXME: x is also valid
+              STAKING_PREFIX : "W",
+              PUBKEY_ADDRESS : 139,
+              SECRET_KEY     : 239,
+              // A list of Labs-trusted explorers
+              Explorers      : [
+                  // Display name      Blockbook-compatible API base
+                  { name: "rockdev",   url: "https://testnet.rockdev.org" }
+              ]
+          }
+      }
+      // Set default chain
+      cChainParams.current = cChainParams.main;
+
       const COIN = 1e8;
 
       /* Internal tweaking parameters */
@@ -93,6 +121,7 @@
             <!-- SIDE NAVBAR -->
             <div class="form-inline my-2 my-lg-0">
               <ul class="navbar-nav mr-auto ptr">
+                <li class="nav-item"><a class="nav-link tablinks active" id="Testnet" onclick="toggleTestnet()"></a></li>
                 <li class="nav-item"><a class="nav-link tablinks active" id="Network" onclick="toggleNetwork()"></a></li>
                 <li class="nav-item"><a class="nav-link tablinks active" id="Debug" onclick="toggleDebug()"></a></li>
               </ul>
@@ -590,6 +619,11 @@
                               <span class="buttoni-text">Toggle Networking Mode</span>
                               <span class="buttoni-arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M23.328 16.707L13.121 26.914a.5.5 0 01-.707 0l-2.828-2.828a.5.5 0 010-.707L16.964 16 9.586 8.621a.5.5 0 010-.707l2.828-2.828a.5.5 0 01.707 0l10.207 10.207a1 1 0 010 1.414z"></path></svg></span>
               </button>
+              <button class="pivx-button-big" onclick="toggleTestnet()">
+                              <span class="buttoni-icon"><i class="fas fa-network-wired fa-tiny-margin"></i></span>
+                              <span class="buttoni-text">Toggle Testnet Mode</span>
+                              <span class="buttoni-arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M23.328 16.707L13.121 26.914a.5.5 0 01-.707 0l-2.828-2.828a.5.5 0 010-.707L16.964 16 9.586 8.621a.5.5 0 010-.707l2.828-2.828a.5.5 0 01.707 0l10.207 10.207a1 1 0 010 1.414z"></path></svg></span>
+              </button>
 
             </div>
           </div>
@@ -810,7 +844,7 @@
 
     function hideAllWalletOptions() {
       // Hide and Reset the Vanity address input
-      domPrefix.value = PUBKEY_PREFIX;
+      domPrefix.value = cChainParams.current.PUBKEY_PREFIX;
       domPrefix.style.display = 'none';
 
       // Hide all "*Wallet" buttons
@@ -822,7 +856,7 @@
 
     function accessOrImportWallet() {
       // Hide and Reset the Vanity address input
-      domPrefix.value = PUBKEY_PREFIX;
+      domPrefix.value = cChainParams.current.PUBKEY_PREFIX;
       domPrefix.style.display = 'none';
 
       // Show Import button, hide access button
@@ -844,7 +878,9 @@
 
     async function guiImportWallet() {
       const isEncrypted=domPrivKey.value.length===128;
-  
+      // If we are in testnet: prompt an import
+      if (cChainParams.current.isTestnet) return importWallet();
+
       // If we don't have a DB wallet and the input is plain: prompt an import
       if (!hasEncryptedWallet() && !isEncrypted) return importWallet();
 
@@ -868,6 +904,9 @@
     }
 
     function guiEncryptWallet() {
+      // Disable wallet encryption in testnet mode
+      if (cChainParams.current.isTestnet) return createAlert('warning', "<b>Testnet Mode is ON!</b><br>Wallet encryption disabled", 2500);
+
       // Show our inputs if we haven't already
       if (domEncryptPasswordBox.style.display === 'none') {
         // Return the display to it's class form
@@ -887,10 +926,10 @@
 
     function checkVanity() {
       // Loosely check if the vanity address is valid
-      if (!domPrefix.value.length) return domPrefix.value = PUBKEY_PREFIX;
-      if (!domPrefix.value.startsWith(PUBKEY_PREFIX)) {
+      if (!domPrefix.value.length) return domPrefix.value = cChainParams.current.PUBKEY_PREFIX;
+      if (!domPrefix.value.startsWith(cChainParams.current.PUBKEY_PREFIX)) {
         // Prefix doesnt match, splice it into the string
-        domPrefix.value = PUBKEY_PREFIX + domPrefix.value.substr(1);
+        domPrefix.value = cChainParams.current.PUBKEY_PREFIX + domPrefix.value.substr(1);
       }
     }
 
@@ -915,7 +954,7 @@
       // Generate a vanity address with the given prefix
       if (domPrefix.value.length === 0 || domPrefix.style.display === 'none') {
         // No prefix, display the intro!
-        domPrefix.placeholder = 'Custom Prefix (' + PUBKEY_PREFIX + ' ...)';
+        domPrefix.placeholder = 'Custom Prefix (' + cChainParams.current.PUBKEY_PREFIX + ' ...)';
         domPrefix.style.display = 'block';
         domGenKeyWarning.style.display = 'none';
         domPrivateTxt.innerHTML = "~";
@@ -941,6 +980,7 @@
         while (arrWorkers.length < nThreads) {
           arrWorkers.push(new Worker("scripts/vanitygen_worker.js"));
           arrWorkers[arrWorkers.length - 1].onmessage = (event) => checkResult(event.data);
+          arrWorkers[arrWorkers.length - 1].postMessage(cChainParams.current.PUBKEY_ADDRESS);
         }
 
         // GUI Updater
@@ -993,7 +1033,7 @@
         if (!askForCSAddr()) return;
 
         // Sanity
-        if (cachedColdStakeAddr.length !== 34 || !cachedColdStakeAddr.startsWith('S')) {
+        if (cachedColdStakeAddr.length !== 34 || !cachedColdStakeAddr.startsWith(cChainParams.current.STAKING_PREFIX)) {
           askForCSAddr(true);
           return createAlert('success', '<b>Staking Address set!</b><br>Now go ahead and unstake!');
         }
@@ -1039,7 +1079,7 @@
       if (!askForCSAddr()) return;      
 
       // Sanity
-      if (cachedColdStakeAddr.length !== 34 || !cachedColdStakeAddr.startsWith('S')) {
+      if (cachedColdStakeAddr.length !== 34 || !cachedColdStakeAddr.startsWith(cChainParams.current.STAKING_PREFIX)) {
         askForCSAddr(true);
         return createAlert('success', '<b>Staking Address set!</b><br>Now go ahead and stake!');
       }
@@ -1132,13 +1172,13 @@
       // Sanity check the address
       const address = domAddress1s.value.trim();
       // If Staking address: redirect to staking page
-      if (address.startsWith("S")) {
+      if (address.startsWith(cChainParams.current.STAKING_PREFIX)) {
         createAlert('warning', 'Here, use the <b>Stake</b> screen, not the Send screen!', 7500);
         return domStakeTab.click();
       }
       if (address.length !== 34)              return createAlert('warning', '<b>Invalid PIVX address!<b><br>Bad length (' + address.length + ')', 2500);
-      if (!address.startsWith(PUBKEY_PREFIX)) return createAlert('warning', '<b>Invalid PIVX address!<b><br>Bad prefix ' + address[0] + ' (Should start with ' + PUBKEY_PREFIX + ')', 3500);
-  
+      if (!address.startsWith(cChainParams.current.PUBKEY_PREFIX)) return createAlert('warning', '<b>Invalid PIVX address!<b><br>Bad prefix ' + address[0] + ' (Should start with ' + cChainParams.current.PUBKEY_PREFIX + ')', 3500);
+
       // Sanity check the amount
       let nValue = Math.round(Number(domValue1s.value.trim()) * COIN);
       if (nValue <= 0 || isNaN(nValue))  return createAlert('warning', '<b>Invalid amount!</b><br>You can\'t send \'nothing\'!', 2500);
@@ -1230,7 +1270,8 @@
     // A safety mechanism enabled if the user attempts to leave without encrypting/saving their keys
     const beforeUnloadListener = (evt) => {
       evt.preventDefault();
-      createAlert("warning", "<b>Save your wallet!</b><br>Dashboard ➜ Set Password", 10000);
+      // Disable Save your wallet warning on unload
+      if( !cChainParams.current.isTestnet ) createAlert("warning", "<b>Save your wallet!</b><br>Dashboard ➜ Set Password", 10000);
       // Most browsers ignore this nowadays, but still, keep it 'just incase'
       return evt.returnValue = "Please ENCRYPT and/or BACKUP your keys before leaving, or you may lose them!";
     };
@@ -1264,7 +1305,7 @@
     });
 
     setInterval(refreshChainData, 15000);
-    domPrefix.value = PUBKEY_PREFIX;
+    domPrefix.value = cChainParams.current.PUBKEY_PREFIX;
   </script>
 
 </body>

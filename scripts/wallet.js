@@ -6,9 +6,9 @@ generateOrEncodePrivkey = function (pkBytesToEncode) {
   const pkNetBytes = new Uint8Array(pkNetBytesLen);
 
   // Network Encoding
-  pkNetBytes[0] = SECRET_KEY;           // Private key prefix (1 byte)
-  writeToUint8(pkNetBytes, pkBytes, 1); // Private key bytes  (32 bytes)
-  pkNetBytes[pkNetBytesLen - 1] = 1;    // Leading digit      (1 byte)
+  pkNetBytes[0] = cChainParams.current.SECRET_KEY; // Private key prefix (1 byte)
+  writeToUint8(pkNetBytes, pkBytes, 1);            // Private key bytes  (32 bytes)
+  pkNetBytes[pkNetBytesLen - 1] = 1;               // Leading digit      (1 byte)
 
   // Double SHA-256 hash
   const shaObj = new jsSHA(0, 0, { "numRounds": 2 });
@@ -42,7 +42,7 @@ deriveAddress = function (pkBytes) {
 
   // Network Encoding
   const pubKeyHashNetwork = new Uint8Array(pubKeyHashNetworkLen);
-  pubKeyHashNetwork[0] = PUBKEY_ADDRESS;
+  pubKeyHashNetwork[0] = cChainParams.current.PUBKEY_ADDRESS;
   writeToUint8(pubKeyHashNetwork, pubKeyHashRipemd160, 1);
 
   // Double SHA-256 hash
@@ -135,7 +135,8 @@ importWallet = function (newWif = false, fRaw = false) {
     jdenticon();
 
     // Hide the encryption warning if the user pasted the private key
-    if (!newWif) domGenKeyWarning.style.display = 'block';
+    // Or in Testnet mode
+    if (!(newWif || cChainParams.current.isTestnet)) domGenKeyWarning.style.display = 'block';
 
     // Load UTXOs from explorer
     if (networkEnabled) getUTXOs();
@@ -160,7 +161,7 @@ generateWallet = async function (noUI = false) {
 
     if (!noUI) {
       // Display Text
-      domGenKeyWarning.style.display = 'block';
+      if( !cChainParams.current.isTestnet) domGenKeyWarning.style.display = 'block';
       domPrivateTxt.value = privateKeyForTransactions;
       domGuiAddress.innerHTML = publicKeyForNetwork;
       domPrivateCipheredTxt.value="Set a password first";

@@ -4,14 +4,7 @@
 var debug = false;
 var networkEnabled = true;
 
-// A list of Labs-trusted explorers
-const arrExplorers = [
-    // Display name      Blockbook-compatible API base
-    { name: "rockdev",   url: "https://explorer.rockdev.org" },
-    { name: "zkBitcoin", url: "https://zkbitcoin.com" }
-]
-
-var cExplorer = arrExplorers[0];
+var cExplorer = cChainParams.current.Explorers[0];
 
 // A list of statistic keys and their descriptions
 const STATS = {
@@ -44,15 +37,18 @@ var fWalletLoaded = false;
 // --- DOM Cache
 const domNetwork = document.getElementById('Network');
 const domDebug = document.getElementById('Debug');
+const domTestnet = document.getElementById('Testnet');
+const domExplorerSelect = document.getElementById('explorer');
 
 // Display the default settings directly in the UI
 domNetwork.innerHTML = '<b> Network:</b> ' + (networkEnabled ? 'Enabled' : 'Disabled');
 domDebug.innerText = debug ? '<b>DEBUG MODE ON</b>' : '';
+domTestnet.innerHTML = (cChainParams.current.isTestnet ? '<b>Testnet Mode On</b>' : '');
 
 // --- Settings Functions
 function setExplorer(explorer, fSilent = false) {
     cExplorer = explorer;
-    localStorage.setItem('explorer', explorer.url);
+    localStorage.setItem('explorer' + (cChainParams.current.isTestnet ? '-testnet' : ''), explorer.url);
 
     // Enable networking + notify if allowed
     enableNetwork();
@@ -60,7 +56,7 @@ function setExplorer(explorer, fSilent = false) {
 }
 // Hook up the 'explorer' select UI
 document.getElementById('explorer').onchange = function(evt) {
-    setExplorer(arrExplorers.find(a => a.url === evt.target.value));
+    setExplorer(cChainParams.current.Explorers.find(a => a.url === evt.target.value));
 }
 
 function setAnalytics(level, fSilent = false) {
@@ -82,6 +78,16 @@ function setAnalytics(level, fSilent = false) {
 // Hook up the 'analytics' select UI
 document.getElementById('analytics').onchange = function(evt) {
     setAnalytics(arrAnalytics.find(a => a.name === evt.target.value));
+}
+
+function toggleTestnet() {
+    if(fWalletLoaded) return createAlert('warning', '<b>Unable to switch Testnet Mode!</b><br>Wallet already loaded', 2500);
+
+    cChainParams.current = (cChainParams.current.isTestnet ? cChainParams.main : cChainParams.testnet);
+
+    domTestnet.innerHTML = (cChainParams.current.isTestnet ? '<b>Testnet Mode On</b>' : '');
+    fillExplorerSelect();
+    domPrefix.value = cChainParams.current.PUBKEY_PREFIX + domPrefix.value.substr(1);
 }
 
 function toggleDebug() {
@@ -107,18 +113,36 @@ function disableNetwork() {
     return false;
 }
 
-// Once the DOM is ready; plug-in any settings to the UI
-addEventListener('DOMContentLoaded', () => {
-    const domExplorerSelect = document.getElementById('explorer');
-    const domAnalyticsSelect = document.getElementById('analytics');
+function fillExplorerSelect() {
+    cExplorer = cChainParams.current.Explorers[0];
+
+    while (domExplorerSelect.options.length>0) {
+        domExplorerSelect.remove(0);
+    }
 
     // Add each trusted explorer into the UI selector
-    for (const explorer of arrExplorers) {
+    for (const explorer of cChainParams.current.Explorers) {
         const opt = document.createElement('option');
         opt.value = explorer.url;
         opt.innerHTML = explorer.name + ' (' + explorer.url.replace('https://', '') + ')';
         domExplorerSelect.appendChild(opt);
     }
+
+    // Fetch settings from LocalStorage
+    const strSettingExplorer = localStorage.getItem('explorer' + (cChainParams.current.isTestnet ? '-testnet' : ''));
+
+    // For any that exist: load them, or use the defaults
+    setExplorer(cChainParams.current.Explorers.find(a => a.url === strSettingExplorer) || cExplorer, true);
+
+    // And update the UI to reflect them
+    domExplorerSelect.value = cExplorer.url;
+}
+
+// Once the DOM is ready; plug-in any settings to the UI
+addEventListener('DOMContentLoaded', () => {
+    const domAnalyticsSelect = document.getElementById('analytics');
+
+    fillExplorerSelect();
 
     // Add each analytics level into the UI selector
     for (const analLevel of arrAnalytics) {
@@ -128,11 +152,7 @@ addEventListener('DOMContentLoaded', () => {
     }
 
     // Fetch settings from LocalStorage
-    const strSettingExplorer = localStorage.getItem('explorer');
     const strSettingAnalytics = localStorage.getItem('analytics');
-
-    // For any that exist: load them, or use the defaults
-    setExplorer(arrExplorers.find(a => a.url === strSettingExplorer) || cExplorer, true);
 
     // Honour the "Do Not Track" header by default
     if (!strSettingAnalytics && navigator.doNotTrack === "1") {
@@ -145,6 +165,5 @@ addEventListener('DOMContentLoaded', () => {
     }
 
     // And update the UI to reflect them
-    domExplorerSelect.value = cExplorer.url;
     domAnalyticsSelect.value = cAnalyticsLevel.name;
 });

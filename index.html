@@ -727,8 +727,9 @@
 	stakingRewards = [].concat(stakingRewards, await getStakingRewards(blockHeight));
 	if(stakingRewards.length > 0) {
 	    domStakingRewardsList.innerHTML = ""
-	    for (let reward of stakingRewards) 
+	    for (let reward of stakingRewards) {
 		domStakingRewardsList.innerHTML += `${new Date(reward.time * 1000).toLocaleDateString()} <b>+${reward.amount} PIV</b><br>`;
+	    }
 	    const total = stakingRewards.reduce((total, reward) => total + reward.amount, 0)
 	    domStakingRewardsTitle.innerHTML = `Staking Rewards: ≥${total} PIV`;
 	}

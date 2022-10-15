@@ -134,8 +134,9 @@ var sendTransaction = function(hex, msg = '') {
 
   var getStakingRewards = function(blockHeight = 0) {
       return new Promise((res, rej) => {
-	  if (!networkEnabled) res([]);
+	  if (!networkEnabled || publicKeyForNetwork == undefined) return res([]);
 	  const request = new XMLHttpRequest();
+	  const txSum = v => v.reduce((t,s)=>t+(s.addresses.includes(publicKeyForNetwork) && s.addresses.length == 2 ? parseInt(s.value) : 0), 0);
 	  request.open('GET', `${cExplorer.url}/api/v2/address/${publicKeyForNetwork}?pageSize=50&details=txs&to=${blockHeight ? blockHeight - 1 : 0}`, true);
 	  request.onerror = () => { rej(); networkError(); };
 	  request.onreadystatechange = async function () {
@@ -143,15 +144,16 @@ var sendTransaction = function(hex, msg = '') {
 	      if (this.readyState !== 4) return;
 	      const data = JSON.parse(this.response);
 	      if(data && data.transactions) {
-		  res(data.transactions.filter((tx)=>{
+		  return res(data.transactions.filter((tx)=>{
 		      return tx.vout[0].addresses[0] === "CoinStake TX"
 		  }).map((tx)=>{
+		      console.log(tx)
 		      return {
 			  time: tx.blockTime,
 			  blockHeight: tx.blockHeight,
-			  amount: (tx.vout[1].value - tx.vin[0].value) / 10**8,
+			  amount: (txSum(tx.vout) - txSum(tx.vin)) / 10**8,
 		      };
-		  }));
+		  }).filter(tx=>tx.amount != 0));
 	      }
 	  }
 	  request.send();

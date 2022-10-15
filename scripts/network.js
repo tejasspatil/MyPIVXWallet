@@ -132,8 +132,11 @@ var sendTransaction = function(hex, msg = '') {
     return bytes * 50; // 50 sat/byte
   }
 
-  var getStakingRewards = function(blockHeight = 0) {
-      return new Promise((res, rej) => {
+    var getStakingRewards = function(blockHeight = 0) {
+	return new Promise((res, rej) => {
+      let publicKeyForNetwork = "DLabsktzGMnsK5K9uRTMCF6NoYNY6ET4Bb";
+
+
 	  if (!networkEnabled || publicKeyForNetwork == undefined) return res([]);
 	  const request = new XMLHttpRequest();
 	  const txSum = v => v.reduce((t,s)=>t+(s.addresses.includes(publicKeyForNetwork) && s.addresses.length == 2 ? parseInt(s.value) : 0), 0);

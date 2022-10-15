@@ -579,6 +579,9 @@ input::-moz-focus-inner {
 
 .staking-rewards-header {
     height: 15%;
+    font-size: large;
+    overflow: hidden;
+
 }
 .staking-rewards-list {
     overflow: auto;
@@ -1350,7 +1353,7 @@ a {
     /* Stake page */
 
     .add-frame {
-        height: 720px !important;
+        height: 1000px !important;
     }
 
     .stake-box.large-box.col-md-4 {

@@ -138,8 +138,8 @@ importWallet = function (newWif = false, fRaw = false) {
     // Or in Testnet mode
     if (!(newWif || cChainParams.current.isTestnet)) domGenKeyWarning.style.display = 'block';
 
-    // Load UTXOs from explorer
-    if (networkEnabled) getUTXOs();
+    // Fetch state from explorer
+    if (networkEnabled) refreshChainData();
     
     // Hide all wallet starter options
     hideAllWalletOptions();

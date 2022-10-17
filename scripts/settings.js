@@ -81,13 +81,20 @@ document.getElementById('analytics').onchange = function(evt) {
 }
 
 function toggleTestnet() {
-    if(fWalletLoaded) return createAlert('warning', '<b>Unable to switch Testnet Mode!</b><br>Wallet already loaded', 2500);
+    if (fWalletLoaded) return createAlert('warning', '<b>Unable to switch Testnet Mode!</b><br>A wallet is already loaded', 3250);
 
-    cChainParams.current = (cChainParams.current.isTestnet ? cChainParams.main : cChainParams.testnet);
+    // Update current chain config
+    cChainParams.current = cChainParams.current.isTestnet ? cChainParams.main : cChainParams.testnet;
 
+    // Update UI and static tickers
     domTestnet.innerHTML = (cChainParams.current.isTestnet ? '<b>Testnet Mode On</b>' : '');
-    fillExplorerSelect();
+    domGuiBalanceTicker.innerText        = cChainParams.current.TICKER;
+    domGuiBalanceStakingTicker.innerText = cChainParams.current.TICKER;
     domPrefix.value = cChainParams.current.PUBKEY_PREFIX + domPrefix.value.substr(1);
+    fillExplorerSelect();
+    getBalance(true);
+    getStakingBalance(true);
+    updateStakingRewardsGUI();
 }
 
 function toggleDebug() {

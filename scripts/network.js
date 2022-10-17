@@ -140,7 +140,7 @@ var sendTransaction = function(hex, msg = '') {
     const nHeight = arrRewards.length ? arrRewards[arrRewards.length - 1].blockHeight : 0;
     const request = new XMLHttpRequest();
     const txSum = v => v.reduce((t, s) => t + (s.addresses.includes(publicKeyForNetwork) && s.addresses.length === 2 ? parseInt(s.value) : 0), 0);
-    request.open('GET', `${cExplorer.url}/api/v2/address/${publicKeyForNetwork}?pageSize=50&details=txs&to=${nHeight ? nHeight - 1 : 0}`, true);
+    request.open('GET', `${cExplorer.url}/api/v2/address/${publicKeyForNetwork}?pageSize=500&details=txs&to=${nHeight ? nHeight - 1 : 0}`, true);
     request.onerror = networkError;
     request.onreadystatechange = async function () {
       if (!this.response || (!this.status === 200 && !this.status === 400)) return stopAnim();

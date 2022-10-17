@@ -159,6 +159,10 @@ var sendTransaction = function(hex, msg = '') {
           }).filter(tx => tx.amount != 0)
         );
 
+        // If the results don't match the full 'max/requested results', then we know there's nothing more to load, hide the button!
+        if (data.transactions.length !== data.itemsOnPage)
+          domGuiStakingLoadMore.style.display = "none";
+
         // Update GUI
         stopAnim();
         updateStakingRewardsGUI(true);

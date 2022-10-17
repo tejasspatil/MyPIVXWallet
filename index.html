@@ -517,7 +517,7 @@
                   <div class="staking-rewards-list">
                 <div id="staking-rewards-content">
               </div>
-              <button type="button" onclick="getStakingRewards()">
+              <button type="button" id="stakingLoadMore" onclick="getStakingRewards()">
                 <span class="buttoni-icon" id="stakingLoadMoreIcon"><i class="fas fa-sync fa-tiny-margin"></i></span>
                 <span class="buttoni-text">Load more</span>
               </button>
@@ -685,6 +685,7 @@
     const domBalanceReloadStaking = document.getElementById("balanceReloadStaking");
     const domGuiBalanceStaking = document.getElementById("guiBalanceStaking");
     const domGuiBalanceStakingTicker = document.getElementById("guiBalanceStakingTicker");
+    const domGuiStakingLoadMore = document.getElementById("stakingLoadMore");
     const domGuiStakingLoadMoreIcon = document.getElementById("stakingLoadMoreIcon");
     const domGuiBalanceBoxStaking = document.getElementById("guiBalanceBoxStaking");
     const domTxTab = document.getElementById("txTab");

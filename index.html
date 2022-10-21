@@ -1321,6 +1321,16 @@
       // Configure Identicon
       jdenticon.configure();
 
+      // Customise the UI if a saved wallet exists
+      if (hasEncryptedWallet()) {
+        // Hide the 'Generate wallet' buttons
+        domGenerateWallet.style.display = "none";
+        domGenVanityWallet.style.display = "none";
+
+        // Display the password unlock upfront
+        accessOrImportWallet();
+      }
+
       // Configure payment processor
       if (requestTo && requestAmount) {
         // Open 'Create Transaction' menu

@@ -1,8 +1,9 @@
 'use strict';
 
 // --- Default Settings
-var debug = false;
-var networkEnabled = true;
+var debug = false;            // A mode that emits verbose console info for internal MPW operations
+var networkEnabled = true;    // A lock which blocks ALL network requests in totality
+var fAlternativeSync = true;  // A more resource-intensive but deep UTXO set sync mode
 
 var cExplorer = cChainParams.current.Explorers[0];
 
@@ -37,13 +38,15 @@ var fWalletLoaded = false;
 // --- DOM Cache
 const domNetwork = document.getElementById('Network');
 const domDebug = document.getElementById('Debug');
+const domSyncMode = document.getElementById('SyncMode');
 const domTestnet = document.getElementById('Testnet');
 const domExplorerSelect = document.getElementById('explorer');
 
 // Display the default settings directly in the UI
 domNetwork.innerHTML = '<b> Network:</b> ' + (networkEnabled ? 'Enabled' : 'Disabled');
-domDebug.innerText = debug ? '<b>DEBUG MODE ON</b>' : '';
-domTestnet.innerHTML = (cChainParams.current.isTestnet ? '<b>Testnet Mode On</b>' : '');
+domDebug.innerHTML = debug                            ? '<b>DEBUG MODE ON</b>'            : '';
+domSyncMode.innerHTML = fAlternativeSync              ? '<b>Experimental Sync Active</b>' : '';
+domTestnet.innerHTML = cChainParams.current.isTestnet ? '<b>Testnet Mode On</b>'          : '';
 
 // --- Settings Functions
 function setExplorer(explorer, fSilent = false) {
@@ -97,6 +100,12 @@ function toggleTestnet() {
     updateStakingRewardsGUI();
 }
 
+function toggleSyncMode() {
+    fAlternativeSync = !fAlternativeSync;
+    domSyncMode.innerHTML = fAlternativeSync ? '<b>Experimental Sync Active</b>' : '';
+    createAlert('success', '<b>Switched sync mode!</b><br>Now using ' + (fAlternativeSync ? 'experimental' : 'stable') + ' sync', 3000);
+}
+
 function toggleDebug() {
     debug = !debug;
     domDebug.innerHTML = debug ? '<b>DEBUG MODE ON</b>' : '';
@@ -104,7 +113,7 @@ function toggleDebug() {
 
 function toggleNetwork() {
     networkEnabled = !networkEnabled;
-    domNetwork.innerHTML = '<b> Network:</b> ' + (networkEnabled ? 'Enabled' : 'Disabled');
+    domNetwork.innerHTML = '<b>Network:</b> ' + (networkEnabled ? 'Enabled' : 'Disabled');
     return networkEnabled;
 }
 

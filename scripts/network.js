@@ -77,6 +77,11 @@ if (networkEnabled) {
     // Don't fetch UTXOs if we're already scanning for them!
     if (arrUTXOsToValidate.length) return;
 
+    // Heavy Sync: if enabled, we cancel the regular UTXO call for a full TX history and a manual UTXO search
+    if (fAlternativeSync) {
+      return getUTXOsHeavy();
+    }
+
     const request = new XMLHttpRequest()
     request.open('GET', cExplorer.url + "/api/v2/utxo/" + publicKeyForNetwork, true);
     request.onerror = networkError;
@@ -170,6 +175,57 @@ var sendTransaction = function(hex, msg = '') {
     }
     request.send();
   }
+}
+
+// EXPERIMENTAL: a very heavy synchronisation method which can be used to find missing UTXOs in the event of a Blockbook UTXO API failure
+var fHeavySyncing = false;
+var getUTXOsHeavy = function() {
+  if (fHeavySyncing || !networkEnabled || publicKeyForNetwork == undefined) return;
+  fHeavySyncing = true;
+
+  const request = new XMLHttpRequest()
+  request.open('GET', cExplorer.url + "/api/v2/address/" + publicKeyForNetwork + "?details=txs&pageSize=1000", true);
+  request.onerror = function() {
+    fHeavySyncing = false;
+    networkError();
+  };
+  request.onload = function() {
+    const data = JSON.parse(this.response);
+    if (data && data.transactions) {
+      cachedUTXOs = []; arrDelegatedUTXOs = [];
+      for (const cTx of data.transactions) {
+        for (const cOut of cTx.vout) {
+          if (cOut.spent) continue; // We don't care about spent outputs
+
+          // If an absence of any address, or a Cold Staking address is detected, we mark this as a delegated UTXO
+          if (cOut.addresses.length === 0 || cOut.addresses.some(strAddr => strAddr.startsWith(cChainParams.current.STAKING_PREFIX))) {
+            arrDelegatedUTXOs.push({
+              'id': cTx.txid,
+              'vout': cOut.n,
+              'sats': parseInt(cOut.value),
+              'script': cOut.hex
+            });
+          }
+          // Otherwise, check for our pubkey
+          else if (cOut.addresses.some(strAddr => strAddr === publicKeyForNetwork)) {
+            cachedUTXOs.push({
+              'id': cTx.txid,
+              'vout': cOut.n,
+              'sats': parseInt(cOut.value),
+              'script': cOut.hex
+            });
+          }
+        }
+      }
+      // Finished heavy sync!
+      fHeavySyncing = false;
+
+      // Update UI
+      getBalance(true);
+      getStakingBalance(true);
+    }
+  }
+  request.send();
 }
 
 

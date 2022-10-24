@@ -357,6 +357,7 @@
 				buffer = buffer.concat(input.script);
 				buffer = buffer.concat(bitjs.numToBytes(parseInt(input.sequence), 4));
 			}
+
 			buffer = buffer.concat(bitjs.numToVarInt(this.outputs.length));
 			for (const output of this.outputs) {
 				buffer = buffer.concat(bitjs.numToBytes(output.value, 8));

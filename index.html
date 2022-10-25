@@ -527,7 +527,7 @@
               <br>
               <div class="staking-banner-bottom">
                 <div class="stake-box large-box col-md-4">
-                  <h5 id="availToDelegate" class="stake-balances">Available: 0 PIV</h5>
+                  <h5 id="availToDelegate" onclick="selectMaxBalance(domGuiDelegateAmount)" class="stake-balances ptr">Available: 0 PIV</h5>
                   <textarea id="delegateAmount" class="stake-input form-control private-key-area"></textarea>
                   <div class="button-padd">
                       <button class="pivx-button-big" onclick="delegateGUI()">
@@ -538,7 +538,7 @@
                  </div>
                 </div>
                 <div class="stake-box large-box col-md-4">
-                  <h5 id="availToUndelegate" class="stake-balances">Staking: 0 PIV</h5>
+                  <h5 id="availToUndelegate" onclick="selectMaxBalance(domGuiUndelegateAmount, true)" class="stake-balances ptr">Staking: 0 PIV</h5>
                   <textarea id="undelegateAmount" class="stake-input form-control private-key-area"></textarea>
                   <div class="button-padd">
                       <button class="pivx-button-big" onclick="undelegateGUI()">
@@ -591,7 +591,7 @@
                   <label>Address</label><br>
                   <input class="center-text" style="width: 100%; font-family: monospace;" type="text" id="address1s">
                   <br>
-                  <label>Amount</label><br>
+                  <label>Amount | <b onclick="selectMaxBalance(domValue1s)" style="opacity: 0.8;" class="ptr">(Send All)</b></label><br>
                   <input class="center-text" type="text" id="value1s">
                   <div id="reqDescDisplay" style="display: none;">
                     <label>Description (from the merchant)</label><br>
@@ -729,6 +729,8 @@
     const domGuiStakingLoadMore = document.getElementById("stakingLoadMore");
     const domGuiStakingLoadMoreIcon = document.getElementById("stakingLoadMoreIcon");
     const domGuiBalanceBoxStaking = document.getElementById("guiBalanceBoxStaking");
+    const domGuiDelegateAmount = document.getElementById('delegateAmount');
+    const domGuiUndelegateAmount = document.getElementById('undelegateAmount');
     const domTxTab = document.getElementById("txTab");
     const domStakeTab = document.getElementById("stakeTab");
     const domsendNotice = document.getElementById("sendNotice");
@@ -810,6 +812,10 @@
       }
 
       return nBalance;
+    }
+
+    function selectMaxBalance(domValueInput, fCold = false) {
+      domValueInput.value = (fCold ? getStakingBalance() : getBalance()) / COIN;
     }
 
     function updateStakingRewardsGUI(fCallback = false) {
@@ -1101,7 +1107,7 @@
 
     function undelegateGUI() {
       // Verify the amount
-      const nAmount = Math.round(Number(document.getElementById('undelegateAmount').value.trim()) * COIN);
+      const nAmount = Math.round(Number(domGuiUndelegateAmount.value.trim()) * COIN);
       if (nAmount < 0.01 * COIN || isNaN(nAmount)) return createAlert('warning', '<b>Invalid amount!</b><br>Minimum amount is 0.01 ' + cChainParams.current.TICKER + '!', 2500);
       if (!Number.isSafeInteger(nAmount))   return createAlert('warning', '<b>Invalid amount!</b><br>8 decimal limit exceeded', 2500);
       undelegate(nAmount);
@@ -1203,7 +1209,7 @@
 
     function delegateGUI() {
       // Verify the amount
-      const nAmount = Math.round(Number(document.getElementById('delegateAmount').value.trim()) * COIN);
+      const nAmount = Math.round(Number(domGuiDelegateAmount.value.trim()) * COIN);
       if (nAmount < COIN || isNaN(nAmount)) return createAlert('warning', '<b>Invalid amount!</b><br>Minimum amount is 1 ' + cChainParams.current.TICKER + '!', 2500);
       if (!Number.isSafeInteger(nAmount))   return createAlert('warning', '<b>Invalid amount!</b><br>8 decimal limit exceeded', 2500);
 

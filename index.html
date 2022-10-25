@@ -1135,8 +1135,8 @@
         cTx.addcoldstakingoutput(publicKeyForNetwork, cachedColdStakeAddr, nChange / COIN);
         console.log('Re-delegated delegation spend change!');
       } else {
-        // Not enough change to cold stake, so we'll just unstake everything
-        cTx.addoutput(publicKeyForNetwork, nChange / COIN);
+        // Not enough change to cold stake, so we'll just unstake everything (and deduct the fee from the value)
+        nValue -= nFee;
         console.log('Spent all CS dust into redeem address!');
       }
 

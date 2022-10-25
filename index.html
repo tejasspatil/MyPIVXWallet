@@ -1119,7 +1119,8 @@
       // Compute fee and change (or lack thereof)
       const nFee = getFee(cTx.serialize().length);
       const nChange = cCoinControl.nValue - (nFee + nValue);
-      if (nChange > 1.01 * COIN) {
+      const fReDelegateChange = nChange > 1.01 * COIN;
+      if (fReDelegateChange) {
         // Enough change to resume cold staking, so we'll re-delegate change to the cold staking address
         // Ensure the user has an address set - if not, request one!
         if (!askForCSAddr()) return;
@@ -1143,7 +1144,7 @@
       cTx.addoutput(publicKeyForNetwork, nValue / COIN);
 
       // Debug-only verbose response
-      if (debug) domHumanReadable.innerHTML = "Balance: " + (nBalance / COIN) + "<br>Fee: " + (nFee / COIN) + "<br>To: " + address + "<br>Sent: " + (nValue / COIN) + (nChange > 0 ? "<br>Change Address: " + publicKeyForNetwork + "<br>Change: " + (nChange / COIN) : "");
+      if (debug) domHumanReadable.innerHTML = "Balance: " + (nBalance / COIN) + "<br>Fee: " + (nFee / COIN) + "<br>To: " + publicKeyForNetwork + "<br>Sent: " + (nValue / COIN) + (nChange > 0 ? "<br>Change Address: " + (fReDelegateChange ? cachedColdStakeAddr : publicKeyForNetwork) + "<br>Change: " + (nChange / COIN) : "");
 
       if (hasHardwareWallet()) {
         // Format the inputs how the Ledger SDK prefers
@@ -1241,7 +1242,7 @@
       cTx.addcoldstakingoutput(publicKeyForNetwork, coldAddr, nValue / COIN);
 
       // Debug-only verbose response
-      if (debug) domHumanReadable.innerHTML = "Balance: " + (nBalance / COIN) + "<br>Fee: " + (nFee / COIN) + "<br>To: " + address + "<br>Sent: " + (nValue / COIN) + (nChange > 0 ? "<br>Change Address: " + publicKeyForNetwork + "<br>Change: " + (nChange / COIN) : "");
+      if (debug) domHumanReadable.innerHTML = "Balance: " + (nBalance / COIN) + "<br>Fee: " + (nFee / COIN) + "<br>To: " + coldAddr + "<br>Sent: " + (nValue / COIN) + (nChange > 0 ? "<br>Change Address: " + publicKeyForNetwork + "<br>Change: " + (nChange / COIN) : "");
 
       // Sign and broadcast!
       if (hasHardwareWallet()) {

@@ -90,7 +90,8 @@
       // Set default chain
       cChainParams.current = cChainParams.main;
 
-      const COIN = 1e8;
+      const COIN_DECIMALS = 8;
+      const COIN = 10**8;
 
       /* Internal tweaking parameters */
       // A new encryption password must be 'at least' this long.
@@ -1105,11 +1106,28 @@
       domID.style.display = domID.style.display === 'block' ? 'none' : 'block';
     }
 
+    function createAlertWithFalse() {
+      createAlert(...arguments);
+      return false;
+    }
+
+    function validateAmount(nAmountSats, nMinSats = 10000) {
+      // Validate the amount is a valid number, and meets the minimum (if any)
+      if (nAmountSats < nMinSats || isNaN(nAmountSats))
+        return createAlertWithFalse('warning', '<b>Invalid amount!</b><br>Minimum amount is ' + (nMinSats / COIN) + ' ' + cChainParams.current.TICKER + '!', 2500);
+
+      // Validate the amount in Satoshi terms meets the coin's native decimal depth
+      if (!Number.isSafeInteger(nAmountSats))
+        return createAlertWithFalse('warning', '<b>Invalid amount!</b><br>' + COIN_DECIMALS + ' decimal limit exceeded', 2500);
+
+      // Amount looks valid!
+      return true;
+    }
+
     function undelegateGUI() {
       // Verify the amount
-      const nAmount = Math.round(Number(domGuiUndelegateAmount.value.trim()) * COIN);
-      if (nAmount < 0.01 * COIN || isNaN(nAmount)) return createAlert('warning', '<b>Invalid amount!</b><br>Minimum amount is 0.01 ' + cChainParams.current.TICKER + '!', 2500);
-      if (!Number.isSafeInteger(nAmount))   return createAlert('warning', '<b>Invalid amount!</b><br>8 decimal limit exceeded', 2500);
+      const nAmount = Number(domGuiUndelegateAmount.value.trim()) * COIN;
+      if (!validateAmount(nAmount, 0.01 * COIN)) return;
       undelegate(nAmount);
     }
 
@@ -1208,10 +1226,9 @@
     }
 
     function delegateGUI() {
-      // Verify the amount
-      const nAmount = Math.round(Number(domGuiDelegateAmount.value.trim()) * COIN);
-      if (nAmount < COIN || isNaN(nAmount)) return createAlert('warning', '<b>Invalid amount!</b><br>Minimum amount is 1 ' + cChainParams.current.TICKER + '!', 2500);
-      if (!Number.isSafeInteger(nAmount))   return createAlert('warning', '<b>Invalid amount!</b><br>8 decimal limit exceeded', 2500);
+      // Verify the amount; Delegations must be a minimum of 1 PIV, enforced by the network
+      const nAmount = Number(domGuiDelegateAmount.value.trim()) * COIN;
+      if (!validateAmount(nAmount, COIN)) return;
 
       // Ensure the user has an address set - if not, request one!
       if (!askForCSAddr()) return;      
@@ -1348,9 +1365,8 @@
       if (!address.startsWith(cChainParams.current.PUBKEY_PREFIX)) return createAlert('warning', '<b>Invalid PIVX address!<b><br>Bad prefix ' + address[0] + ' (Should start with ' + cChainParams.current.PUBKEY_PREFIX + ')', 3500);
 
       // Sanity check the amount
-      let nValue = Math.round(Number(domValue1s.value.trim()) * COIN);
-      if (nValue <= 0 || isNaN(nValue))  return createAlert('warning', '<b>Invalid amount!</b><br>You can\'t send \'nothing\'!', 2500);
-      if (!Number.isSafeInteger(nValue)) return createAlert('warning', '<b>Invalid amount!</b><br>8 decimal limit exceeded', 2500);
+      let nValue = Number(domValue1s.value.trim()) * COIN;
+      if (!validateAmount(nValue)) return;
 
       // Construct a TX and fetch Standard inputs
       const nBalance = getBalance();

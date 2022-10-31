@@ -38,6 +38,7 @@ pre {
 
 textarea,
 input {
+    font-family: monospace !important;
     background-color: #fff;
     border-style: dashed;
     border-width: 2px;
@@ -46,6 +47,10 @@ input {
     width: 100%;
     height: 43px;
     margin-bottom: 14px;
+}
+
+#privateKey {
+    text-align: center;
 }
 
 button {

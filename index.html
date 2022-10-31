@@ -501,7 +501,7 @@
                   <!-- IMPORT WALLET -->
                   <input class="hide-element" type="text" id="clipboard">
                   <div id='importWallet' style='display: none;'>
-                    <input type="password" id='privateKey' placeholder="Private Key or Seed Phrase" oninput="onPrivateKeyChanged()">
+                    <input type="password" id='privateKey' placeholder="Seed Phrase, XPriv or WIF Private Key" oninput="onPrivateKeyChanged()">
                     <input hidden type="password" id='privateKeyPassword' placeholder="Password"> <!-- I added this --> 
                     <button class="pivx-button-big" onclick="guiImportWallet()">
                                   <span class="buttoni-icon"><i class="fas fa-file-upload fa-tiny-margin"></i></span>
@@ -956,11 +956,16 @@
         domPrivKey.focus();
       }
     }
-    function onPrivateKeyChanged(){
+
+    function onPrivateKeyChanged() {
       if (hasEncryptedWallet()) return;
       // Check whether the length of the string is 128 bytes (that's the length of ciphered plain texts)
       // and it doesn't have any spaces (would be a mnemonic seed)
-      domPrivKeyPassword.hidden = domPrivKey.value.length !== 128 || domPrivKey.value.includes(" ");
+      const fContainsSpaces = domPrivKey.value.includes(" ");
+      domPrivKeyPassword.hidden = domPrivKey.value.length !== 128 || fContainsSpaces;
+
+      // Uncloak the private input IF spaces are detected, to make Seed Phrases easier to input and verify
+      domPrivKey.setAttribute('type', fContainsSpaces ? 'text' : 'password');
     }
 
     async function guiImportWallet() {

@@ -38,6 +38,7 @@ pre {
 
 textarea,
 input {
+    font-family: monospace !important;
     background-color: #fff;
     border-style: dashed;
     border-width: 2px;

@@ -1,18 +1,123 @@
+class MasterKey {
+  
+  constructor() { }
+  
+  async getPrivateKeyBytes(path) {
+    throw new Error("Not implemented");
+  }
+  
+  async getPrivateKey(path) {
+    return generateOrEncodePrivkey(await this.getPrivateKeyBytes(path)).strWIF;
+  }
+  
+  async getAddress(path) {
+    return deriveAddress({pkBytes: await this.getPrivateKeyBytes(path)});
+  }
+  
+  async getxpub(path) {
+    throw new Error("Not implemented");
+  }
+  
+  get keyToBackup() {
+    throw new Error("Not implemented");
+  }
+  
+  get isHD() {
+    return this._isHD;
+  }
+  get isHardwareWallet() {
+    return this._isHardwareWallet;
+  }
+}
+
+class HdMasterKey extends MasterKey {
+  constructor({seed, xpriv}) {
+    super();
+    // Generate the HDKey
+    if(seed) this._hdKey = HDKey.fromMasterSeed(seed);
+    if(xpriv) this._hdKey = HDKey.fromExtendedKey(xpriv);
+    if (!this._hdKey) throw new Error("Both seed and xpriv are undefined");
+    this._isHD = true;
+    this._isHardwareWallet = false;
+  }
+  
+  async getPrivateKeyBytes(path) {
+    return this._hdKey.derive(path).privateKey;
+  }
+  
+  get keyToBackup() {
+    return this._hdKey.privateExtendedKey;
+  }
+  async getxpub(path) {
+    return this._hdKey.derive(path).publicExtendedKey;
+  }
+}
+
+class HardwareWalletMasterKey extends MasterKey {
+  constructor() {
+    super();
+    this._isHD = true;
+    this._isHardwareWallet = true;
+  }
+  async getPrivateKeyBytes(path) {
+    throw new Error("Hardware wallets cannot export private keys");
+  }
+  
+  async getAddress(path) {
+    return deriveAddress({publicKey: await getHardwareWalletKeys(path)});
+  }
+  
+  get keyToBackup() {
+    throw new Error("Hardware wallets don't have keys to backup");
+  }
+  
+  async getxpub(path) {
+    if(!this.xpub) {
+      this.xpub = await getHardwareWalletKeys(path, true);
+    }
+    return this.xpub;
+  }
+}
+
+class LegacyMasterKey extends MasterKey {
+  constructor (pkBytes) {
+    super();
+    this._isHD = false;
+    this._isHardwareWallet = false;
+    this._pkBytes = pkBytes;
+  }
+  
+  async getPrivateKeyBytes(_path) {
+    return this._pkBytes;
+  }
+  
+  get keyToBackup() {
+    return generateOrEncodePrivkey(this._pkBytes).strWIF;
+  }
+  
+  async getxpub(path) {
+    throw new Error("Trying to get an extended public key from a legacy address");
+  }
+}
+
 // Ledger Hardware wallet constants
 const LEDGER_ERRS = new Map([
   // Ledger error code <--> User-friendly string
   [25870, "Open the PIVX app on your device"],
+  [25873, "Open the PIVX app on your device"],
   [57408, "Navigate to the PIVX app on your device"],
+  [27157, "Wrong app! Open the PIVX app on your device"],
   [27266, "Wrong app! Open the PIVX app on your device"],
   [27904, "Wrong app! Open the PIVX app on your device"],
-  [27010, "Unlock your Ledger, then try again!"]
+  [27010, "Unlock your Ledger, then try again!"],
+  [27404, "Unlock your Ledger, then try again!"]
 ]);
 
 // Construct a full BIP44 pubkey derivation path from it's parts
 function getDerivationPath(fLedger = false, nAccount = 0, nReceiving = 0, nIndex = 0) {
   // Coin-Type is different on Ledger, as such, we modify it if we're using a Ledger to derive a key
   const strCoinType = fLedger ? cChainParams.current.BIP44_TYPE_LEDGER : cChainParams.current.BIP44_TYPE;
-  return `44'/${strCoinType}'/${nAccount}'/${nReceiving}/${nIndex}`;
+  return `m/44'/${strCoinType}'/${nAccount}'/${nReceiving}/${nIndex}`;
 }
 
 // Generate a new private key OR encode an existing private key from raw bytes
@@ -46,6 +151,7 @@ deriveAddress = function({
   pkBytes,
   publicKey
 }) {
+  if(!pkBytes && !publicKey) return null;
   // Public Key Derivation
   let nPubkey = (publicKey || Crypto.util.bytesToHex(nSecp256k1.getPublicKey(pkBytes))).substring(2)
   const pubY = Secp256k1.uint256(nPubkey.substr(64), 16);
@@ -98,12 +204,16 @@ importWallet = async function({
         return createAlert("warning", "<b>Firefox doesn't support this!</b><br>Unfortunately, Firefox does not support hardware wallets", 7500);
       }
 
-      const publicKey = await getHardwareWalletPublicKey();
+      const publicKey = await getHardwareWalletKeys(getDerivationPath(true));
       // Errors are handled within the above function, so there's no need for an 'else' here, just silent ignore.
       if (!publicKey) return;
 
       // Derive our hardware address and import!
-      publicKeyForNetwork = deriveAddress({publicKey});
+      masterKey = new HardwareWalletMasterKey();
+
+      // Hide the 'export wallet' button, it's not relevant to hardware wallets
+      domExportWallet.style.display = "none";
+
       createAlert("info", "<b>Hardware wallet ready!</b><br>Please keep your " + strHardwareName + " plugged in, unlocked, and in the PIVX app", 12500);
     } else {
       // If raw bytes: purely encode the given bytes rather than generating our own bytes
@@ -116,66 +226,61 @@ importWallet = async function({
         });
       }
 
-      // Select WIF from internal source OR user input
-      privateKeyForTransactions = newWif || domPrivKey.value;
+      // Select WIF from internal source OR user input (could be: WIF, Mnemonic or xpriv)
+      const privateImportValue = newWif || domPrivKey.value;
       domPrivKey.value = "";
 
-      // Public Key Derivation
-      try {
-        // Incase of an invalid/malformed/incompatible private key: catch and display a nice error!
-        const bArrConvert = from_b58(privateKeyForTransactions);
-        const bArrDropFour = bArrConvert.slice(0, bArrConvert.length - 4);
-        const bKey = bArrDropFour.slice(1, bArrDropFour.length);
+      const wordCount = privateImportValue.trim().split(/\s+/g).length;
 
-        // Extract raw bytes and derive the key from them
-        const pkBytes = bKey.slice(0, bKey.length - 1);
-        publicKeyForNetwork = deriveAddress({
-          pkBytes
-        });
-      } catch (e) {
-        return createAlert('warning', '<b>Failed to import!</b> Invalid private key.' +
-          '<br>Double-check where your key came from!',
-          6000);
+      if (wordCount >= 12 && wordCount <= 24) {
+        if (!bip39.validateMnemonic(privateImportValue)) {
+          // The reason we want to ask the user for confirmation is that the mnemonic
+          // Could have been generated with another app that has a different dictionary
+          if(!confirm("Warning: The mnemonic is either invalid, or was not generated by MPW. Do you still want to proceed?")) {
+            return false;
+          }
+        }
+
+        // Generate our masterkey via Mnemonic Phrase
+        const seed = await bip39.mnemonicToSeed(privateImportValue);
+        masterKey = new HdMasterKey({seed});
+      } else {
+        // Public Key Derivation
+        try {
+          if (privateImportValue.startsWith("xprv")) {
+            masterKey = new HdMasterKey({xpriv: privateImportValue})
+          } else {
+            // Incase of an invalid/malformed/incompatible private key: catch and display a nice error!
+            const bArrConvert = from_b58(privateImportValue);
+            const bArrDropFour = bArrConvert.slice(0, bArrConvert.length - 4);
+            const bKey = bArrDropFour.slice(1, bArrDropFour.length);
+
+            // Extract raw bytes and derive the key from them
+            const pkBytes = bKey.slice(0, bKey.length - 1);
+
+            // Hide the 'new address' button, since non-HD wallets are essentially single-address MPW wallets
+            domNewAddress.style.display = "none";
+
+            // Import the raw private key
+            masterKey = new LegacyMasterKey(pkBytes);
+          }
+        } catch (e) {
+          return createAlert('warning', '<b>Failed to import!</b> Invalid private key.' +
+                             '<br>Double-check where your key came from!',
+                             6000);
+        }
       }
     }
-    
+
     // Reaching here: the deserialisation was a full cryptographic success, so a wallet is now imported!
     fWalletLoaded = true;
 
+    getNewAddress(true);
     // Display Text
-    domGuiAddress.innerHTML = publicKeyForNetwork;
     domGuiWallet.style.display = 'block';
-    domPrivateTxt.value = privateKeyForTransactions;
-    domGuiAddress.innerHTML = publicKeyForNetwork;
-    domPrivateCipheredTxt.value = "Set a password first";
-    if (hasEncryptedWallet()) domPrivateCipheredTxt.value = localStorage.getItem("encwif");
-
-    // Private Key QR (with HW you don't have access to the private key)
-    if (!isHardwareWallet) createQR(privateKeyForTransactions, domPrivateQr);
-
-    // Ciphered Private Key  QR 
-    if(hasEncryptedWallet()) createQR(localStorage.getItem("encwif"), domPrivateCipheredQr,12);
-    
-  
-    // Address QR
-    createQR('pivx:' + publicKeyForNetwork, domPublicQr);
-
-    // Address Modal QR
-    createQR('pivx:' + publicKeyForNetwork, domModalQR);
-    domModalQrLabel.innerHTML = 'pivx:' + publicKeyForNetwork;
-    domModalQR.firstChild.style.width = "100%";
-    domModalQR.firstChild.style.height = "auto";
-    domModalQR.firstChild.style.imageRendering = "crisp-edges";
-
-    // Set the address clipboard value
-    document.getElementById('clipboard').value = publicKeyForNetwork;
-
-    // Set view key as public
-    viewPrivKey = true;
-    toggleKeyView();
 
     // Update identicon
-    domIdenticon.dataset.jdenticonValue = publicKeyForNetwork;
+    domIdenticon.dataset.jdenticonValue = masterKey.getAddress(getDerivationPath());
     jdenticon();
 
     // Hide the encryption warning if the user pasted the private key
@@ -184,7 +289,7 @@ importWallet = async function({
 
     // Fetch state from explorer
     if (networkEnabled) refreshChainData();
-    
+
     // Hide all wallet starter options
     hideAllWalletOptions();
   }
@@ -192,62 +297,53 @@ importWallet = async function({
 
 // Wallet Generation
 generateWallet = async function (noUI = false) {
-  const strImportConfirm = "Do you really want to import a new address? If you haven't saved the last private key, the wallet will be LOST forever.";
-  const walletConfirm = fWalletLoaded && !noUI ? window.confirm(strImportConfirm) : true;
-  if (walletConfirm) {
-    // Private Key Generation
-    const cPriv = generateOrEncodePrivkey();
-    privateKeyForTransactions = cPriv.strWIF;
+    const strImportConfirm = "Do you really want to import a new address? If you haven't saved the last private key, the wallet will be LOST forever.";
+    const walletConfirm = fWalletLoaded && !noUI ? window.confirm(strImportConfirm) : true;
+    if (walletConfirm) {
+      const mnemonic = await bip39.generateMnemonic();
 
-    // Public Key Derivation
-    publicKeyForNetwork = deriveAddress({
-      pkBytes: cPriv.pkBytes
-    });
-    fWalletLoaded = true;
+      if(!noUI) await informUserOfMnemonic(mnemonic);
+      const seed = await bip39.mnemonicToSeed(mnemonic);
 
-    if (!noUI) {
-      // Display Text
-      if( !cChainParams.current.isTestnet) domGenKeyWarning.style.display = 'block';
-      domPrivateTxt.value = privateKeyForTransactions;
-      domGuiAddress.innerHTML = publicKeyForNetwork;
-      domPrivateCipheredTxt.value="Set a password first";
-      // Private Key QR
-      createQR(privateKeyForTransactions, domPrivateQr);
+      // Prompt the user to encrypt the seed
+      masterKey = new HdMasterKey({seed});
+      fWalletLoaded = true;
 
-      // Address QR
-      createQR('pivx:' + publicKeyForNetwork, domPublicQr);
-
-      // Address Modal QR
-      createQR('pivx:' + publicKeyForNetwork, domModalQR);
-      domModalQrLabel.innerHTML = 'pivx:' + publicKeyForNetwork;
-      domModalQR.firstChild.style.width = "100%";
-      domModalQR.firstChild.style.height = "auto";
-      domModalQR.firstChild.style.imageRendering = "crisp-edges";
-
-      // Set the address clipboard value
-      document.getElementById('clipboard').value = publicKeyForNetwork;
-
-      // Update identicon
-      domIdenticon.dataset.jdenticonValue = publicKeyForNetwork;
-      jdenticon();
+      if(!cChainParams.current.isTestnet) domGenKeyWarning.style.display = 'block';
+      // Add a listener to block page unloads until we are sure the user has saved their keys, safety first!
+      addEventListener("beforeunload", beforeUnloadListener, {capture: true});
 
       // Display the dashboard
       domGuiWallet.style.display = 'block';
       viewPrivKey = false;
       hideAllWalletOptions();
 
+      // Update identicon
+      domIdenticon.dataset.jdenticonValue = masterKey.getAddress(getDerivationPath());
+      jdenticon();
+
+      getNewAddress(true);
+
       // Refresh the balance UI (why? because it'll also display any 'get some funds!' alerts)
       getBalance(true);
       getStakingBalance(true);
-      
-      // Add a listener to block page unloads until we are sure the user has saved their keys, safety first!
-      addEventListener("beforeunload", beforeUnloadListener, {capture: true});
     }
 
-    // Return the keypair
-    return { 'pubkey': publicKeyForNetwork, 'privkey': privateKeyForTransactions };
-  }
+    return masterKey;
 }
+
+informUserOfMnemonic = function (mnemonic) {
+  return new Promise((res, rej) => {
+    $('#mnemonicModal').modal({keyboard: false})
+    domMnemonicModalContent.innerText = mnemonic;
+    domMnemonicModalButton.onclick = () => {
+      res();
+      $('#mnemonicModal').modal("hide");
+    };
+    $('#mnemonicModal').modal("show");
+  });
+}
+
 
 async function benchmark(quantity) {
   let i = 0;
@@ -262,7 +358,7 @@ async function benchmark(quantity) {
 
 encryptWallet = async function (strPassword = '') {
   // Encrypt the wallet WIF with AES-GCM and a user-chosen password - suitable for browser storage
-  let strEncWIF = await encrypt(privateKeyForTransactions, strPassword);
+  let strEncWIF = await encrypt(masterKey.keyToBackup, strPassword);
   if (!strEncWIF) return false;
 
   // Set the encrypted wallet in localStorage
@@ -273,11 +369,6 @@ encryptWallet = async function (strPassword = '') {
 
   // Remove the exit blocker, we can annoy the user less knowing the key is safe in their localstorage!
   removeEventListener("beforeunload", beforeUnloadListener, {capture: true});
-
-  //Add the new ciphered text QR
-  domPrivateCipheredTxt.value = localStorage.getItem("encwif");
-
-  createQR(localStorage.getItem("encwif"), domPrivateCipheredQr, 12);
 }
 
 decryptWallet = async function (strPassword = '') {
@@ -300,15 +391,17 @@ decryptWallet = async function (strPassword = '') {
 hasEncryptedWallet = function () {
   return localStorage.getItem("encwif") ? true : false;
 }
-//If the privateKey is null then the user connected a hardware wallet
+
+// If the privateKey is null then the user connected a hardware wallet
 hasHardwareWallet = function() {
-  return privateKeyForTransactions == null;
+  if (!masterKey) return false;
+  return masterKey.isHardwareWallet == true;
 }
 
 hasWalletUnlocked = function (fIncludeNetwork = false) {
   if (fIncludeNetwork && !networkEnabled)
     return createAlert('warning', "<b>Offline Mode is active!</b><br>Please disable Offline Mode for automatic transactions", 5500);
-  if (!publicKeyForNetwork) {
+    if (!masterKey) {
       return createAlert('warning', "Please " + (hasEncryptedWallet() ? "unlock " : "import/create") + " your wallet before sending transactions!", 3500);
   } else {
     return true;
@@ -317,7 +410,7 @@ hasWalletUnlocked = function (fIncludeNetwork = false) {
 
 let cHardwareWallet = null;
 let strHardwareName = "";
-getHardwareWalletPublicKey = async function() {
+getHardwareWalletKeys = async function(path, xpub = false, verify = false, _attempts = 0) {
   try {
     // Check if we haven't setup a connection yet OR the previous connection disconnected
     if (!cHardwareWallet || cHardwareWallet.transport._disconnectEmitted) {
@@ -328,15 +421,29 @@ getHardwareWalletPublicKey = async function() {
     strHardwareName = cHardwareWallet.transport.device.manufacturerName + " " + cHardwareWallet.transport.device.productName;
 
     // Prompt the user in both UIs
-    createAlert("info", "Confirm the import on your Ledger", 3500);
-
-    const cPubkey = await cHardwareWallet.getWalletPublicKey(getDerivationPath(true, 0, 0, 0), {
-      verify: true,
-      format: "legacy"
+    if (verify) createAlert("info", "Confirm the import on your Ledger", 3500);
+    const cPubKey = await cHardwareWallet.getWalletPublicKey(path, {
+      verify,
+      format: "legacy",
     });
 
-    return cPubkey.publicKey;
+    if (xpub) {
+      return createXpub({
+        depth: 3,
+        childNumber: 2147483648,
+        chainCode: cPubKey.chainCode,
+        publicKey: cPubKey.publicKey,
+      });
+    } else {
+      return cPubKey.publicKey;
+    }
   } catch (e) {
+    if (_attempts < 10) { // This is an ugly hack :(
+      // in the event where multiple parts of the code decide to ask for an address, just
+      // Retry at most 10 times waiting 200ms each time
+      await sleep(200);
+      return getHardwareWalletKeys(path, xpub, false, _attempts+1);
+    }
     // If there's no device, nudge the user to plug it in.
     if (e.message.toLowerCase().includes('no device selected')) {
       createAlert("info", "<b>No device available</b><br>Couldn't find a hardware wallet; please plug it in and unlock!", 10000);

@@ -32,6 +32,7 @@ if (networkEnabled) {
   var acceptUTXO = () => {
     // Cancel if the queue is empty: no wasting precious bandwidth & CPU cycles!
     if (!arrUTXOsToValidate.length) {
+      getNewAddress(true);
       // If allowed by settings: submit a sync performance measurement to Labs Analytics
       return submitAnalytics('time_to_sync', { time: (Date.now() / 1000) - nTimeSyncStart, explorer: cExplorer.name });
     }
@@ -43,13 +44,22 @@ if (networkEnabled) {
     request.onload = function() {
       // Fetch the single output of the UTXO
       const cVout = JSON.parse(this.response).vout[arrUTXOsToValidate[0].vout];
+      console.log(arrUTXOsToValidate[0]);
+      let path;
+      if(arrUTXOsToValidate[0].path) {
+	path = arrUTXOsToValidate[0].path.split("/")
+	path[2] = (masterKey.isHardwareWallet ? cChainParams.current.BIP44_TYPE_LEDGER : cChainParams.current.BIP44_TYPE) + "'";
+	lastWallet = Math.max(parseInt(path[5]), lastWallet);
+	path = path.join("/");
+      }
 
       // Convert to MPW format
       const cUTXO = {
         'id': arrUTXOsToValidate[0].txid,
         'vout': cVout.n,
         'sats': Math.round(cVout.value * COIN),
-        'script': cVout.scriptPubKey.hex
+        'script': cVout.scriptPubKey.hex,
+	path,
       }
 
       // Determine the UTXO type, and use it accordingly
@@ -73,7 +83,7 @@ if (networkEnabled) {
     request.send();
   }
 
-  var getUTXOs = () => {
+  var getUTXOs = async () => {
     // Don't fetch UTXOs if we're already scanning for them!
     if (arrUTXOsToValidate.length) return;
 
@@ -83,7 +93,15 @@ if (networkEnabled) {
     }
 
     const request = new XMLHttpRequest()
-    request.open('GET', cExplorer.url + "/api/v2/utxo/" + publicKeyForNetwork, true);
+    let publicKey;
+    if(masterKey.isHD) {
+      const derivationPath = getDerivationPath(masterKey.isHardwareWallet).split("/").slice(0, 4).join("/");
+      publicKey = await masterKey.getxpub(derivationPath);
+    } else {
+      publicKey = await masterKey.getAddress();
+    }
+
+    request.open('GET', cExplorer.url + "/api/v2/utxo/" + publicKey, true);
     request.onerror = networkError;
     request.onload = function() {
       arrUTXOsToValidate = JSON.parse(this.response);
@@ -139,42 +157,55 @@ var sendTransaction = function(hex, msg = '') {
   }
 
   var getStakingRewards = async function() {
-    if (!networkEnabled || publicKeyForNetwork == undefined) return;
+    if (!networkEnabled || masterKey == undefined) return;
     domGuiStakingLoadMoreIcon.style.opacity = 0.5;
     const stopAnim = () => domGuiStakingLoadMoreIcon.style.opacity = 1;
     const nHeight = arrRewards.length ? arrRewards[arrRewards.length - 1].blockHeight : 0;
     const request = new XMLHttpRequest();
-    const txSum = v => v.reduce((t, s) => t + (s.addresses.includes(publicKeyForNetwork) && s.addresses.length === 2 ? parseInt(s.value) : 0), 0);
-    request.open('GET', `${cExplorer.url}/api/v2/address/${publicKeyForNetwork}?pageSize=500&details=txs&to=${nHeight ? nHeight - 1 : 0}`, true);
-    request.onerror = networkError;
-    request.onreadystatechange = async function () {
-      if (!this.response || (!this.status === 200 && !this.status === 400)) return stopAnim();
-      if (this.readyState !== 4) return stopAnim();
-      const data = JSON.parse(this.response);
-      if (data && data.transactions) {
-        // Update rewards
-        arrRewards = arrRewards.concat(
-          data.transactions.filter(tx => tx.vout[0].addresses[0] === "CoinStake TX").map(tx =>{
-            return {
-              id: tx.txid,
-              time: tx.blockTime,
-              blockHeight: tx.blockHeight,
-              amount: (txSum(tx.vout) - txSum(tx.vin)) / COIN,
-            };
-          }).filter(tx => tx.amount != 0)
-        );
-
-        // If the results don't match the full 'max/requested results', then we know there's nothing more to load, hide the button!
-        if (data.transactions.length !== data.itemsOnPage)
-          domGuiStakingLoadMore.style.display = "none";
-
-        // Update GUI
-        stopAnim();
-        updateStakingRewardsGUI(true);
-      }
+    let mapPaths = new Map();
+    const txSum = v => v.reduce((t, s) => t + (s.addresses.map(strAddr=>mapPaths.get(strAddr)).filter(v => v).length && s.addresses.length === 2 ? parseInt(s.value) : 0), 0);
+    let cData;
+    if (masterKey.isHD) {
+      const derivationPath = getDerivationPath(masterKey.isHardwareWallet).split("/").slice(0, 4).join("/");
+      const xpub = await masterKey.getxpub(derivationPath);
+      cData = await (await fetch(`${cExplorer.url}/api/v2/xpub/${xpub}?details=txs&pageSize=500&to=${nHeight ? nHeight - 1 : 0}`)).json();
+      // Map all address <--> derivation paths
+      if (cData.tokens) cData.tokens.forEach(cAddrPath => mapPaths.set(cAddrPath.name, cAddrPath.path));
+    } else {
+      const address = await masterKey.getAddress();
+      cData = await (await fetch(`${cExplorer.url}/api/v2/address/${address}?details=txs&pageSize=500&to=${nHeight ? nHeight - 1 : 0}`)).json();
+      mapPaths.set(address, ":)");
     }
-    request.send();
+    if (cData && cData.transactions) {
+      // Update rewards
+      arrRewards = arrRewards.concat(
+        cData.transactions.filter(tx => tx.vout[0].addresses[0] === "CoinStake TX").map(tx =>{
+          return {
+            id: tx.txid,
+            time: tx.blockTime,
+            blockHeight: tx.blockHeight,
+            amount: (txSum(tx.vout) - txSum(tx.vin)) / COIN,
+          };
+        }).filter(tx => tx.amount != 0)
+      );
+      
+      // If the results don't match the full 'max/requested results', then we know there's nothing more to load, hide the button!
+      if (cData.transactions.length !== cData.itemsOnPage)
+        domGuiStakingLoadMore.style.display = "none";
+      
+      // Update GUI
+      stopAnim();
+      updateStakingRewardsGUI(true);
+    } else {
+      // No balance history!
+      domGuiStakingLoadMore.style.display = "none";
+
+      // Update GUI
+      stopAnim();
+    }
   }
+
+
 
   var getTxInfo = async function(txHash) {
     const req = await fetch(`${cExplorer.url}/api/v2/tx/${txHash}`);
@@ -183,55 +214,80 @@ var sendTransaction = function(hex, msg = '') {
 }
 
 // EXPERIMENTAL: a very heavy synchronisation method which can be used to find missing UTXOs in the event of a Blockbook UTXO API failure
+let lastWallet = 0;
 var fHeavySyncing = false;
-var getUTXOsHeavy = function() {
-  if (fHeavySyncing || !networkEnabled || publicKeyForNetwork == undefined) return;
+var getUTXOsHeavy = async function() {
+  if (fHeavySyncing || !networkEnabled || masterKey == undefined) return;
   fHeavySyncing = true;
 
-  const request = new XMLHttpRequest()
-  request.open('GET', cExplorer.url + "/api/v2/address/" + publicKeyForNetwork + "?details=txs&pageSize=1000", true);
-  request.onerror = function() {
-    fHeavySyncing = false;
-    networkError();
-  };
-  request.onload = function() {
-    const data = JSON.parse(this.response);
-    if (data && data.transactions) {
+  try {
+    let cData;
+    let mapPaths = new Map();
+    if (masterKey.isHD) {
+      // Fetch our xpub
+      const derivationPath = getDerivationPath(masterKey.isHardwareWallet).split("/").slice(0, 4).join("/");
+      const xpub = await masterKey.getxpub(derivationPath);
+
+      // Run an xpub balance synchronisation
+      cData = await (await fetch(`${cExplorer.url}/api/v2/xpub/${xpub}?details=txs&pageSize=1000`)).json();
+
+      // Map all address <--> derivation paths
+      if (cData.tokens) {
+        cData.tokens.forEach(cAddrPath => mapPaths.set(cAddrPath.name, cAddrPath.path));
+        lastWallet = parseInt(cData.tokens[cData.tokens.length - 1].path.split("/")[5]);
+      }
+    } else {
+      // Fetch our single address and state, map address to an empty derivation path
+      const address = await masterKey.getAddress();
+      cData = await (await fetch(`${cExplorer.url}/api/v2/address/${address}?details=txs&pageSize=1000`)).json();
+      mapPaths.set(address, ":)");
+    }
+    if (cData && cData.transactions) {
       cachedUTXOs = []; arrDelegatedUTXOs = [];
-      for (const cTx of data.transactions) {
+      for (const cTx of cData.transactions) {
         for (const cOut of cTx.vout) {
           if (cOut.spent) continue; // We don't care about spent outputs
-
+          const paths = cOut.addresses.map(strAddr => mapPaths.get(strAddr)).filter(v => v);
           // If an absence of any address, or a Cold Staking address is detected, we mark this as a delegated UTXO
           if (cOut.addresses.length === 0 || cOut.addresses.some(strAddr => strAddr.startsWith(cChainParams.current.STAKING_PREFIX))) {
             arrDelegatedUTXOs.push({
               'id': cTx.txid,
               'vout': cOut.n,
               'sats': parseInt(cOut.value),
-              'script': cOut.hex
+              'script': cOut.hex,
+	      // Until we can get blockbook to tell us which address are involved in cold staking
+	      // We will only use the first key
+	      'path': getDerivationPath(masterKey.isHardwareWallet),
             });
           }
-          // Otherwise, check for our pubkey
-          else if (cOut.addresses.some(strAddr => strAddr === publicKeyForNetwork)) {
+          // Otherwise, an address matches one of ours
+          else if (paths.length > 0) {
+	    // Blockbook still returns 119' as the coinType, even in testnet
+	    let path = paths[0].split("/");
+	    path[2] = (masterKey.isHardwareWallet ? cChainParams.current.BIP44_TYPE_LEDGER : cChainParams.current.BIP44_TYPE) + "'";
             cachedUTXOs.push({
               'id': cTx.txid,
               'vout': cOut.n,
               'sats': parseInt(cOut.value),
-              'script': cOut.hex
+              'script': cOut.hex,
+              'path': path.join("/"),
             });
           }
         }
       }
-      // Finished heavy sync!
-      fHeavySyncing = false;
-
       // Update UI
+      getNewAddress(true);
       getBalance(true);
       getStakingBalance(true);
     }
+  } catch(e) {
+    networkError();
+    throw e;
+  } finally {
+    fHeavySyncing = false;
   }
-  request.send();
 }
+
 
 
 // PIVX Labs Analytics: if you are a user, you can disable this FULLY via the Settings.

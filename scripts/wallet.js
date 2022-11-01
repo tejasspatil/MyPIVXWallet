@@ -120,6 +120,43 @@ function getDerivationPath(fLedger = false, nAccount = 0, nReceiving = 0, nIndex
   return `m/44'/${strCoinType}'/${nAccount}'/${nReceiving}/${nIndex}`;
 }
 
+// Verify the integrity of a WIF private key, optionally parsing and returning the key payload
+function verifyWIF(strWIF = "", fParseBytes = false) {
+  // Convert from Base58
+  const bWIF = from_b58(strWIF);
+
+  // Verify the byte length
+  if (bWIF.byteLength !== PRIVKEY_BYTE_LENGTH) {
+    throw Error("Private key length (" + bWIF.byteLength + ") is invalid, should be " + PRIVKEY_BYTE_LENGTH + "!");
+  }
+
+  // Verify the network byte
+  if (bWIF[0] !== cChainParams.current.SECRET_KEY) {
+    // Find the network it's trying to use, if any
+    const cNetwork = Object.keys(cChainParams).filter(strNet => strNet !== 'current').map(strNet => cChainParams[strNet]).find(cNet => cNet.SECRET_KEY === bWIF[0]);
+    // Give a specific alert based on the byte properties
+    throw Error(cNetwork ? "This private key is for " + (cNetwork.isTestnet ? "Testnet" : "Mainnet") + ", wrong network!" : "This private key belongs to another coin, or is corrupted.");
+  }
+
+  // Perform SHA256d hash of the WIF bytes
+  const shaHash = new jsSHA(0, 0, { "numRounds": 2 });
+  shaHash.update(bWIF.slice(0, 34));
+
+  // Verify checksum (comparison by String since JS hates comparing object-like primitives)
+  const bChecksumWIF = bWIF.slice(bWIF.byteLength - 4);
+  const bChecksum = shaHash.getHash(0).slice(0, 4);
+  if (bChecksumWIF.join('') !== bChecksum.join('')) {
+    throw Error("Private key checksum is invalid, key may be modified, mis-typed, or corrupt.");
+  }
+
+  return fParseBytes ? bWIF.slice(1, 33) : true;
+}
+
+// A convenient alias to verifyWIF that returns the raw byte payload
+function parseWIF(strWIF) {
+  return verifyWIF(strWIF, true);
+}
+
 // Generate a new private key OR encode an existing private key from raw bytes
 generateOrEncodePrivkey = function (pkBytesToEncode) {
   // Private Key Generation
@@ -240,13 +277,8 @@ importWallet = async function({
           if (privateImportValue.startsWith("xprv")) {
             masterKey = new HdMasterKey({xpriv: privateImportValue})
           } else {
-            // Incase of an invalid/malformed/incompatible private key: catch and display a nice error!
-            const bArrConvert = from_b58(privateImportValue);
-            const bArrDropFour = bArrConvert.slice(0, bArrConvert.length - 4);
-            const bKey = bArrDropFour.slice(1, bArrDropFour.length);
-
-            // Extract raw bytes and derive the key from them
-            const pkBytes = bKey.slice(0, bKey.length - 1);
+            // Lastly, attempt to parse as a WIF private key
+            const pkBytes = parseWIF(privateImportValue);
 
             // Hide the 'new address' button, since non-HD wallets are essentially single-address MPW wallets
             domNewAddress.style.display = "none";
@@ -255,8 +287,8 @@ importWallet = async function({
             masterKey = new LegacyMasterKey(pkBytes);
           }
         } catch (e) {
-          return createAlert('warning', '<b>Failed to import!</b> Invalid private key.' +
-                             '<br>Double-check where your key came from!',
+          return createAlert('warning', '<b>Failed to import!</b>' +
+                             '<br>' + e.message,
                              6000);
         }
       }

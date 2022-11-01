@@ -90,6 +90,9 @@
       // Set default chain
       cChainParams.current = cChainParams.main;
 
+      // <[network_byte] [32_byte_payload] [0x01] [4_byte_checksum]>
+      const PRIVKEY_BYTE_LENGTH = 38;
+
       const COIN_DECIMALS = 8;
       const COIN = 10**8;
 
@@ -969,22 +972,23 @@
     }
 
     async function guiImportWallet() {
-      const isEncrypted = domPrivKey.value.length === 128;
+      const fEncrypted = domPrivKey.value.length === 128;
+
       // If we are in testnet: prompt an import
       if (cChainParams.current.isTestnet) return importWallet();
 
       // If we don't have a DB wallet and the input is plain: prompt an import
-      if (!hasEncryptedWallet() && !isEncrypted) return importWallet();
+      if (!hasEncryptedWallet() && !fEncrypted) return importWallet();
 
       // If we don't have a DB wallet and the input is ciphered: 
-      const privateKey = domPrivKey.value
+      const strPrivKey = domPrivKey.value
       const strPassword = domPrivKeyPassword.value;
-      if (!hasEncryptedWallet() && isEncrypted) {
-        const strDecWIF = await decrypt(privateKey, strPassword);
+      if (!hasEncryptedWallet() && fEncrypted) {
+        const strDecWIF = await decrypt(strPrivKey, strPassword);
         if (!strDecWIF || strDecWIF === "decryption failed!") {
           return createAlert('warning', '<b>Failed to import!</b> Invalid password',6000);
         } else {
-          localStorage.setItem("encwif", privateKey);
+          localStorage.setItem("encwif", strPrivKey);
           return importWallet({
             newWif: strDecWIF
           });

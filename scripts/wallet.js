@@ -190,7 +190,7 @@ deriveAddress = function({
 }) {
   if(!pkBytes && !publicKey) return null;
   // Public Key Derivation
-  let nPubkey = (publicKey || Crypto.util.bytesToHex(nSecp256k1.getPublicKey(pkBytes))).substring(2)
+  let nPubkey = (publicKey || Crypto.util.bytesToHex(nobleSecp256k1.getPublicKey(pkBytes))).substring(2)
   const pubY = Secp256k1.uint256(nPubkey.substr(64), 16);
   nPubkey = nPubkey.substr(0, 64);
   const publicKeyBytesCompressed = Crypto.util.hexToBytes(nPubkey);

@@ -196,123 +196,25 @@
 		}
 
 		/* generate a signature from a transaction hash */
-		btrx.transactionSig = function(index, wif, sigHashType, txhash) {
-
-			function serializeSig(r, s) {
-				const rBa = r.toByteArraySigned();
-				const sBa = s.toByteArraySigned();
-
-				let sequence = [];
-				sequence.push(0x02); // INTEGER
-				sequence.push(rBa.length);
-				sequence = sequence.concat(rBa);
-
-				sequence.push(0x02); // INTEGER
-				sequence.push(sBa.length);
-				sequence = sequence.concat(sBa);
-
-				sequence.unshift(sequence.length);
-				sequence.unshift(0x30); // SEQUENCE
-
-				return sequence;
-			}
-
+		btrx.transactionSig = async function(index, wif, sigHashType, txhash) {
 			const shType = sigHashType || 1;
 			const hash = txhash || Crypto.util.hexToBytes(this.transactionHash(index, shType));
+			if (!hash) return false;
 
-			if (hash) {
-				const curve = EllipticCurve.getSECCurveByName("secp256k1");
-				const key = bitjs.wif2privkey(wif);
-				const priv = BigInteger.fromByteArrayUnsigned(Crypto.util.hexToBytes(key['privkey']));
-				const n = curve.getN();
-				const e = BigInteger.fromByteArrayUnsigned(hash);
-				let badrs = 0
-				let r, s;
-				do {
-					const k = this.deterministicK(wif, hash, badrs);
-					const G = curve.getG();
-					const Q = G.multiply(k);
-					r = Q.getX().toBigInteger().mod(n);
-					s = k.modInverse(n).multiply(e.add(priv.multiply(r))).mod(n);
-					badrs++
-				} while (r.compareTo(BigInteger.ZERO) <= 0 || s.compareTo(BigInteger.ZERO) <= 0);
+			// Parse the private key
+			let strPrivKey = bitjs.wif2privkey(wif);
 
-				// Force lower s values per BIP62
-				const halfn = n.shiftRight(1);
-				if (s.compareTo(halfn) > 0) {
-					s = n.subtract(s);
-				};
+			// Generate low-s deterministic ECDSA signature as per RFC6979
+			// [0] = Uint8Array(sig), [1] = Int(recovery_byte)
+			let arrSig = await nobleSecp256k1.sign(Crypto.util.bytesToHex(hash), strPrivKey.privkey, { canonical: true, recovered: true, extraEntropy: true });
 
-				const sig = serializeSig(r, s);
-				sig.push(parseInt(shType, 10));
+			// Concat the Signature with it's recovery byte
+			const bSigFinal = new Uint8Array(arrSig[0].byteLength + 1);
+			writeToUint8(bSigFinal, arrSig[0], 0);
+			bSigFinal[bSigFinal.byteLength - 1] = arrSig[1];
 
-				return Crypto.util.bytesToHex(sig);
-			} else {
-				return false;
-			}
+			return Crypto.util.bytesToHex(bSigFinal);
 		}
-
-		// https://tools.ietf.org/html/rfc6979#section-3.2
-		btrx.deterministicK = function(wif, hash, badrs) {
-			// if r or s were invalid when this function was used in signing,
-			// we do not want to actually compute r, s here for efficiency, so,
-			// we can increment badrs. explained at end of RFC 6979 section 3.2
-
-			// wif is b58check encoded wif privkey.
-			// hash is byte array of transaction digest.
-			// badrs is used only if the k resulted in bad r or s.
-
-			// some necessary things out of the way for clarity.
-			badrs = badrs || 0;
-			const key = bitjs.wif2privkey(wif);
-			const x = Crypto.util.hexToBytes(key['privkey'])
-			const curve = EllipticCurve.getSECCurveByName("secp256k1");
-			const N = curve.getN();
-
-			// Step: a
-			// hash is a byteArray of the message digest. so h1 == hash in our case
-
-			// Step: b
-			let v = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-
-			// Step: c
-			let k = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-			// Step: d
-			k = Crypto.HMAC(Crypto.SHA256, v.concat([0]).concat(x).concat(hash), k, { asBytes: true });
-
-			// Step: e
-			v = Crypto.HMAC(Crypto.SHA256, v, k, { asBytes: true });
-
-			// Step: f
-			k = Crypto.HMAC(Crypto.SHA256, v.concat([1]).concat(x).concat(hash), k, { asBytes: true });
-
-			// Step: g
-			v = Crypto.HMAC(Crypto.SHA256, v, k, { asBytes: true });
-
-			// Step: h1
-			let T = [];
-
-			// Step: h2 (since we know tlen = qlen, just copy v to T.)
-			v = Crypto.HMAC(Crypto.SHA256, v, k, { asBytes: true });
-			T = v;
-
-			// Step: h3
-			let KBigInt = BigInteger.fromByteArrayUnsigned(T);
-
-			// loop if KBigInt is not in the range of [1, N-1] or if badrs needs incrementing.
-			let i = 0;
-			while (KBigInt.compareTo(N) >= 0 || KBigInt.compareTo(BigInteger.ZERO) <= 0 || i < badrs) {
-				k = Crypto.HMAC(Crypto.SHA256, v.concat([0]), k, { asBytes: true });
-				v = Crypto.HMAC(Crypto.SHA256, v, k, { asBytes: true });
-				v = Crypto.HMAC(Crypto.SHA256, v, k, { asBytes: true });
-				T = v;
-				KBigInt = BigInteger.fromByteArrayUnsigned(T);
-				i++
-			};
-
-			return KBigInt;
-		};
 
     	/* sign a "standard" input */
 	    btrx.signinput = async function(index, masterKey, sigHashType, txType = 'pubkey') {
@@ -322,7 +224,7 @@
 		const shType = sigHashType || 1;
 		var buf = [];
 
-		const signature = this.transactionSig(index, wif, shType);
+		const signature = await this.transactionSig(index, wif, shType);
 
 		const sigBytes = Crypto.util.hexToBytes(signature);
 		buf.push(sigBytes.length);

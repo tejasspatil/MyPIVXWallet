@@ -197,23 +197,19 @@
 
 		/* generate a signature from a transaction hash */
 		btrx.transactionSig = async function(index, wif, sigHashType, txhash) {
-			const shType = sigHashType || 1;
-			const hash = txhash || Crypto.util.hexToBytes(this.transactionHash(index, shType));
-			if (!hash) return false;
+			const nSigHashType = sigHashType || 1;
+			const strHash = txhash || this.transactionHash(index, nSigHashType);
+			if (!strHash) return false;
 
 			// Parse the private key
 			let strPrivKey = bitjs.wif2privkey(wif);
 
 			// Generate low-s deterministic ECDSA signature as per RFC6979
 			// [0] = Uint8Array(sig), [1] = Int(recovery_byte)
-			let arrSig = await nobleSecp256k1.sign(Crypto.util.bytesToHex(hash), strPrivKey.privkey, { canonical: true, recovered: true });
+			let arrSig = await nobleSecp256k1.sign(strHash, strPrivKey.privkey, { canonical: true, recovered: true });
 
-			// Concat the Signature with it's recovery byte
-			const bSigFinal = new Uint8Array(arrSig[0].byteLength + 1);
-			writeToUint8(bSigFinal, arrSig[0], 0);
-			bSigFinal[bSigFinal.byteLength - 1] = arrSig[1];
-
-			return Crypto.util.bytesToHex(bSigFinal);
+			// Concat the Signature with the SigHashType byte, and return
+			return Crypto.util.bytesToHex([...arrSig[0], nSigHashType]);
 		}
 
     	/* sign a "standard" input */

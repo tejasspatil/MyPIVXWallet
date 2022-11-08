@@ -206,7 +206,7 @@
 
 			// Generate low-s deterministic ECDSA signature as per RFC6979
 			// [0] = Uint8Array(sig), [1] = Int(recovery_byte)
-			let arrSig = await nobleSecp256k1.sign(Crypto.util.bytesToHex(hash), strPrivKey.privkey, { canonical: true, recovered: true, extraEntropy: true });
+			let arrSig = await nobleSecp256k1.sign(Crypto.util.bytesToHex(hash), strPrivKey.privkey, { canonical: true, recovered: true });
 
 			// Concat the Signature with it's recovery byte
 			const bSigFinal = new Uint8Array(arrSig[0].byteLength + 1);

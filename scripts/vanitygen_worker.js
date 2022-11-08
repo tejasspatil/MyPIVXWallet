@@ -1,5 +1,5 @@
 
-importScripts('misc.js', 'libs/noble-secp256k1.js', 'libs/bn.js', 'libs/secp256k1.js', 'libs/crypto-min.js', 'libs/crypto-sha256-hmac.js', 'libs/crypto-sha256.js', 'libs/jsbn.js', 'libs/ripemd160.js', 'libs/sha256.js');
+importScripts('misc.js', 'libs/noble-secp256k1.js', 'libs/bn.js', 'libs/crypto-min.js', 'libs/crypto-sha256-hmac.js', 'libs/crypto-sha256.js', 'libs/jsbn.js', 'libs/ripemd160.js', 'libs/sha256.js');
 
 const cKeypair = {
   'pub':  '',
@@ -18,7 +18,7 @@ onmessage = function(evt) {
 
         // Public Key Derivation
         const nPubkey = Crypto.util.bytesToHex(nobleSecp256k1.getPublicKey(cKeypair.priv)).substr(2);
-        const pubY = Secp256k1.uint256(nPubkey.substr(64), 16);
+        const pubY = uint256(nPubkey.substr(64), 16);
         const publicKeyBytesCompressed = Crypto.util.hexToBytes(nPubkey.substr(0, 64));
         publicKeyBytesCompressed.unshift(pubY.isEven() ? 0x02 : 0x03);
         // First pubkey SHA-256 Hash

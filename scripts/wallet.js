@@ -149,7 +149,7 @@ function verifyWIF(strWIF = "", fParseBytes = false) {
     throw Error("Private key checksum is invalid, key may be modified, mis-typed, or corrupt.");
   }
 
-  return fParseBytes ? bWIF.slice(1, 33) : true;
+  return fParseBytes ? Uint8Array.from(bWIF.slice(1, 33)) : true;
 }
 
 // A convenient alias to verifyWIF that returns the raw byte payload
@@ -158,7 +158,7 @@ function parseWIF(strWIF) {
 }
 
 // Generate a new private key OR encode an existing private key from raw bytes
-generateOrEncodePrivkey = function (pkBytesToEncode) {
+function generateOrEncodePrivkey(pkBytesToEncode) {
   // Private Key Generation
   const pkBytes = pkBytesToEncode || getSafeRand();
   const pkNetBytesLen = pkBytes.length + 2;
@@ -184,9 +184,10 @@ generateOrEncodePrivkey = function (pkBytesToEncode) {
 }
 
 // Derive a Secp256k1 network-encoded public key (coin address) from raw private or public key bytes
-deriveAddress = function({
+function deriveAddress({
   pkBytes,
-  publicKey
+  publicKey,
+  fNoEncoding
 }) {
   if(!pkBytes && !publicKey) return null;
   // Public Key Derivation
@@ -195,6 +196,9 @@ deriveAddress = function({
   nPubkey = nPubkey.substr(0, 64);
   const publicKeyBytesCompressed = Crypto.util.hexToBytes(nPubkey);
   publicKeyBytesCompressed.unshift(pubY.isEven() ? 2 : 3);
+
+  // If we're only trying to derive a Secp256k1 pubkey (not an encoded address), return early
+  if (fNoEncoding) return publicKeyBytesCompressed;
 
   // First pubkey SHA-256 hash
   const pubKeyHashing = new jsSHA(0, 0, { "numRounds": 1 });

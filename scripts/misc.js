@@ -28,6 +28,11 @@ function writeToUint8(arr, bytes, pos) {
         arr[pos++] = bytes[i++];
 }
 
+// bn.js alias
+function uint256(x, base) {
+    return new BN(x, base)
+}
+
 
 
 /* --- BASE58 (EN/DE)CODING */

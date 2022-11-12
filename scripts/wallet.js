@@ -349,7 +349,7 @@ async function generateWallet(noUI = false) {
       domIdenticon.dataset.jdenticonValue = masterKey.getAddress(getDerivationPath());
       jdenticon();
 
-      getNewAddress(true);
+      getNewAddress({ updateGUI: true });
 
       // Refresh the balance UI (why? because it'll also display any 'get some funds!' alerts)
       getBalance(true);

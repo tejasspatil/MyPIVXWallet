@@ -343,7 +343,6 @@ async function generateWallet(noUI = false) {
 
       // Display the dashboard
       domGuiWallet.style.display = 'block';
-      viewPrivKey = false;
       hideAllWalletOptions();
 
       // Update identicon

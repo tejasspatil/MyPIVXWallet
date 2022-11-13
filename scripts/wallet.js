@@ -1,3 +1,5 @@
+'use strict';
+
 class MasterKey {
   
   constructor() { }
@@ -230,7 +232,7 @@ function deriveAddress({
 }
 
 // Wallet Import
-importWallet = async function({
+async function importWallet({
   newWif = false,
   fRaw = false,
   isHardwareWallet = false
@@ -322,7 +324,7 @@ importWallet = async function({
 }
 
 // Wallet Generation
-generateWallet = async function (noUI = false) {
+async function generateWallet(noUI = false) {
     const strImportConfirm = "Do you really want to import a new address? If you haven't saved the last private key, the wallet will be LOST forever.";
     const walletConfirm = fWalletLoaded && !noUI ? await confirmPopup({html: strImportConfirm}) : true;
     if (walletConfirm) {
@@ -341,14 +343,13 @@ generateWallet = async function (noUI = false) {
 
       // Display the dashboard
       domGuiWallet.style.display = 'block';
-      viewPrivKey = false;
       hideAllWalletOptions();
 
       // Update identicon
       domIdenticon.dataset.jdenticonValue = masterKey.getAddress(getDerivationPath());
       jdenticon();
 
-      getNewAddress(true);
+      getNewAddress({ updateGUI: true });
 
       // Refresh the balance UI (why? because it'll also display any 'get some funds!' alerts)
       getBalance(true);
@@ -380,7 +381,7 @@ async function verifyMnemonic(strMnemonic = "", fPopupConfirm = true) {
   }
 }
 
-informUserOfMnemonic = function (mnemonic) {
+function informUserOfMnemonic(mnemonic) {
   return new Promise((res, rej) => {
     $('#mnemonicModal').modal({keyboard: false})
     domMnemonicModalContent.innerText = mnemonic;
@@ -404,7 +405,7 @@ async function benchmark(quantity) {
   console.log("Time taken to generate " + i + " addresses: " + (nEndTime - nStartTime).toFixed(2) + 'ms');
 }
 
-encryptWallet = async function (strPassword = '') {
+async function encryptWallet(strPassword = '') {
   // Encrypt the wallet WIF with AES-GCM and a user-chosen password - suitable for browser storage
   let strEncWIF = await encrypt(masterKey.keyToBackup, strPassword);
   if (!strEncWIF) return false;
@@ -419,7 +420,7 @@ encryptWallet = async function (strPassword = '') {
   removeEventListener("beforeunload", beforeUnloadListener, {capture: true});
 }
 
-decryptWallet = async function (strPassword = '') {
+async function decryptWallet(strPassword = '') {
   // Check if there's any encrypted WIF available
   const strEncWIF = localStorage.getItem("encwif");
   if (!strEncWIF || strEncWIF.length < 1) return false;
@@ -436,17 +437,17 @@ decryptWallet = async function (strPassword = '') {
   }
 }
 
-hasEncryptedWallet = function () {
+function hasEncryptedWallet() {
   return localStorage.getItem("encwif") ? true : false;
 }
 
 // If the privateKey is null then the user connected a hardware wallet
-hasHardwareWallet = function() {
+function hasHardwareWallet() {
   if (!masterKey) return false;
   return masterKey.isHardwareWallet == true;
 }
 
-hasWalletUnlocked = function (fIncludeNetwork = false) {
+function hasWalletUnlocked(fIncludeNetwork = false) {
   if (fIncludeNetwork && !networkEnabled)
     return createAlert('warning', "<b>Offline Mode is active!</b><br>Please disable Offline Mode for automatic transactions", 5500);
     if (!masterKey) {
@@ -458,7 +459,7 @@ hasWalletUnlocked = function (fIncludeNetwork = false) {
 
 let cHardwareWallet = null;
 let strHardwareName = "";
-getHardwareWalletKeys = async function(path, xpub = false, verify = false, _attempts = 0) {
+async function getHardwareWalletKeys(path, xpub = false, verify = false, _attempts = 0) {
   try {
     // Check if we haven't setup a connection yet OR the previous connection disconnected
     if (!cHardwareWallet || cHardwareWallet.transport._disconnectEmitted) {

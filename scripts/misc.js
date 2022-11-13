@@ -37,7 +37,7 @@ function uint256(x, base) {
 
 /* --- BASE58 (EN/DE)CODING */
 // ByteArray to Base58 String
-const to_b58 = function (B) {
+function to_b58(B) {
     var d = [],    //the array for storing the stream of base58 digits
         s = "",    //the result string variable that will be returned
         i,         //the iterator variable for the byte input
@@ -62,7 +62,7 @@ const to_b58 = function (B) {
 }
 
 // Base58 String to ByteArray
-const from_b58 = function (S) {
+function from_b58(S) {
     var d = [], //the array for storing the stream of decoded bytes
         b = [], //the result byte array that will be returned
         i,      //the iterator variable for the base58 string

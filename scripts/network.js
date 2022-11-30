@@ -4,7 +4,7 @@ function networkError() {
     if (disableNetwork()) {
         createAlert('warning',
                     '<b>Failed to synchronize!</b> Please try again later.' +
-                    '<br>You can attempt re-connect via the Settings.');
+                    '<br>You can attempt re-connect via the Settings.', []);
     }
 }
 

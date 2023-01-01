@@ -1,7 +1,7 @@
 "use strict";
 
 /**
-    * Construct a masternode
+    * Construct a Masternode
     * @param {string} [masternode.walletPrivateKeyPath] - BIP39 path pointing to the private key holding the collateral. Optional if not HD
     * @param {string} masternode.mnPrivateKey - Masternode private key. Must be uncompressed WIF
     * @param {string} masternode.collateralTxId - Must be a UTXO pointing to the collateral

@@ -1250,7 +1250,7 @@
       const cTx = bitjs.transaction();
       const cCoinControl = chooseUTXOs(cTx, nValue, 0, false);
       
-      if (!cCoinControl.success) return alert(cCoinControl.msg);
+      if (!cCoinControl.success) return createAlert("warning",cCoinControl.msg ,5000);
       // Compute fee
       const nFee = getFee(cTx.serialize().length);
       
@@ -1693,7 +1693,7 @@
       const nBalance = getStakingBalance();
       const cTx = bitjs.transaction();
       const cCoinControl = chooseUTXOs(cTx, nValue, 0, true);
-      if (!cCoinControl.success) return alert(cCoinControl.msg);
+      if (!cCoinControl.success) return createAlert("warning",cCoinControl.msg,5000);
 
       // Compute fee and change (or lack thereof)
       const nFee = getFee(cTx.serialize().length);
@@ -1833,7 +1833,7 @@
       const nBalance = getBalance();
       const cTx = bitjs.transaction();
       const cCoinControl = chooseUTXOs(cTx, nValue, 0, false);
-      if (!cCoinControl.success) return alert(cCoinControl.msg);
+      if (!cCoinControl.success) return createAlert("warning",cCoinControl.msg,5000);
 
       // Compute fee and change (or lack thereof)
       const nFee = getFee(cTx.serialize().length);
@@ -2032,7 +2032,7 @@
       const nBalance = getBalance();
       const cTx = bitjs.transaction();
       const cCoinControl = chooseUTXOs(cTx, nValue, 0, false);
-      if (!cCoinControl.success) return alert(cCoinControl.msg);
+      if (!cCoinControl.success) return createAlert("warning",cCoinControl.msg,5000);
       // Compute fee
       const nFee = getFee(cTx.serialize().length);
       

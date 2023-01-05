@@ -11,8 +11,9 @@ class UTXO {
      * @param {Number} UTXO.vout - Output position of this transaction
      * @param {Number} UTXO.height - Block height of the UTXO
      * @param {Number} UTXO.status - UTXO status enum state
+     * @param {bool} UTXO.isDelegate - Whether the UTXO is a cold stake delegation
      */
-    constructor({id, path, sats, script, vout, height, status} = {}) {
+    constructor({id, path, sats, script, vout, height, status, isDelegate = false, isReward = false} = {}) {
         /** Transaction ID
          * @type {String} */
         this.id = id;
@@ -40,6 +41,21 @@ class UTXO {
         /** UTXO status enum state
          *  @type {Number} */
         this.status = status;
+
+        /** If it's a delegation UTXO
+        * @type {bool} */
+        this.isDelegate = isDelegate;
+
+	this.isReward = isReward;
+    }
+
+    /**
+     * Check for equality between this UTXO and another UTXO
+     * @param {UTXO} cUTXO - UTXO to compare against
+     * @returns {Boolean} `true` if equal, `false` if unequal
+     */
+    equalsUTXO(cUTXO) {
+        return this.id === cUTXO.id && this.vout === cUTXO.vout && this.status === cUTXO.status;
     }
 };
 
@@ -62,16 +78,6 @@ class Mempool {
     /** The PENDING state (standard UTXO is in mempool, pending confirmation) */
     static PENDING = 2;
 
-    /** The DELEGATED PENDING state (cold UTXO is in mempool, pending confirmation) */
-    static PENDING_COLD = 3;
-
-    /** The CONFIRMED DELEGATED state (cold UTXO is spendable) */
-    static DELEGATE = 4;
-
-    /** The REWARD state (UTXO is a reward from a stake or masternode) */
-    static REWARD = 5;
-
-
     /**
      * Remove a UTXO after a set amount of time
      * @param {Number} nBlocks - Estimated blocks to wait
@@ -84,31 +90,16 @@ class Mempool {
 
     /**
      * Check if an exact UTXO match can be found in our wallet
-     * @param {UTXO} cNewUTXO - UTXO to search for
+     * @param {Object} UTXO
+     * @param {String} UTXO.id - Transaction ID
+     * @param {Number} UTXO.vout - Output position of this transaction
+     * @param {Number} [UTXO.status] - UTXO status enum state. If it's undefined, it will ignore it.
      * @returns {Boolean} `true` or `false`
      */
-    isAlreadyStored(cNewUTXO) {
-        for (const cUTXO of this.UTXOs) {
-            if (JSON.stringify(cUTXO) === JSON.stringify(cNewUTXO)) {
-                return true;
-            }
-        }
-        return false;
+    isAlreadyStored({id, vout, status}) {
+	return this.UTXOs.some(
+	    cUTXO => (cUTXO.id === id && cUTXO.vout === vout && (!status || cUTXO.status === status)));
     }
-
-        /**
-     * Check if an exact UTXO match can be found in our wallet
-     * @param {id,path,vout} - txid path and vout of the UTXO
-     * @returns {Boolean} `true` or `false`
-     */
-         isAlreadyStored({id,path,vout,status}) {
-            for (const cUTXO of this.UTXOs) {
-                if (cUTXO.id === id && cUTXO.path===path && cUTXO.vout===vout && cUTXO.status===status) {
-                    return true;
-                }
-            }
-            return false;
-        }
 
     /**
      * Fetches an array of UTXOs filtered by their state
@@ -119,13 +110,7 @@ class Mempool {
         return this.UTXOs.filter(cUTXO => cUTXO.status === nState);
     }
 
-    /**
-     * Fetches an array of confirmed UTXOs, an easier alias to {@link getUTXOsByState}
-     * @returns {Array<UTXO>} `array` - An array of UTXOs
-     */
-    getConfirmed() {
-        return this.getUTXOsByState(Mempool.CONFIRMED);
-    }
+
 
     /**
      * Removes a UTXO from a specific state
@@ -155,25 +140,39 @@ class Mempool {
      * @param {Number} UTXO.vout - Output position of this transaction
      * @param {Number} UTXO.height - Block height of the UTXO
      * @param {Number} UTXO.status - UTXO status enum state
+     * @param {Boolean} UTXO.isDelegate - If this is a Cold Delegation
      */
-    addUTXO({id, path, sats, script, vout, height, status}) {
-        const newUTXO = new UTXO({id, path, sats, script, vout, height, status});
-        // Ensure the new UTXO doesn't have the same status
-        if (this.isAlreadyStored(newUTXO)) return;
-
-        // Ensure the new UTXO doesn't have a REMOVED status
-        if (this.isAlreadyStored({id: id,path: path,vout: vout,status: Mempool.REMOVED})) return;
-        
-        // Remove any pending versions of this UTXO
-        this.removeFromState(newUTXO, Mempool.PENDING);
-
-        // If delegated, remove pending versions of that too
-        if (status === Mempool.DELEGATE) this.removeFromState(newUTXO, Mempool.PENDING_COLD);
-
-        // Add to list
-        this.UTXOs.push(newUTXO);
+    addUTXO({id, path, sats, script, vout, height, status, isDelegate}) {
+      const newUTXO = new UTXO({id, path, sats, script, vout, height, status, isDelegate});
+	
+	if (this.isAlreadyStored({ id, vout })) {
+	    this.updateUTXO({id, vout});
+	} else {
+            this.UTXOs.push(newUTXO);
+	}
         getBalance(true);
         getStakingBalance(true);
+    }
+
+    /**
+     * Update an existing UTXO, by confirming its pending status
+     * The UTXO must be in 
+     * @param {Object} UTXO - Object to be deconstructed
+     * @param {String} UTXO.id - Transaction id
+     * @param {Number} UTXO.vout - vout
+     */
+    updateUTXO({id, vout}) {
+	if(debug) {
+	    console.assert(this.isAlreadyStored({id, vout}), "updateUTXO must be called with an existing UTXO");
+	}
+	const cUTXO = this.UTXOs.find(utxo => utxo.id === id && utxo.vout == vout);
+	switch (cUTXO.status) {
+	case Mempool.PENDING:
+	    cUTXO.status = Mempool.CONFIRMED;
+	    break;
+	}
+	getBalance(true);
+	getStakingBalance(true);
     }
 
     /**
@@ -181,24 +180,26 @@ class Mempool {
      * @param {UTXO} cUTXO - UTXO to remove
      */
     removeUTXO(cUTXO) {
-        this.UTXOs = this.UTXOs.filter(utxo => JSON.stringify(utxo) !== JSON.stringify(cUTXO));
+        this.UTXOs = this.UTXOs.filter(utxo => !utxo.equalsUTXO(cUTXO));
     }
     
     /**
      * Remove a UTXO completely from our wallet, with a 12 minute delay given his id, path and vout
-     * @param {Array<UTXO>} arrUTXOs - UTXOs to remove
+     * @param {Object} UTXO
+     * @param {String} UTXO.id - Transaction ID
+     * @param {Number} UTXO.vout - Output position of this transaction
      */
-    autoRemoveUTXO({id,path,vout}){
-            for (const cUTXO of this.UTXOs) {
-                // Loop given + internal UTXOs to find a match, then start the delayed removal
-                if (cUTXO.id === id && cUTXO.path===path && cUTXO.vout===vout) {
-                    cUTXO.status = Mempool.REMOVED;
-                    this.removeWithDelay(12, cUTXO);
-                    return;
-                }
+    autoRemoveUTXO({id, vout}) {
+        for (const cUTXO of this.UTXOs) {
+            // Loop given + internal UTXOs to find a match, then start the delayed removal
+            if (cUTXO.id === id && cUTXO.vout === vout) {
+                cUTXO.status = Mempool.REMOVED;
+                this.removeWithDelay(12, cUTXO);
+                return;
             }
-            console.error("Mempool: Failed to find UTXO " + id + " (" + vout + ") for auto-removal!");
         }
+        console.error("Mempool: Failed to find UTXO " + id + " (" + vout + ") for auto-removal!");
+    }
     
     /**
      * Remove many UTXOs completely from our wallet, with a 12 minute delay
@@ -208,7 +209,7 @@ class Mempool {
         for (const cNewUTXO of arrUTXOs) {
             for (const cUTXO of this.UTXOs) {
                 // Loop given + internal UTXOs to find a match, then start the delayed removal
-                if (JSON.stringify(cUTXO) === JSON.stringify(cNewUTXO)) {
+                if (cUTXO.equalsUTXO(cNewUTXO)) {
                     cUTXO.status = Mempool.REMOVED;
                     this.removeWithDelay(12, cUTXO);
                     break;
@@ -218,27 +219,27 @@ class Mempool {
     }
 
     /**
-     * Change the status of a UTXO, matched by it's properties
-     * @param {String} id - Transaction ID
-     * @param {String} path - If applicable, the HD Path of the owning address
-     * @param {Number} sats - Satoshi value in this UTXO
-     * @param {String} script - The HEX encoded spending script
-     * @param {Number} vout - Output position of this transaction
-     * @param {Number} newStatus - New mempool status to apply to the UTXO
-     * @returns {Boolean} `true` if successful, `false` if UTXO not found
+     * Fetches an array of confirmed UTXOs, an easier alias to {@link getUTXOsByState}
+     * @returns {Array<UTXO>} `array` - An array of UTXOs
      */
-    changeUTXOstatus(id, path, sats, script, vout, newStatus) {
-        for (const cUTXO of this.UTXOs) {
-            if (cUTXO.id === id && cUTXO.path === path && cUTXO.sats === sats && cUTXO.script === script && cUTXO.vout === vout) {
-                cUTXO.status = newStatus;
-                // If the new status is REMOVED, start the delayed removal
-                if (newStatus === Mempool.REMOVED) {
-                    this.removeWithDelay(12, cUTXO);
-                }
-                return;
-            }
-        }
-        console.log("Mempool: Failed to find UTXO " + id + " (" + vout + ") for auto-removal!");
+    getConfirmed() {
+        return this.getUTXOsByState(Mempool.CONFIRMED);
+    }
+
+    /**
+     * Get standard, non delegated, UTXOs
+     * @returns {Array<UTXO>} Non delegated utxos
+     */
+    getStandardUTXOs() {
+        return this.UTXOs.filter(cUTXO => cUTXO.status !== Mempool.REMOVED && !cUTXO.isDelegate);
+    }
+
+    /**
+     * Get delegated UTXOs
+     * @returns {Array<UTXO>} Delegated UTXOs
+     */
+    getDelegatedUTXOs() {
+        return this.UTXOs.filter(cUTXO => cUTXO.status !== Mempool.REMOVED && cUTXO.isDelegate);
     }
 
     /**
@@ -247,22 +248,20 @@ class Mempool {
      */
     getBalance() {
         // Fetch 'standard' balances: the sum of all Confirmed or Unconfirmed transactions (excluding Masternode collaterals)
-        const nStandardBalance = this.UTXOs.filter(cUTXO => (cUTXO.status === Mempool.CONFIRMED || cUTXO.status === Mempool.PENDING) && !isMasternodeUTXO(cUTXO)).reduce((a, b) => a + b.sats, 0);
-        
-        // Fetch 'staked' balances: the sum of all Confirmed Rewards (excluding rewards not yet 'matured')
-        const nStakedBalance = this.UTXOs.filter(cUTXO => cUTXO.status === Mempool.REWARD).filter(cUTXO => Mempool.isValidReward(cUTXO)).reduce((a, b) => a + b.sats, 0);
-
-        // Combine and return total satoshis
-        return nStandardBalance + nStakedBalance;
+        return this.getStandardUTXOs().filter(cUTXO => !isMasternodeUTXO(cUTXO)).reduce((a, b) => a + b.sats, 0);
     }
 
     /**
-     * Returns if a reward is fully confirmed, matured and spendable
-     * @param {UTXO} cUTXO - Reward UTXO
+     * Returns if a UTXO is valid
+     * @param {UTXO} cUTXO - UTXO
      * @returns {Boolean} `true` if the reward UTXO is spendable, `false` if not
      */
-    static isValidReward(cUTXO) {
-        return cachedBlockCount - cUTXO.height > 100;
+    static isValidUTXO(cUTXO) {
+	if (cUTXO.isReward) {
+            return cachedBlockCount - cUTXO.height > 100;
+	} else {
+	    return true;
+	}
     }
 
     /**
@@ -270,6 +269,6 @@ class Mempool {
      * @returns {Number} Delegated balance in satoshis
      */
     getDelegatedBalance() {
-        return this.UTXOs.filter(cUTXO => cUTXO.status === Mempool.DELEGATE || cUTXO.status === Mempool.PENDING_COLD).reduce((a, b) => a + b.sats, 0);
+        return this.getDelegatedUTXOs().reduce((a, b) => a + b.sats, 0);
     }
 };

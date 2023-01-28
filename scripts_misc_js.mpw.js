@@ -179,8 +179,8 @@ const en_translation = {
     WALLET_HARDWARE_WALLET:"<b>Hardware wallet ready!</b><br>Please keep your {hardwareWallet} plugged in, unlocked, and in the PIVX app",
     WALLET_CONFIRM_L:"Confirm the import on your Ledger",
     WALLET_NO_HARDWARE: "<b>No device available</b><br>Couldn't find a hardware wallet; please plug it in and unlock!",
-    WALLET_HARDWARE_CONNECTION_LOST: "<b>Lost connection to {hardwareWallet} </b><br>It seems the {hardwareWalletProductionName} was unplugged mid-operation, oops!",
-    WALLET_HARDWARE_BUSY: "<b>{hardwareWallet} is waiting</b><br>Please unlock your {hardwareWalletProductionName} or finish it's current prompt",
+    WALLET_HARDWARE_CONNECTION_LOST: "<b>Lost connection to {hardwareWallet} </b><br>It seems the {hardwareWallet} was unplugged mid-operation, oops!",
+    WALLET_HARDWARE_BUSY: "<b>{hardwareWallet} is waiting</b><br>Please unlock your {hardwareWallet} or finish it's current prompt",
     WALLET_HARDWARE_ERROR: "<b> {hardwareWallet} </b><br> {error}",
 
 
@@ -1889,7 +1889,7 @@ function switchTranslation(langName) {
  */
 function translateAlerts(message, variables) {
     variables.forEach((element) => {
-        message = message.replace(
+        message = message.replaceAll(
             '{' + Object.keys(element)[0] + '}',
             Object.values(element)[0]
         );
@@ -4195,7 +4195,7 @@ function deriveAddress({ pkBytes, publicKey, output = 'ENCODED' }) {
     }
 
     // First pubkey SHA-256 hash
-    const pubKeyHashing = (0,_noble_hashes_sha256__WEBPACK_IMPORTED_MODULE_2__.sha256)(pubKeyBytes);
+    const pubKeyHashing = (0,_noble_hashes_sha256__WEBPACK_IMPORTED_MODULE_2__.sha256)(new Uint8Array(pubKeyBytes));
 
     // RIPEMD160 hash
     const pubKeyHashRipemd160 = (0,_noble_hashes_ripemd160__WEBPACK_IMPORTED_MODULE_3__.ripemd160)(pubKeyHashing);
@@ -4583,6 +4583,7 @@ async function getNewAddress({
 
 let cHardwareWallet = null;
 let strHardwareName = '';
+let transport;
 async function getHardwareWalletKeys(
     path,
     xpub = false,
@@ -4591,15 +4592,16 @@ async function getHardwareWalletKeys(
 ) {
     try {
         // Check if we haven't setup a connection yet OR the previous connection disconnected
-        if (!cHardwareWallet || cHardwareWallet.transport._disconnectEmitted) {
-            cHardwareWallet = new _ledgerhq_hw_app_btc__WEBPACK_IMPORTED_MODULE_13__["default"](await _ledgerhq_hw_transport_webusb__WEBPACK_IMPORTED_MODULE_14__["default"].create());
+        if (!cHardwareWallet || transport._disconnectEmitted) {
+            transport = await _ledgerhq_hw_transport_webusb__WEBPACK_IMPORTED_MODULE_14__["default"].create();
+            cHardwareWallet = new _ledgerhq_hw_app_btc__WEBPACK_IMPORTED_MODULE_13__["default"]({ transport, currency: 'PIVX' });
         }
 
         // Update device info and fetch the pubkey
         strHardwareName =
-            cHardwareWallet.transport.device.manufacturerName +
+            transport.device.manufacturerName +
             ' ' +
-            cHardwareWallet.transport.device.productName;
+            transport.device.productName;
 
         // Prompt the user in both UIs
         if (verify) (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)('info', _i18n_js__WEBPACK_IMPORTED_MODULE_10__.ALERTS.WALLET_CONFIRM_L, [], 3500);
@@ -4623,13 +4625,7 @@ async function getHardwareWalletKeys(
             // User denied an operation
             return false;
         }
-        if (_attempts < 10) {
-            // This is an ugly hack :(
-            // in the event where multiple parts of the code decide to ask for an address, just
-            // Retry at most 10 times waiting 200ms each time
-            await (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.sleep)(200);
-            return getHardwareWalletKeys(path, xpub, verify, _attempts + 1);
-        }
+
         // If there's no device, nudge the user to plug it in.
         if (e.message.toLowerCase().includes('no device selected')) {
             (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)('info', _i18n_js__WEBPACK_IMPORTED_MODULE_10__.ALERTS.WALLET_NO_HARDWARE, [], 10000);
@@ -4644,13 +4640,18 @@ async function getHardwareWalletKeys(
                 [
                     {
                         hardwareWallet: strHardwareName,
-                        hardwareWalletProductionName:
-                            cHardwareWallet.transport.device.productName,
                     },
                 ],
                 10000
             );
             return false;
+        }
+        if (_attempts < 10) {
+            // This is an ugly hack :(
+            // in the event where multiple parts of the code decide to ask for an address, just
+            // Retry at most 10 times waiting 200ms each time
+            await (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.sleep)(200);
+            return getHardwareWalletKeys(path, xpub, verify, _attempts + 1);
         }
 
         // If the ledger is busy, just nudge the user.
@@ -4661,8 +4662,6 @@ async function getHardwareWalletKeys(
                 [
                     {
                         hardwareWallet: strHardwareName,
-                        hardwareWalletProductionName:
-                            cHardwareWallet.transport.device.productName,
                     },
                 ],
                 7500
@@ -4685,11 +4684,14 @@ async function getHardwareWalletKeys(
             [
                 {
                     hardwareWallet: strHardwareName,
+                },
+                {
                     error: LEDGER_ERRS.get(e.statusCode),
                 },
             ],
             5500
         );
+
         return false;
     }
 }

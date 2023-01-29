@@ -21,6 +21,8 @@ import { createAlert, confirmPopup, sanitizeHTML, MAP_B58 } from './misc.js';
 import { cChainParams, COIN, MIN_PASS_LENGTH } from './chain_params.js';
 import { decrypt } from './aes-gcm.js';
 
+import { registerWorker } from './native.js';
+
 export let doms = {};
 
 export function start() {
@@ -164,6 +166,10 @@ export function start() {
     i18nStart();
     loadImages();
     doms.domStart.click();
+
+    // Register native app service
+    registerWorker();
+
     // Configure Identicon
     jdenticon.configure();
     // URL-Query request processing

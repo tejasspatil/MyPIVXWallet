@@ -28,6 +28,7 @@ export let doms = {};
 export function start() {
     doms = {
         domStart: document.getElementById('start'),
+        domInstall: document.getElementById('installTab'),
         domNavbarToggler: document.getElementById('navbarToggler'),
         domGuiStaking: document.getElementById('guiStaking'),
         domGuiWallet: document.getElementById('guiWallet'),
@@ -221,6 +222,7 @@ export function start() {
 
 // WALLET STATE DATA
 export const mempool = new Mempool();
+let exportHidden = false;
 
 //                        PIVX Labs' Cold Pool
 export let cachedColdStakeAddr = 'SdgQDpS8jDRJDX8yK8m9KnTMarsE84zdsy';
@@ -333,6 +335,12 @@ async function loadImages() {
             document.getElementById('mpw-main-logo').src = (
                 await import('../assets/logo.png')
             ).default;
+            document.getElementById('privateKeyImage').src = (
+                await import('../assets/key.png')
+            ).default;
+            document.getElementById('pivxLogoSend').src = (
+                await import('../assets/pivx.png')
+            ).default;
         })(),
     ]);
 }
@@ -357,13 +365,21 @@ export async function playMusic() {
     }
 }
 
+export function unblurPrivKey() {
+    if (document.getElementById("exportPrivateKeyText").classList.contains("blurred")) {
+        document.getElementById("exportPrivateKeyText").classList.remove("blurred");
+    } else {
+        document.getElementById("exportPrivateKeyText").classList.add("blurred");
+    }
+}
+
 export function toClipboard(source, caller) {
     // Fetch the text/value source
-    const domCopy = document.getElementById(source);
+    const domCopy = document.getElementById(source) || source;
 
     // Use an invisible textbox as the clipboard source
     const domClipboard = document.getElementById('clipboard');
-    domClipboard.value = domCopy.value || domCopy.innerHTML;
+    domClipboard.value = domCopy.value || domCopy.innerHTML || domCopy;
     domClipboard.select();
     domClipboard.setSelectionRange(0, 99999);
 
@@ -371,7 +387,7 @@ export function toClipboard(source, caller) {
     if (!navigator.clipboard) {
         document.execCommand('copy');
     } else {
-        navigator.clipboard.writeText(domCopy.innerHTML);
+        navigator.clipboard.writeText(domCopy.innerHTML || domCopy);
     }
 
     // Display a temporary checkmark response
@@ -599,6 +615,9 @@ export function accessOrImportWallet() {
 
     // Show Import button, hide access button
     doms.domImportWallet.style.display = 'block';
+    setTimeout(() => {
+        doms.domPrivKey.style.opacity = '1';
+    }, 100);
     doms.domAccessWalletBtn.style.display = 'none';
 
     // If we have a local wallet, display the decryption prompt
@@ -665,52 +684,47 @@ export function guiEncryptWallet() {
             2500
         );
 
-    // Show our inputs if we haven't already
-    if (doms.domEncryptPasswordBox.style.display === 'none') {
-        // Return the display to it's class form
-        doms.domEncryptPasswordBox.style.display = '';
-        doms.domEncryptBtnTxt.innerText = 'Finish Encryption';
-    } else {
-        // Fetch our inputs, ensure they're of decent entropy + match eachother
-        const strPass = doms.domEncryptPasswordFirst.value,
-            strPassRetype = doms.domEncryptPasswordSecond.value;
-        if (strPass.length < MIN_PASS_LENGTH)
-            return createAlert(
-                'warning',
-                ALERTS.PASSWORD_TOO_SMALL,
-                [{ MIN_PASS_LENGTH: MIN_PASS_LENGTH }],
-                4000
-            );
-        if (strPass !== strPassRetype)
-            return createAlert(
-                'warning',
-                ALERTS.PASSWORD_DOESNT_MATCH,
-                [],
-                2250
-            );
-        encryptWallet(strPass);
-        createAlert('success', ALERTS.NEW_PASSWORD_SUCCESS, [], 5500);
-    }
+    // Fetch our inputs, ensure they're of decent entropy + match eachother
+    const strPass = doms.domEncryptPasswordFirst.value,
+        strPassRetype = doms.domEncryptPasswordSecond.value;
+    if (strPass.length < MIN_PASS_LENGTH)
+        return createAlert(
+            'warning',
+            ALERTS.PASSWORD_TOO_SMALL,
+            [{ MIN_PASS_LENGTH: MIN_PASS_LENGTH }],
+            4000
+        );
+    if (strPass !== strPassRetype)
+        return createAlert(
+            'warning',
+            ALERTS.PASSWORD_DOESNT_MATCH,
+            [],
+            2250
+        );
+    encryptWallet(strPass);
+    createAlert('success', ALERTS.NEW_PASSWORD_SUCCESS, [], 5500);
+
+    $('#encryptWalletModal').modal('hide');
+
+    doms.domWipeWallet.hidden = false;
 }
 
 export async function toggleExportUI() {
-    doms.domExportDiv.hidden = !doms.domExportDiv.hidden;
-    if (!doms.domExportDiv.hidden) {
+    if (!exportHidden) {
         if (hasEncryptedWallet()) {
-            doms.domExportPrivateKey.innerText = localStorage.getItem('encwif');
-            doms.domExportPrivateKeyHold.hidden = false;
+            doms.domExportPrivateKey.innerHTML = localStorage.getItem('encwif');
+            exportHidden = true;
         } else {
             if (masterKey.isViewOnly) {
-                doms.domExportPrivateKeyHold.hidden = true;
+                exportHidden = false;
             } else {
-                doms.domExportPrivateKey.innerText = masterKey.keyToBackup;
-                doms.domExportPrivateKeyHold.hidden = false;
+                doms.domExportPrivateKey.innerHTML = masterKey.keyToBackup;
+                exportHidden = true;
             }
         }
-
-        doms.domExportPublicKey.innerText = await masterKey.keyToExport;
     } else {
-        doms.domExportPrivateKey.innerText = '';
+        doms.domExportPrivateKey.innerHTML = '';
+        exportHidden = false;
     }
 }
 
@@ -759,7 +773,9 @@ export async function generateVanityWallet() {
     ) {
         // No prefix, display the intro!
         doms.domPrefix.style.display = 'block';
-        doms.domGenKeyWarning.style.display = 'none';
+        setTimeout(() => {
+            doms.domPrefix.style.opacity = '1';
+        },100);
         doms.domGuiAddress.innerHTML = '~';
         doms.domPrefix.focus();
     } else {

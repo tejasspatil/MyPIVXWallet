@@ -44,6 +44,13 @@ export function createAlert(type, message, alertVariables = [], timeout = 0) {
     const domAlert = document.createElement('div');
     domAlert.classList.add('alertpop');
     domAlert.classList.add(type);
+    setTimeout(() => {
+        domAlert.style.opacity = '1';
+        domAlert.style.zIndex = '999999';
+        domAlert.classList.add('bounce-ani');
+        domAlert.classList.add('bounce');
+    }, 100);
+    
 
     // Maintainer QoL adjustment: if `alertVariables` is a number, it is instead assumed to be `timeout`
     if (typeof alertVariables === 'number') {
@@ -117,7 +124,7 @@ export function createQR(strData = '', domImg, size = 4) {
     const cQR = qrcode(size, 'L');
     cQR.addData(strData);
     cQR.make();
-    domImg.innerHTML = cQR.createImgTag();
+    domImg.innerHTML = cQR.createImgTag(2,2);
     domImg.firstChild.style.borderRadius = '8px';
 }
 

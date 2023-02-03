@@ -633,6 +633,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "toClipboard": () => (/* binding */ toClipboard),
 /* harmony export */   "toggleDropDown": () => (/* binding */ toggleDropDown),
 /* harmony export */   "toggleExportUI": () => (/* binding */ toggleExportUI),
+/* harmony export */   "unblurPrivKey": () => (/* binding */ unblurPrivKey),
 /* harmony export */   "updateMasternodeTab": () => (/* binding */ updateMasternodeTab),
 /* harmony export */   "updateStakingRewardsGUI": () => (/* binding */ updateStakingRewardsGUI),
 /* harmony export */   "wipePrivateData": () => (/* binding */ wipePrivateData)
@@ -647,7 +648,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _misc_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./misc.js */ "./scripts/misc.js");
 /* harmony import */ var _chain_params_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./chain_params.js */ "./scripts/chain_params.js");
 /* harmony import */ var _aes_gcm_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./aes-gcm.js */ "./scripts/aes-gcm.js");
+/* harmony import */ var _native_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./native.js */ "./scripts/native.js");
 /* provided dependency */ var console = __webpack_require__(/*! ./node_modules/console-browserify/index.js */ "./node_modules/console-browserify/index.js");
+/* provided dependency */ var $ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
+
+
 
 
 
@@ -664,6 +669,7 @@ let doms = {};
 function start() {
     doms = {
         domStart: document.getElementById('start'),
+        domInstall: document.getElementById('installTab'),
         domNavbarToggler: document.getElementById('navbarToggler'),
         domGuiStaking: document.getElementById('guiStaking'),
         domGuiWallet: document.getElementById('guiWallet'),
@@ -802,6 +808,10 @@ function start() {
     (0,_i18n_js__WEBPACK_IMPORTED_MODULE_2__.start)();
     loadImages();
     doms.domStart.click();
+
+    // Register native app service
+    (0,_native_js__WEBPACK_IMPORTED_MODULE_10__.registerWorker)();
+
     // Configure Identicon
     jdenticon__WEBPACK_IMPORTED_MODULE_3__.configure();
     // URL-Query request processing
@@ -853,6 +863,7 @@ function start() {
 
 // WALLET STATE DATA
 const mempool = new _mempool_js__WEBPACK_IMPORTED_MODULE_0__.Mempool();
+let exportHidden = false;
 
 //                        PIVX Labs' Cold Pool
 let cachedColdStakeAddr = 'SdgQDpS8jDRJDX8yK8m9KnTMarsE84zdsy';
@@ -964,6 +975,12 @@ async function loadImages() {
             document.getElementById('mpw-main-logo').src = (
                 await __webpack_require__.e(/*! import() */ "assets_logo_png").then(__webpack_require__.t.bind(__webpack_require__, /*! ../assets/logo.png */ "./assets/logo.png", 17))
             ).default;
+            document.getElementById('privateKeyImage').src = (
+                await __webpack_require__.e(/*! import() */ "assets_key_png").then(__webpack_require__.t.bind(__webpack_require__, /*! ../assets/key.png */ "./assets/key.png", 17))
+            ).default;
+            document.getElementById('pivxLogoSend').src = (
+                await __webpack_require__.e(/*! import() */ "assets_pivx_png").then(__webpack_require__.t.bind(__webpack_require__, /*! ../assets/pivx.png */ "./assets/pivx.png", 17))
+            ).default;
         })(),
     ]);
 }
@@ -988,13 +1005,21 @@ async function playMusic() {
     }
 }
 
+function unblurPrivKey() {
+    if (document.getElementById("exportPrivateKeyText").classList.contains("blurred")) {
+        document.getElementById("exportPrivateKeyText").classList.remove("blurred");
+    } else {
+        document.getElementById("exportPrivateKeyText").classList.add("blurred");
+    }
+}
+
 function toClipboard(source, caller) {
     // Fetch the text/value source
-    const domCopy = document.getElementById(source);
+    const domCopy = document.getElementById(source) || source;
 
     // Use an invisible textbox as the clipboard source
     const domClipboard = document.getElementById('clipboard');
-    domClipboard.value = domCopy.value || domCopy.innerHTML;
+    domClipboard.value = domCopy.value || domCopy.innerHTML || domCopy;
     domClipboard.select();
     domClipboard.setSelectionRange(0, 99999);
 
@@ -1002,7 +1027,7 @@ function toClipboard(source, caller) {
     if (!navigator.clipboard) {
         document.execCommand('copy');
     } else {
-        navigator.clipboard.writeText(domCopy.innerHTML);
+        navigator.clipboard.writeText(domCopy.innerHTML || domCopy);
     }
 
     // Display a temporary checkmark response
@@ -1230,6 +1255,9 @@ function accessOrImportWallet() {
 
     // Show Import button, hide access button
     doms.domImportWallet.style.display = 'block';
+    setTimeout(() => {
+        doms.domPrivKey.style.opacity = '1';
+    }, 100);
     doms.domAccessWalletBtn.style.display = 'none';
 
     // If we have a local wallet, display the decryption prompt
@@ -1296,52 +1324,47 @@ function guiEncryptWallet() {
             2500
         );
 
-    // Show our inputs if we haven't already
-    if (doms.domEncryptPasswordBox.style.display === 'none') {
-        // Return the display to it's class form
-        doms.domEncryptPasswordBox.style.display = '';
-        doms.domEncryptBtnTxt.innerText = 'Finish Encryption';
-    } else {
-        // Fetch our inputs, ensure they're of decent entropy + match eachother
-        const strPass = doms.domEncryptPasswordFirst.value,
-            strPassRetype = doms.domEncryptPasswordSecond.value;
-        if (strPass.length < _chain_params_js__WEBPACK_IMPORTED_MODULE_8__.MIN_PASS_LENGTH)
-            return (0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.createAlert)(
-                'warning',
-                _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.PASSWORD_TOO_SMALL,
-                [{ MIN_PASS_LENGTH: _chain_params_js__WEBPACK_IMPORTED_MODULE_8__.MIN_PASS_LENGTH }],
-                4000
-            );
-        if (strPass !== strPassRetype)
-            return (0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.createAlert)(
-                'warning',
-                _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.PASSWORD_DOESNT_MATCH,
-                [],
-                2250
-            );
-        (0,_wallet_js__WEBPACK_IMPORTED_MODULE_4__.encryptWallet)(strPass);
-        (0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.createAlert)('success', _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.NEW_PASSWORD_SUCCESS, [], 5500);
-    }
+    // Fetch our inputs, ensure they're of decent entropy + match eachother
+    const strPass = doms.domEncryptPasswordFirst.value,
+        strPassRetype = doms.domEncryptPasswordSecond.value;
+    if (strPass.length < _chain_params_js__WEBPACK_IMPORTED_MODULE_8__.MIN_PASS_LENGTH)
+        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.createAlert)(
+            'warning',
+            _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.PASSWORD_TOO_SMALL,
+            [{ MIN_PASS_LENGTH: _chain_params_js__WEBPACK_IMPORTED_MODULE_8__.MIN_PASS_LENGTH }],
+            4000
+        );
+    if (strPass !== strPassRetype)
+        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.createAlert)(
+            'warning',
+            _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.PASSWORD_DOESNT_MATCH,
+            [],
+            2250
+        );
+    (0,_wallet_js__WEBPACK_IMPORTED_MODULE_4__.encryptWallet)(strPass);
+    (0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.createAlert)('success', _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.NEW_PASSWORD_SUCCESS, [], 5500);
+
+    $('#encryptWalletModal').modal('hide');
+
+    doms.domWipeWallet.hidden = false;
 }
 
 async function toggleExportUI() {
-    doms.domExportDiv.hidden = !doms.domExportDiv.hidden;
-    if (!doms.domExportDiv.hidden) {
+    if (!exportHidden) {
         if ((0,_wallet_js__WEBPACK_IMPORTED_MODULE_4__.hasEncryptedWallet)()) {
-            doms.domExportPrivateKey.innerText = localStorage.getItem('encwif');
-            doms.domExportPrivateKeyHold.hidden = false;
+            doms.domExportPrivateKey.innerHTML = localStorage.getItem('encwif');
+            exportHidden = true;
         } else {
             if (_wallet_js__WEBPACK_IMPORTED_MODULE_4__.masterKey.isViewOnly) {
-                doms.domExportPrivateKeyHold.hidden = true;
+                exportHidden = false;
             } else {
-                doms.domExportPrivateKey.innerText = _wallet_js__WEBPACK_IMPORTED_MODULE_4__.masterKey.keyToBackup;
-                doms.domExportPrivateKeyHold.hidden = false;
+                doms.domExportPrivateKey.innerHTML = _wallet_js__WEBPACK_IMPORTED_MODULE_4__.masterKey.keyToBackup;
+                exportHidden = true;
             }
         }
-
-        doms.domExportPublicKey.innerText = await _wallet_js__WEBPACK_IMPORTED_MODULE_4__.masterKey.keyToExport;
     } else {
-        doms.domExportPrivateKey.innerText = '';
+        doms.domExportPrivateKey.innerHTML = '';
+        exportHidden = false;
     }
 }
 
@@ -1390,7 +1413,9 @@ async function generateVanityWallet() {
     ) {
         // No prefix, display the intro!
         doms.domPrefix.style.display = 'block';
-        doms.domGenKeyWarning.style.display = 'none';
+        setTimeout(() => {
+            doms.domPrefix.style.opacity = '1';
+        },100);
         doms.domGuiAddress.innerHTML = '~';
         doms.domPrefix.focus();
     } else {
@@ -2767,6 +2792,13 @@ function createAlert(type, message, alertVariables = [], timeout = 0) {
     const domAlert = document.createElement('div');
     domAlert.classList.add('alertpop');
     domAlert.classList.add(type);
+    setTimeout(() => {
+        domAlert.style.opacity = '1';
+        domAlert.style.zIndex = '999999';
+        domAlert.classList.add('bounce-ani');
+        domAlert.classList.add('bounce');
+    }, 100);
+    
 
     // Maintainer QoL adjustment: if `alertVariables` is a number, it is instead assumed to be `timeout`
     if (typeof alertVariables === 'number') {
@@ -2840,7 +2872,7 @@ function createQR(strData = '', domImg, size = 4) {
     const cQR = qrcode_generator__WEBPACK_IMPORTED_MODULE_2___default()(size, 'L');
     cQR.addData(strData);
     cQR.make();
-    domImg.innerHTML = cQR.createImgTag();
+    domImg.innerHTML = cQR.createImgTag(2,2);
     domImg.firstChild.style.borderRadius = '8px';
 }
 
@@ -2916,6 +2948,44 @@ function sanitizeHTML(text) {
  */
 function sleep(ms) {
     return new Promise((res, _) => setTimeout(res, ms));
+}
+
+
+/***/ }),
+
+/***/ "./scripts/native.js":
+/*!***************************!*\
+  !*** ./scripts/native.js ***!
+  \***************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "registerWorker": () => (/* binding */ registerWorker)
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./global */ "./scripts/global.js");
+/* harmony import */ var _misc__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./misc */ "./scripts/misc.js");
+
+
+
+// Register a service worker, if it's supported
+function registerWorker() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./native-worker.js');
+
+        // Listen for device pre-install events, these fire if MPW is capable of being installed on the device
+        window.addEventListener('beforeinstallprompt', (event) => {
+            // Prevent the mini-infobar from appearing on mobile.
+            event.preventDefault();
+        });
+
+        // Listen for successful installs
+        window.addEventListener('appinstalled', (_event) => {
+            // Notify!
+            return (0,_misc__WEBPACK_IMPORTED_MODULE_1__.createAlert)('success', 'App Installed!', 2500);
+        });
+    }
 }
 
 
@@ -4569,12 +4639,11 @@ async function getNewAddress({
     }
 
     if (updateGUI) {
-        _global_js__WEBPACK_IMPORTED_MODULE_5__.doms.domGuiAddress.innerText = address;
         (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createQR)('pivx:' + address, _global_js__WEBPACK_IMPORTED_MODULE_5__.doms.domModalQR);
-        _global_js__WEBPACK_IMPORTED_MODULE_5__.doms.domModalQrLabel.innerHTML = 'pivx:' + address;
+        _global_js__WEBPACK_IMPORTED_MODULE_5__.doms.domModalQrLabel.innerHTML = 'pivx:' + address + `<i onclick="MPW.toClipboard('${address}', this)" id="guiAddressCopy" class="fas fa-clipboard" style="cursor: pointer; width: 20px;"></i>`;
         _global_js__WEBPACK_IMPORTED_MODULE_5__.doms.domModalQR.firstChild.style.width = '100%';
         _global_js__WEBPACK_IMPORTED_MODULE_5__.doms.domModalQR.firstChild.style.height = 'auto';
-        _global_js__WEBPACK_IMPORTED_MODULE_5__.doms.domModalQR.firstChild.style.imageRendering = 'crisp-edges';
+        _global_js__WEBPACK_IMPORTED_MODULE_5__.doms.domModalQR.firstChild.classList.add('no-antialias');
         document.getElementById('clipboard').value = address;
     }
     addressIndex++;

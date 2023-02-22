@@ -43,7 +43,6 @@ const en_translation = {
     navExperimentalSync:"<b>Experimental Sync Active</b>",         //
 
     // Footer
-    footerDonateLink: "Donate!",           //
     footerBuiltWithPivxLabs: "Built with 💜 by PIVX Labs",    //
     footerGithubLink: "MyPIVXWallet",           //
 
@@ -67,29 +66,26 @@ const en_translation = {
     cardFourDesc: "MyPIVXWallet is built with love without any fees, privacy intrusions or advertising. ",               //
     cardFourLink: "Know more",               //
 
-    buttonDonate: "Donate - Pay with MyPIVXWallet",               //
-
     // Dashboard
     dashboardTitle: "Dashboard",             //
     dCardOneTitle: "Create a",              //
     dCardOneSubTitle: "New Wallet",           //
-    dCardOneDesc: "This will create a new, random PIVX wallet that will contain no initial funds, you may transfer to-and-from this wallet with ease.",               //
+    dCardOneDesc: "Create a new PIVX wallet, offering the most secure backup & security methods.",               //
     dCardOneButton: "Create A New Wallet",             //
 
     dCardTwoTitle: "Create a new",              //
     dCardTwoSubTitle: "Vanity Wallet",           //
-    dCardTwoDesc: "This will create a PIVX wallet with a customized prefix of your choosing, requiring more processing power to generate such addresses, it is recommended to generate a prefix of less than 6 characters, for example: 'DAD' is a possible address prefix.",               //
+    dCardTwoDesc: "Create a wallet with a custom prefix, this can take a long time!",               //
     dCardTwoButton: "Create A Vanity Wallet",             //
 
     dCardThreeTitle: "Access your",            //
-    dCardThreeSubTitle: "Hardware Wallet",         //
-    dCardThreeDesc: "This will help managing the PIVX wallet on your ledger. Notice that the private key will remain safe in your hardware device",             //
-    dCardThreeButton: "Access my hardware wallet",           //
+    dCardThreeSubTitle: "Ledger Wallet",         //
+    dCardThreeDesc: "Use your Ledger Hardware wallet with MPW's familiar interface.",             //
+    dCardThreeButton: "Access my Ledger",           //
 
     dCardFourTitle: "Go to",             //
     dCardFourSubTitle: "My Wallet",          //
-    dCardFourDesc: "This will import a PIVX wallet that you hold via it's private key, loading the address and pulling your existing balance, if any, from an explorer node.",              //
-    dCardFourSubDesc:"*Note: MPW developers can NOT access your wallet, this wallet runs purely in YOUR browser using JavaScript.",            //
+    dCardFourDesc: "Import a PIVX wallet using a Private Key, xpriv, or Seed Phrase.",              //
     dCardFourButtonI:"Import Wallet",            //
     dCardFourButtonA:"Access My Wallet",            //
 
@@ -121,14 +117,20 @@ const en_translation = {
     sendSignedTutorialAdvInfo:"Advanced Details: <br>locktime is set to 0, sequence is set to max. SIGHASH_ALL option is chosen for signing raw Transaction.",   //
 
     // Stake
-    stakeTitle:"<b>New Feature!<b>",                  //
-    stakeSubTitle:"Please be aware MPW Cold Staking is a new, slightly experimental feature, it may be unstable, and is currently slow. Please have patience when using this feature, and wait for block confirmations before actions and balances are shown on-screen.",               //
+    stakeTitle:"Stake your PIV to generate rewards!",                  //
+    stakeSubTitle:"Coins that you Stake are \"Locked\" seperately from your Available balance, and have a chance to generate rewards. <br> The more coins you stake, the more frequently you'll receive rewards.",               //
+    stake:"Stake",
     stakeUnstake:"Unstake",                //
     stakeLoadMore:"Load more",               //
 
+    // Governance
+    contestedProposalsTitle:"Contested Proposals",
+    contestedProposalsDesc:"These are proposals that received an overwhelming amount of downvotes, making it likely spam or a highly contestable proposal.",
+
     // Settings
-    settingsExplorer:"Choose an explorer",            //
-    settingsLanguage:"Choose an Language:",            //
+    settingsCurrency:"Choose a display currency:",
+    settingsExplorer:"Choose an explorer:",            //
+    settingsLanguage:"Choose a Language:",            //
     settingsPivxNode:"Choose a PIVX node:",            //
     settingsAnalytics:"Choose your analytics contribution level:",           //
     settingsToggleDebug:"Toggle Debug Mode",         //
@@ -220,7 +222,7 @@ const uwu_translation = {
     amount:"a<i>meow</i>nt",                      //Amount
     staking:"",                     //Staking
     rewards:"rewowods",                     //rewards
-    available:"avawable",                   //Available
+    available:"Avawable",                   //Available
 
     // Nav Bar
     navIntro: "Intwo",                   //Intro
@@ -237,7 +239,6 @@ const uwu_translation = {
     navExperimentalSync:"<b>Dangewous sync actiwated!</b>",         //<b>Experimental Sync Active</b>
 
     // Footer
-    footerDonateLink: "Donate pwease owo!",           //Donate!
     footerBuiltWithPivxLabs: "Built with wuv by PIVX Wabs❣",    //Built with 💜 by PIVX Labs
     footerGithubLink: "",           //MyPIVXWallet
 
@@ -261,29 +262,26 @@ const uwu_translation = {
     cardFourDesc: "MyPIVXWawwet is built with wuv without any fees, pwiwacy intruwutions, or adwertizing.",               //MyPIVXWallet is built with love without any fees, privacy intrusions or advertising. 
     cardFourLink: "Knowo mowore",               //Know more
 
-    buttonDonate: "Dowonate! Pay with MyPIVXWawwet!",               //Donate - Pay with MyPIVXWallet
-
     // Dashboard
     dashboardTitle: "Dashbowod",             //Dashboard
     dCardOneTitle: "Cweate a",              //Create a
     dCardOneSubTitle: "New Wawwet!",           //New Wallet
-    dCardOneDesc: "Dis will cweate a new, wandom, PIVX wawwet dat will contain no initial funds, uwu. Yowou may twansfer to-and-fwom dis wawwet with ease! ",               //This will create a new, random PIVX wallet that will contain no initial funds, you may transfer to-and-from this wallet with ease.
+    dCardOneDesc: "Cweate a new PIVX wawwet, offewing da most secuwur backup & securrrity methods.",               //Create a new PIVX wallet, offering the most secure backup & security methods.
     dCardOneButton: "Cweate A New Wawwet",             //Create A New Wallet
 
     dCardTwoTitle: "Cweate a new",              //Create a new
     dCardTwoSubTitle: "Vanity Wawwet",           //Vanity Wallet
-    dCardTwoDesc: "Dis will cweate a PIVX wawwet with a customizabwe pwefix of yowour choosing, requiweing mowore pwocessing power to genewate such addwesses, it is weccomended to genewate a pwefix of wess den six, fow example: 'DADDY' is a pawsibwe addwess pwefix.",               //This will create a PIVX wallet with a customized prefix of your choosing, requiring more processing power to generate such addresses, it is recommended to generate a prefix of less than 6 characters, for example: "DAD" is a possible address prefix.
+    dCardTwoDesc: "Cweate a wawwet wiv a custom pwefix, dis can take a long twime!",               //Create a wallet with a custom prefix, this can take a long time!
     dCardTwoButton: "Cweate A Vanity Wawwet",             //Create A Vanity Wallet
 
     dCardThreeTitle: "Access yowour",            //Access your
     dCardThreeSubTitle: "Hawdware Wawwet",         //Hardware Wallet
-    dCardThreeDesc: "Dis will help managing da PIVX wawwet on your wedger. Nowotice dat de pwivate key will wemaine safe in yowour hawdware device",             //This will help managing the PIVX wallet on your ledger. Notice that the private key will remain safe in your hardware device
-    dCardThreeButton: "Access my hawdware wawwet",           //Access my hardware wallet
+    dCardThreeDesc: "Use ur Ledger Hardware wawwet wiv MPW's famiwiar intwerface.",             //Use your Ledger Hardware wallet with MPW's familiar interface.
+    dCardThreeButton: "Access my Ledger",           //Access my Ledger
 
     dCardFourTitle: "Go to",             //Go to
     dCardFourSubTitle: "My Wawwet",          //My Wallet
-    dCardFourDesc: "Dis will impowt a PIVX wawwet dat you howd via it's pwivate key, woading da adwess and puwwing your existing bawance, if any, fwom an expwowor node.",              //This will import a PIVX wallet that you hold via it's private key, loading the address and pulling your existing balance, if any, from an explorer node.
-    dCardFourSubDesc:"♡Nowote: MPW devewepers can NOT access yowour wawwet, dis wawwet wuns purewy in YOWOUR bwowser using JavaScwipt.",            //*Note: MPW developers can NOT access your wallet, this wallet runs purely in YOUR browser using JavaScript.
+    dCardFourDesc: "Impowt a PIVX wawwet using a Pwivate Key, xpriv, or Seed Phrase.",              //Import a PIVX wallet using a Private Key, xpriv, or Seed Phrase.
     dCardFourButtonI:"Impowt Wawwet",            //Import Wallet
     dCardFourButtonA:"Access My Wawwet",            //Access My Wallet
 
@@ -315,14 +313,20 @@ const uwu_translation = {
     sendSignedTutorialAdvInfo:"Advanced Detaiws: <br>wocktime is set to zewo, sequence is set to max. SIGHASH_ALL option is chosen for signing rawr Twansaction.",   //Advanced Details: <br>locktime is set to 0, sequence is set to max. SIGHASH_ALL option is chosen for signing raw Transaction.
 
     // Stake
-    stakeTitle:"New Feature!♡",                  //<b>New Feature!<b>
-    stakeSubTitle:"Pwease be aware MPW Cold staking is new, slightly expewimental, feature. It may be unstabwe, and is cuwwentwy slow. Pwease have patience when using dis feature, and wait for bwock confiwmations befowore actions and bawances are showown on-scween.",               //Please be aware MPW Cold Staking is a new, slightly experimental feature, it may be unstable, and is currently slow. Please have patience when using this feature, and wait for block confirmations before actions and balances are shown on-screen.
+    stakeTitle:"Stake ur PIV to genewwate wewards!",                  //Stake your PIV to generate rewards!
+    stakeSubTitle:"Coins dat you Stake are \"Locked\" sepewately from ur Avaiwable bwalance, and havs a chance to genewwate rewawrds. <br> Da more coins you stake, da more frequwuntly you'll receive rewawrds.",               // Coins that you Stake are \"Locked\" seperately from your Available balance, and have a chance to generate rewards. <br> The more coins you stake, the more frequently you'll receive rewards.
+    stake:"", //Stake
     stakeUnstake:"",                //Unstake
     stakeLoadMore:"Lowoad Mowore",               //Load more
 
+    // Governance
+    contestedProposalsTitle:"Contwested Pwoposals",
+    contestedProposalsDesc:"Dees are pwoposals dat received an overwhelming ameownt of downwotes, making it likely spam or a highly contwestable pwoposal.",
+
     // Settings
-    settingsExplorer:"Chowose an expwower",            //Choose an explorer
-    settingsLanguage:"Chowose a Languwuage!",            //Choose an Language:
+    settingsCurrency:"Chowose a dispway cuwwency:",
+    settingsExplorer:"Chowose an expwower:",            //Choose an explorer:
+    settingsLanguage:"Chowose a Languwuage!",            //Choose a Language:
     settingsAnalytics:"Chowose your anawytics contwibution wevel:",           //Choose your analytics contribution level:
     settingsPivxNode:"Chowose a PIVX nowode pwease:",            //Choose a PIVX node:
     settingsToggleDebug:"Toggle Debug Mowode",         //Toggle Debug Mode
@@ -115856,8 +115860,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "MAX_ACCOUNT_GAP": () => (/* binding */ MAX_ACCOUNT_GAP),
 /* harmony export */   "MIN_PASS_LENGTH": () => (/* binding */ MIN_PASS_LENGTH),
 /* harmony export */   "PRIVKEY_BYTE_LENGTH": () => (/* binding */ PRIVKEY_BYTE_LENGTH),
-/* harmony export */   "cChainParams": () => (/* binding */ cChainParams),
-/* harmony export */   "donationAddress": () => (/* binding */ donationAddress)
+/* harmony export */   "cChainParams": () => (/* binding */ cChainParams)
 /* harmony export */ });
 // In most BTC-derived coins, the below parameters can be found in the 'src/chainparams.cpp' Mainnet configuration.
 // These below params share the same names as the CPP params, so finding and editing these is easy-peasy!
@@ -115873,9 +115876,6 @@ const MAX_ACCOUNT_GAP = 20;
 /* Internal tweaking parameters */
 // A new encryption password must be 'at least' this long.
 const MIN_PASS_LENGTH = 6;
-
-// Cool stuff
-const donationAddress = 'DLabsktzGMnsK5K9uRTMCF6NoYNY6ET4Bb';
 
 /* chainparams */
 const cChainParams = {
@@ -115987,8 +115987,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _chain_params_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./chain_params.js */ "./scripts/chain_params.js");
 /* harmony import */ var _aes_gcm_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./aes-gcm.js */ "./scripts/aes-gcm.js");
 /* harmony import */ var _native_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./native.js */ "./scripts/native.js");
+/* harmony import */ var _prices_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./prices.js */ "./scripts/prices.js");
 /* provided dependency */ var console = __webpack_require__(/*! ./node_modules/console-browserify/index.js */ "./node_modules/console-browserify/index.js");
 /* provided dependency */ var $ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
+
 
 
 
@@ -116013,6 +116015,10 @@ function start() {
         domGuiWallet: document.getElementById('guiWallet'),
         domGuiBalance: document.getElementById('guiBalance'),
         domGuiBalanceTicker: document.getElementById('guiBalanceTicker'),
+        domGuiBalanceValue: document.getElementById('guiBalanceValue'),
+        domGuiBalanceValueCurrency: document.getElementById(
+            'guiBalanceValueCurrency'
+        ),
         domGuiBalanceBox: document.getElementById('guiBalanceBox'),
         domBalanceReload: document.getElementById('balanceReload'),
         domBalanceReloadStaking: document.getElementById(
@@ -116052,6 +116058,12 @@ function start() {
         //GOVERNANCE ELEMENTS
         domGovProposalsTable: document.getElementById('proposalsTable'),
         domGovProposalsTableBody: document.getElementById('proposalsTableBody'),
+        domGovProposalsContestedTable: document.getElementById(
+            'proposalsContestedTable'
+        ),
+        domGovProposalsContestedTableBody: document.getElementById(
+            'proposalsContestedTableBody'
+        ),
         //MASTERNODE ELEMENTS
         domCreateMasternode: document.getElementById('createMasternode'),
         domControlMasternode: document.getElementById('controlMasternode'),
@@ -116139,6 +116151,7 @@ function start() {
         domNetworkD: document.getElementById('NetworkD'),
         domDebug: document.getElementById('Debug'),
         domTestnet: document.getElementById('Testnet'),
+        domCurrencySelect: document.getElementById('currency'),
         domExplorerSelect: document.getElementById('explorer'),
         domNodeSelect: document.getElementById('node'),
         domTranslationSelect: document.getElementById('translation'),
@@ -116231,19 +116244,46 @@ function openTab(evt, tabName) {
 
 function getBalance(updateGUI = false) {
     const nBalance = mempool.getBalance();
+    const nCoins = nBalance / _chain_params_js__WEBPACK_IMPORTED_MODULE_8__.COIN;
 
     // Update the GUI too, if chosen
     if (updateGUI) {
         // Set the balance, and adjust font-size for large balance strings
-        const nLen = (nBalance / _chain_params_js__WEBPACK_IMPORTED_MODULE_8__.COIN).toFixed(2).length;
-        doms.domGuiBalance.innerText = (nBalance / _chain_params_js__WEBPACK_IMPORTED_MODULE_8__.COIN).toFixed(
-            nLen >= 6 ? 0 : 2
-        );
+        const nLen = nCoins.toFixed(2).length;
+        doms.domGuiBalance.innerText = nCoins.toFixed(nLen >= 6 ? 0 : 2);
         doms.domAvailToDelegate.innerText =
             'Available: ~' +
-            (nBalance / _chain_params_js__WEBPACK_IMPORTED_MODULE_8__.COIN).toFixed(2) +
+            nCoins.toFixed(2) +
             ' ' +
             _chain_params_js__WEBPACK_IMPORTED_MODULE_8__.cChainParams.current.TICKER;
+
+        // Update currency values
+        _settings_js__WEBPACK_IMPORTED_MODULE_6__.cMarket.getPrice(_settings_js__WEBPACK_IMPORTED_MODULE_6__.strCurrency).then((nPrice) => {
+            // Configure locale settings by detecting currency support
+            const cLocale = Intl.supportedValuesOf('currency').includes(
+                _settings_js__WEBPACK_IMPORTED_MODULE_6__.strCurrency.toUpperCase()
+            )
+                ? {
+                      style: 'currency',
+                      currency: _settings_js__WEBPACK_IMPORTED_MODULE_6__.strCurrency,
+                      currencyDisplay: 'narrowSymbol',
+                  }
+                : { maximumFractionDigits: 8, minimumFractionDigits: 8 };
+            let nValue = nCoins * nPrice;
+            // Handle certain edge-cases; like satoshis having decimals.
+            switch (_settings_js__WEBPACK_IMPORTED_MODULE_6__.strCurrency) {
+                case 'sats':
+                    nValue = Math.round(nValue);
+                    cLocale.maximumFractionDigits = 0;
+                    cLocale.minimumFractionDigits = 0;
+            }
+            doms.domGuiBalanceValue.innerText = nValue.toLocaleString(
+                'en-gb',
+                cLocale
+            );
+            doms.domGuiBalanceValueCurrency.innerText =
+                _settings_js__WEBPACK_IMPORTED_MODULE_6__.strCurrency.toUpperCase();
+        });
 
         // Add a notice to the Send page if balance is lacking
         doms.domsendNotice.innerHTML = nBalance
@@ -116344,10 +116384,18 @@ async function playMusic() {
 }
 
 function unblurPrivKey() {
-    if (document.getElementById("exportPrivateKeyText").classList.contains("blurred")) {
-        document.getElementById("exportPrivateKeyText").classList.remove("blurred");
+    if (
+        document
+            .getElementById('exportPrivateKeyText')
+            .classList.contains('blurred')
+    ) {
+        document
+            .getElementById('exportPrivateKeyText')
+            .classList.remove('blurred');
     } else {
-        document.getElementById("exportPrivateKeyText").classList.add("blurred");
+        document
+            .getElementById('exportPrivateKeyText')
+            .classList.add('blurred');
     }
 }
 
@@ -116673,12 +116721,7 @@ function guiEncryptWallet() {
             4000
         );
     if (strPass !== strPassRetype)
-        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.createAlert)(
-            'warning',
-            _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.PASSWORD_DOESNT_MATCH,
-            [],
-            2250
-        );
+        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.createAlert)('warning', _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.PASSWORD_DOESNT_MATCH, [], 2250);
     (0,_wallet_js__WEBPACK_IMPORTED_MODULE_4__.encryptWallet)(strPass);
     (0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.createAlert)('success', _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.NEW_PASSWORD_SUCCESS, [], 5500);
 
@@ -116753,7 +116796,7 @@ async function generateVanityWallet() {
         doms.domPrefix.style.display = 'block';
         setTimeout(() => {
             doms.domPrefix.style.opacity = '1';
-        },100);
+        }, 100);
         doms.domGuiAddress.innerHTML = '~';
         doms.domPrefix.focus();
     } else {
@@ -116794,7 +116837,7 @@ async function generateVanityWallet() {
         console.log('Spawning ' + nThreads + ' vanity search threads!');
         while (arrWorkers.length < nThreads) {
             arrWorkers.push(
-                new Worker(new URL(/* worker import */ __webpack_require__.p + __webpack_require__.u("scripts_misc_js"), __webpack_require__.b))
+                new Worker(new URL(/* worker import */ __webpack_require__.p + __webpack_require__.u("scripts_global_js-scripts_misc_js"), __webpack_require__.b))
             );
             const checkResult = (data) => {
                 attempts++;
@@ -116899,52 +116942,89 @@ async function restoreWallet() {
     }
 }
 
+/**
+ * Fetch Governance data and re-render the Governance UI
+ */
 async function updateGovernanceTab() {
-    const proposals = await _masternode_js__WEBPACK_IMPORTED_MODULE_1__["default"].getProposals();
-    doms.domGovProposalsTableBody.innerHTML = '';
-    for (const proposal of proposals) {
-        if (proposal.RemainingPaymentCount === 0) {
-            continue;
-        }
-        const tr = doms.domGovProposalsTableBody.insertRow();
-        const td1 = tr.insertCell();
-        // IMPORTANT: We must sanite all of our HTML or a rogue server or malicious proposal could perform a cross side scripting attack
-        td1.innerHTML = `<a class="active" href="${(0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.sanitizeHTML)(
-            proposal.URL
-        )}"><b>${(0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.sanitizeHTML)(proposal.Name)}</b></a>`;
-        const td2 = tr.insertCell();
-        td2.innerHTML = `<b>${(0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.sanitizeHTML)(proposal.MonthlyPayment)}</b> ${
-            _chain_params_js__WEBPACK_IMPORTED_MODULE_8__.cChainParams.current.TICKER
-        } <br>
+    // Fetch all proposals from the network
+    const arrProposals = await _masternode_js__WEBPACK_IMPORTED_MODULE_1__["default"].getProposals({
+        fAllowFinished: false,
+    });
+
+    /* Sort proposals into two categories
+        - Standard (Proposal is either new with <100 votes, or has a healthy vote count)
+        - Contested (When a proposal may be considered spam, malicious, or simply highly contestable)
+    */
+    const arrStandard = arrProposals.filter(
+        (a) => a.Yeas + a.Nays < 100 || a.Ratio > 0.25
+    );
+    const arrContested = arrProposals.filter(
+        (a) => a.Yeas + a.Nays >= 100 && a.Ratio <= 0.25
+    );
+
+    // Render Proposals
+    renderProposals(arrStandard, false);
+    renderProposals(arrContested, true);
+}
+
+/**
+ * Render Governance proposal objects to a given Proposal category
+ * @param {Array<object>} arrProposals - The proposals to render
+ * @param {boolean} fContested - The proposal category
+ */
+function renderProposals(arrProposals, fContested) {
+    // Select the table based on the proposal category
+    const domTable = fContested
+        ? doms.domGovProposalsContestedTableBody
+        : doms.domGovProposalsTableBody;
+
+    // Render the proposals in the relevent table
+    domTable.innerHTML = '';
+    for (const cProposal of arrProposals) {
+        const domRow = domTable.insertRow();
+
+        // Name and URL hyperlink
+        const domNameAndURL = domRow.insertCell();
+        // IMPORTANT: Sanitise all of our HTML or a rogue server or malicious proposal could perform a cross-site scripting attack
+        domNameAndURL.innerHTML = `<a class="active" href="${(0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.sanitizeHTML)(
+            cProposal.URL
+        )}"><b>${(0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.sanitizeHTML)(cProposal.Name)}</b></a>`;
+
+        // Payment Schedule and Amounts
+        const domPayments = domRow.insertCell();
+        domPayments.innerHTML = `<b>${(0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.sanitizeHTML)(
+            cProposal.MonthlyPayment
+        )}</b> ${_chain_params_js__WEBPACK_IMPORTED_MODULE_8__.cChainParams.current.TICKER} <br>
       <small> ${(0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.sanitizeHTML)(
-          proposal['RemainingPaymentCount']
-      )} payments remaining of <b>${(0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.sanitizeHTML)(proposal.TotalPayment)}</b> ${
+          cProposal['RemainingPaymentCount']
+      )} payments remaining of <b>${(0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.sanitizeHTML)(cProposal.TotalPayment)}</b> ${
             _chain_params_js__WEBPACK_IMPORTED_MODULE_8__.cChainParams.current.TICKER
         } total</small>`;
-        const td3 = tr.insertCell();
-        let { Yeas, Nays } = proposal;
-        Yeas = parseInt(Yeas);
-        Nays = parseInt(Nays);
-        const percentage = Yeas + Nays !== 0 ? (Yeas / (Yeas + Nays)) * 100 : 0;
 
-        td3.innerHTML = `<b>${percentage.toFixed(2)}%</b> <br>
+        // Vote Counts and Consensus Percentages
+        const domVoteCounters = domRow.insertCell();
+        const { Yeas, Nays } = cProposal;
+        const nPercent = cProposal.Ratio * 100;
+
+        domVoteCounters.innerHTML = `<b>${nPercent.toFixed(2)}%</b> <br>
       <small> <b><div class="text-success" style="display:inline;"> ${Yeas} </div></b> /
 	  <b><div class="text-danger" style="display:inline;"> ${Nays} </div></b>
       `;
-        const td4 = tr.insertCell();
-        //append vote buttons
-        const buttonNo = document.createElement('button');
-        buttonNo.className = 'pivx-button-big';
-        buttonNo.innerText = 'No';
-        buttonNo.onclick = () => govVote(proposal.Hash, 2);
 
-        const buttonYes = document.createElement('button');
-        buttonYes.className = 'pivx-button-big';
-        buttonYes.innerText = 'Yes';
-        buttonYes.onclick = () => govVote(proposal.Hash, 1);
+        // Voting Buttons for Masternode owners (MNOs)
+        const domVoteBtns = domRow.insertCell();
+        const domNoBtn = document.createElement('button');
+        domNoBtn.className = 'pivx-button-big';
+        domNoBtn.innerText = 'No';
+        domNoBtn.onclick = () => govVote(cProposal.Hash, 2);
 
-        td4.appendChild(buttonNo);
-        td4.appendChild(buttonYes);
+        const domYesBtn = document.createElement('button');
+        domYesBtn.className = 'pivx-button-big';
+        domYesBtn.innerText = 'Yes';
+        domYesBtn.onclick = () => govVote(cProposal.Hash, 1);
+
+        domVoteBtns.appendChild(domNoBtn);
+        domVoteBtns.appendChild(domYesBtn);
     }
 }
 
@@ -117169,6 +117249,9 @@ function refreshChainData() {
     // Fetch block count + UTXOs
     (0,_network_js__WEBPACK_IMPORTED_MODULE_5__.getBlockCount)();
     getBalance(true);
+
+    // Fetch pricing data
+    (0,_prices_js__WEBPACK_IMPORTED_MODULE_11__.refreshPriceDisplay)();
 }
 
 // A safety mechanism enabled if the user attempts to leave without encrypting/saving their keys
@@ -117642,11 +117725,22 @@ class Masternode {
     }
 
     /**
-     * @return {Promise<Array>} A list of currently active proposal
+     *
+     * @param {object} options
+     * @param {bool} options.fAllowFinished - Pass `true` to stop filtering proposals if finished
+     * @return {Promise<Array<object>} A list of currently active proposal
      */
-    static async getProposals() {
+    static async getProposals({ fAllowFinished = false } = {}) {
         const url = `${_settings_js__WEBPACK_IMPORTED_MODULE_0__.cNode.url}/getbudgetinfo`;
-        return await (await fetch(url)).json();
+        let arrProposals = await (await fetch(url)).json();
+
+        // Apply optional filters
+        if (!fAllowFinished) {
+            arrProposals = arrProposals.filter(
+                (a) => a.RemainingPaymentCount > 0
+            );
+        }
+        return arrProposals;
     }
 
     /**
@@ -118136,7 +118230,6 @@ function createAlert(type, message, alertVariables = [], timeout = 0) {
         domAlert.classList.add('bounce-ani');
         domAlert.classList.add('bounce');
     }, 100);
-    
 
     // Maintainer QoL adjustment: if `alertVariables` is a number, it is instead assumed to be `timeout`
     if (typeof alertVariables === 'number') {
@@ -118210,7 +118303,7 @@ function createQR(strData = '', domImg, size = 4) {
     const cQR = qrcode_generator__WEBPACK_IMPORTED_MODULE_2___default()(size, 'L');
     cQR.addData(strData);
     cQR.make();
-    domImg.innerHTML = cQR.createImgTag(2,2);
+    domImg.innerHTML = cQR.createImgTag(2, 2);
     domImg.firstChild.style.borderRadius = '8px';
 }
 
@@ -118529,16 +118622,10 @@ async function sendTransaction(hex, msg = '') {
         ).json();
         if (data.result && data.result.length === 64) {
             console.log('Transaction sent! ' + data.result);
-            if (_global_js__WEBPACK_IMPORTED_MODULE_1__.doms.domAddress1s.value !== _chain_params_js__WEBPACK_IMPORTED_MODULE_3__.donationAddress)
-                _global_js__WEBPACK_IMPORTED_MODULE_1__.doms.domTxOutput.innerHTML =
-                    '<h4 style="color:green; font-family:mono !important;">' +
-                    data.result +
-                    '</h4>';
-            else
-                _global_js__WEBPACK_IMPORTED_MODULE_1__.doms.domTxOutput.innerHTML =
-                    '<h4 style="color:green">Thank you for supporting MyPIVXWallet! 💜💜💜<br><span style="font-family:mono !important">' +
-                    data.result +
-                    '</span></h4>';
+            _global_js__WEBPACK_IMPORTED_MODULE_1__.doms.domTxOutput.innerHTML =
+                '<h4 style="color:green; font-family:mono !important;">' +
+                data.result +
+                '</h4>';
             _global_js__WEBPACK_IMPORTED_MODULE_1__.doms.domSimpleTXs.style.display = 'none';
             _global_js__WEBPACK_IMPORTED_MODULE_1__.doms.domAddress1s.value = '';
             _global_js__WEBPACK_IMPORTED_MODULE_1__.doms.domValue1s.innerHTML = '';
@@ -118695,6 +118782,108 @@ function submitAnalytics(strType, cData = {}) {
     request.setRequestHeader('Content-Type', 'application/json');
     request.send(JSON.stringify(cStats));
     return true;
+}
+
+
+/***/ }),
+
+/***/ "./scripts/prices.js":
+/*!***************************!*\
+  !*** ./scripts/prices.js ***!
+  \***************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "COINGECKO_ENDPOINT": () => (/* binding */ COINGECKO_ENDPOINT),
+/* harmony export */   "CoinGecko": () => (/* binding */ CoinGecko),
+/* harmony export */   "MarketSource": () => (/* binding */ MarketSource),
+/* harmony export */   "refreshPriceDisplay": () => (/* binding */ refreshPriceDisplay)
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./global */ "./scripts/global.js");
+/* harmony import */ var _settings__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./settings */ "./scripts/settings.js");
+
+
+
+/**
+ * CoinGecko's endpoint for PIVX data, optimised for least bandwidth
+ * - No localisation, tickers, community data, developer data or sparklines
+ */
+const COINGECKO_ENDPOINT =
+    'https://api.coingecko.com/api/v3/coins/pivx?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false';
+
+/**
+ * The generic market data source template, used to build site-specific classes
+ */
+class MarketSource {
+    /** The storage object for raw market data */
+    cData = {};
+
+    /** The name of the market source */
+    strName = '';
+
+    /** The customised API endpoint of the market source */
+    strEndpoint = '';
+
+    /**
+     * Ensure a market data cache exists, if not, fetch it and resume
+     */
+    async ensureCacheExists() {
+        if (!this.cData || !Object.keys(this.cData).length) await this.fetch();
+    }
+
+    /**
+     * Fetches the raw market source data
+     * @returns {Promise<object>}
+     */
+    async fetch() {
+        return (this.cData = await (await fetch(this.strEndpoint)).json());
+    }
+}
+
+/**
+ * The CoinGecko market data source
+ */
+class CoinGecko extends MarketSource {
+    constructor() {
+        super();
+        this.strName = 'CoinGecko';
+        this.strEndpoint = COINGECKO_ENDPOINT;
+    }
+
+    /**
+     * Get the price in a specific display currency
+     * @param {string} strCurrency - The CoinGecko-supported display currency
+     * @return {Promise<number>}
+     */
+    async getPrice(strCurrency) {
+        await this.ensureCacheExists();
+        return this.cData.market_data.current_price[strCurrency];
+    }
+
+    /**
+     * Get a list of the supported display currencies
+     * @returns {Promise<Array<string>>} - A list of CoinGecko-supported display currencies
+     */
+    async getCurrencies() {
+        await this.ensureCacheExists();
+        return Object.keys(this.cData.market_data.current_price);
+    }
+}
+
+/**
+ * Refreshes market data from the user's data source, then re-renders currency options and price displays
+ */
+async function refreshPriceDisplay() {
+    // Refresh our price data
+    await _settings__WEBPACK_IMPORTED_MODULE_1__.cMarket.fetch();
+
+    // Update the currency customisation menu from the selected data source
+    await (0,_settings__WEBPACK_IMPORTED_MODULE_1__.fillCurrencySelect)();
+
+    // Update price values
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.getBalance)(true);
 }
 
 
@@ -118893,10 +119082,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "STATS": () => (/* binding */ STATS),
 /* harmony export */   "cAnalyticsLevel": () => (/* binding */ cAnalyticsLevel),
 /* harmony export */   "cExplorer": () => (/* binding */ cExplorer),
+/* harmony export */   "cMarket": () => (/* binding */ cMarket),
 /* harmony export */   "cNode": () => (/* binding */ cNode),
 /* harmony export */   "cStatKeys": () => (/* binding */ cStatKeys),
 /* harmony export */   "debug": () => (/* binding */ debug),
+/* harmony export */   "fillCurrencySelect": () => (/* binding */ fillCurrencySelect),
 /* harmony export */   "start": () => (/* binding */ start),
+/* harmony export */   "strCurrency": () => (/* binding */ strCurrency),
 /* harmony export */   "toggleDebug": () => (/* binding */ toggleDebug),
 /* harmony export */   "toggleTestnet": () => (/* binding */ toggleTestnet)
 /* harmony export */ });
@@ -118906,6 +119098,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _network_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./network.js */ "./scripts/network.js");
 /* harmony import */ var _misc_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./misc.js */ "./scripts/misc.js");
 /* harmony import */ var _i18n_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./i18n.js */ "./scripts/i18n.js");
+/* harmony import */ var _prices_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./prices.js */ "./scripts/prices.js");
+
 
 
 
@@ -118914,9 +119108,23 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // --- Default Settings
-let debug = false; // A mode that emits verbose console info for internal MPW operations
-let networkEnabled = true; // A lock which blocks ALL network requests in totality
+/** A mode that emits verbose console info for internal MPW operations */
+let debug = false;
+/** A lock which blocks ALL network requests in totality */
+let networkEnabled = true;
+/**
+ * The user-selected display currency from market-aggregator sites
+ * @type {string}
+ */
+let strCurrency = 'usd';
+/**
+ * The global market data source
+ * @type {CoinGecko}
+ */
+let cMarket = new _prices_js__WEBPACK_IMPORTED_MODULE_6__.CoinGecko();
+/** The user-selected explorer, used for most of MPW's data synchronisation */
 let cExplorer = _chain_params_js__WEBPACK_IMPORTED_MODULE_2__.cChainParams.current.Explorers[0];
+/** The user-selected MPW node, used for alternative blockchain data */
 let cNode = _chain_params_js__WEBPACK_IMPORTED_MODULE_2__.cChainParams.current.Nodes[0];
 
 let transparencyReport;
@@ -118959,6 +119167,11 @@ function start() {
         : 'none';
     _global_js__WEBPACK_IMPORTED_MODULE_0__.doms.domDebug.style.display = debug ? '' : 'none';
 
+    // Hook up the 'currency' select UI
+    document.getElementById('currency').onchange = function (evt) {
+        setCurrency(evt.target.value);
+    };
+
     // Hook up the 'explorer' select UI
     document.getElementById('explorer').onchange = function (evt) {
         setExplorer(
@@ -118968,21 +119181,26 @@ function start() {
         );
     };
 
+    // Hook up the 'translation' select UI
     document.getElementById('translation').onchange = function (evt) {
         setTranslation(evt.target.value);
     };
+
     // Hook up the 'analytics' select UI
     document.getElementById('analytics').onchange = function (evt) {
         setAnalytics(arrAnalytics.find((a) => a.name === evt.target.value));
     };
 
-    const domAnalyticsSelect = document.getElementById('analytics');
-
+    // Fill all selection UIs with their options
+    if (networkEnabled) {
+        fillCurrencySelect();
+    }
     fillExplorerSelect();
     fillNodeSelect();
     fillTranslationSelect();
 
     // Add each analytics level into the UI selector
+    const domAnalyticsSelect = document.getElementById('analytics');
     for (const analLevel of arrAnalytics) {
         const opt = document.createElement('option');
         opt.value = opt.innerHTML = analLevel.name;
@@ -119068,13 +119286,24 @@ function setNode(node, fSilent = false) {
 
 //TRANSLATION
 /**
- * switches the translation and sets the translation preference to local storage
+ * Switches the translation and sets the translation preference to local storage
  * @param {string} lang
  * @param {bool} fSilent
  */
 function setTranslation(lang) {
     (0,_i18n_js__WEBPACK_IMPORTED_MODULE_5__.switchTranslation)(lang);
     localStorage.setItem('translation', lang);
+}
+
+/**
+ * Sets and saves the display currency setting in runtime and localStorage
+ * @param {string} currency - The currency string name
+ */
+function setCurrency(currency) {
+    strCurrency = currency;
+    localStorage.setItem('displayCurrency', strCurrency);
+    // Update the UI to reflect the new currency
+    (0,_global_js__WEBPACK_IMPORTED_MODULE_0__.getBalance)(true);
 }
 
 /**
@@ -119088,14 +119317,34 @@ function fillTranslationSelect() {
     // Add each trusted explorer into the UI selector
     for (const lang of _i18n_js__WEBPACK_IMPORTED_MODULE_5__.arrActiveLangs) {
         const opt = document.createElement('option');
-        opt.value = lang;
-        opt.innerHTML = lang;
+        opt.innerHTML = opt.value = lang;
         _global_js__WEBPACK_IMPORTED_MODULE_0__.doms.domTranslationSelect.appendChild(opt);
     }
 
     // And update the UI to reflect them
     _global_js__WEBPACK_IMPORTED_MODULE_0__.doms.domTranslationSelect.value =
         localStorage.getItem('translation') || 'en';
+}
+
+/**
+ * Fills the display currency dropbox on the settings page
+ */
+async function fillCurrencySelect() {
+    while (_global_js__WEBPACK_IMPORTED_MODULE_0__.doms.domCurrencySelect.options.length > 0) {
+        _global_js__WEBPACK_IMPORTED_MODULE_0__.doms.domCurrencySelect.remove(0);
+    }
+
+    // Add each data source currency into the UI selector
+    for (const currency of await cMarket.getCurrencies()) {
+        const opt = document.createElement('option');
+        opt.innerHTML = currency.toUpperCase();
+        opt.value = currency;
+        _global_js__WEBPACK_IMPORTED_MODULE_0__.doms.domCurrencySelect.appendChild(opt);
+    }
+
+    // And update the UI to reflect them
+    strCurrency = _global_js__WEBPACK_IMPORTED_MODULE_0__.doms.domCurrencySelect.value =
+        localStorage.getItem('displayCurrency') || strCurrency;
 }
 
 function setAnalytics(level, fSilent = false) {
@@ -121276,7 +121525,10 @@ async function getNewAddress({
 
     if (updateGUI) {
         (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createQR)('pivx:' + address, _global_js__WEBPACK_IMPORTED_MODULE_5__.doms.domModalQR);
-        _global_js__WEBPACK_IMPORTED_MODULE_5__.doms.domModalQrLabel.innerHTML = 'pivx:' + address + `<i onclick="MPW.toClipboard('${address}', this)" id="guiAddressCopy" class="fas fa-clipboard" style="cursor: pointer; width: 20px;"></i>`;
+        _global_js__WEBPACK_IMPORTED_MODULE_5__.doms.domModalQrLabel.innerHTML =
+            'pivx:' +
+            address +
+            `<i onclick="MPW.toClipboard('${address}', this)" id="guiAddressCopy" class="fas fa-clipboard" style="cursor: pointer; width: 20px;"></i>`;
         _global_js__WEBPACK_IMPORTED_MODULE_5__.doms.domModalQR.firstChild.style.width = '100%';
         _global_js__WEBPACK_IMPORTED_MODULE_5__.doms.domModalQR.firstChild.style.height = 'auto';
         _global_js__WEBPACK_IMPORTED_MODULE_5__.doms.domModalQR.firstChild.classList.add('no-antialias');
@@ -125284,7 +125536,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "delegateGUI": () => (/* reexport safe */ _transactions_js__WEBPACK_IMPORTED_MODULE_7__.delegateGUI),
 /* harmony export */   "destroyMasternode": () => (/* reexport safe */ _global_js__WEBPACK_IMPORTED_MODULE_4__.destroyMasternode),
 /* harmony export */   "doms": () => (/* reexport safe */ _global_js__WEBPACK_IMPORTED_MODULE_4__.doms),
-/* harmony export */   "donationAddress": () => (/* reexport safe */ _chain_params_js__WEBPACK_IMPORTED_MODULE_9__.donationAddress),
 /* harmony export */   "generateVanityWallet": () => (/* reexport safe */ _global_js__WEBPACK_IMPORTED_MODULE_4__.generateVanityWallet),
 /* harmony export */   "generateWallet": () => (/* reexport safe */ _wallet_js__WEBPACK_IMPORTED_MODULE_5__.generateWallet),
 /* harmony export */   "getNewAddress": () => (/* reexport safe */ _wallet_js__WEBPACK_IMPORTED_MODULE_5__.getNewAddress),
@@ -125305,7 +125556,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "toggleDebug": () => (/* reexport safe */ _settings_js__WEBPACK_IMPORTED_MODULE_6__.toggleDebug),
 /* harmony export */   "toggleDropDown": () => (/* reexport safe */ _global_js__WEBPACK_IMPORTED_MODULE_4__.toggleDropDown),
 /* harmony export */   "toggleExportUI": () => (/* reexport safe */ _global_js__WEBPACK_IMPORTED_MODULE_4__.toggleExportUI),
-/* harmony export */   "toggleNetwork": () => (/* reexport safe */ _network_js__WEBPACK_IMPORTED_MODULE_10__.toggleNetwork),
+/* harmony export */   "toggleNetwork": () => (/* reexport safe */ _network_js__WEBPACK_IMPORTED_MODULE_9__.toggleNetwork),
 /* harmony export */   "toggleTestnet": () => (/* reexport safe */ _settings_js__WEBPACK_IMPORTED_MODULE_6__.toggleTestnet),
 /* harmony export */   "unblurPrivKey": () => (/* reexport safe */ _global_js__WEBPACK_IMPORTED_MODULE_4__.unblurPrivKey),
 /* harmony export */   "undelegateGUI": () => (/* reexport safe */ _transactions_js__WEBPACK_IMPORTED_MODULE_7__.undelegateGUI),
@@ -125321,8 +125572,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _settings_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./settings.js */ "./scripts/settings.js");
 /* harmony import */ var _transactions_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./transactions.js */ "./scripts/transactions.js");
 /* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./utils.js */ "./scripts/utils.js");
-/* harmony import */ var _chain_params_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./chain_params.js */ "./scripts/chain_params.js");
-/* harmony import */ var _network_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./network.js */ "./scripts/network.js");
+/* harmony import */ var _network_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./network.js */ "./scripts/network.js");
 
 
 
@@ -125333,7 +125583,6 @@ __webpack_require__.r(__webpack_exports__);
 window.onload = _global_js__WEBPACK_IMPORTED_MODULE_4__.start;
 
 // Export global functions to the MPW namespace so we can use them in html
-
 
 
 

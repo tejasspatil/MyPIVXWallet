@@ -57962,6 +57962,1677 @@ module.exports = invariant;
 
 /***/ }),
 
+/***/ "./node_modules/ip-address/dist/esm/ip-address.js":
+/*!********************************************************!*\
+  !*** ./node_modules/ip-address/dist/esm/ip-address.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Address4": () => (/* reexport safe */ _lib_ipv4__WEBPACK_IMPORTED_MODULE_0__.Address4),
+/* harmony export */   "Address6": () => (/* reexport safe */ _lib_ipv6__WEBPACK_IMPORTED_MODULE_1__.Address6),
+/* harmony export */   "AddressError": () => (/* reexport safe */ _lib_address_error__WEBPACK_IMPORTED_MODULE_2__.AddressError),
+/* harmony export */   "v6": () => (/* binding */ v6)
+/* harmony export */ });
+/* harmony import */ var _lib_ipv4__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./lib/ipv4 */ "./node_modules/ip-address/dist/esm/lib/ipv4.js");
+/* harmony import */ var _lib_ipv6__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./lib/ipv6 */ "./node_modules/ip-address/dist/esm/lib/ipv6.js");
+/* harmony import */ var _lib_address_error__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./lib/address-error */ "./node_modules/ip-address/dist/esm/lib/address-error.js");
+/* harmony import */ var _lib_v6_helpers__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./lib/v6/helpers */ "./node_modules/ip-address/dist/esm/lib/v6/helpers.js");
+
+
+
+
+
+
+
+const v6 = { helpers: _lib_v6_helpers__WEBPACK_IMPORTED_MODULE_3__ };
+//# sourceMappingURL=ip-address.js.map
+
+/***/ }),
+
+/***/ "./node_modules/ip-address/dist/esm/lib/address-error.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/ip-address/dist/esm/lib/address-error.js ***!
+  \***************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "AddressError": () => (/* binding */ AddressError)
+/* harmony export */ });
+class AddressError extends Error {
+    constructor(message, parseMessage) {
+        super(message);
+        this.name = 'AddressError';
+        if (parseMessage !== null) {
+            this.parseMessage = parseMessage;
+        }
+    }
+}
+//# sourceMappingURL=address-error.js.map
+
+/***/ }),
+
+/***/ "./node_modules/ip-address/dist/esm/lib/common.js":
+/*!********************************************************!*\
+  !*** ./node_modules/ip-address/dist/esm/lib/common.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "isCorrect": () => (/* binding */ isCorrect),
+/* harmony export */   "isInSubnet": () => (/* binding */ isInSubnet)
+/* harmony export */ });
+function isInSubnet(address) {
+    if (this.subnetMask < address.subnetMask) {
+        return false;
+    }
+    if (this.mask(address.subnetMask) === address.mask()) {
+        return true;
+    }
+    return false;
+}
+function isCorrect(defaultBits) {
+    return function () {
+        if (this.addressMinusSuffix !== this.correctForm()) {
+            return false;
+        }
+        if (this.subnetMask === defaultBits && !this.parsedSubnet) {
+            return true;
+        }
+        return this.parsedSubnet === String(this.subnetMask);
+    };
+}
+//# sourceMappingURL=common.js.map
+
+/***/ }),
+
+/***/ "./node_modules/ip-address/dist/esm/lib/ipv4.js":
+/*!******************************************************!*\
+  !*** ./node_modules/ip-address/dist/esm/lib/ipv4.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Address4": () => (/* binding */ Address4)
+/* harmony export */ });
+/* harmony import */ var _common__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./common */ "./node_modules/ip-address/dist/esm/lib/common.js");
+/* harmony import */ var _v4_constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./v4/constants */ "./node_modules/ip-address/dist/esm/lib/v4/constants.js");
+/* harmony import */ var _address_error__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./address-error */ "./node_modules/ip-address/dist/esm/lib/address-error.js");
+/* harmony import */ var jsbn__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! jsbn */ "./node_modules/jsbn/index.js");
+/* harmony import */ var jsbn__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(jsbn__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var sprintf_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! sprintf-js */ "./node_modules/sprintf-js/src/sprintf.js");
+/* harmony import */ var sprintf_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(sprintf_js__WEBPACK_IMPORTED_MODULE_4__);
+/* eslint-disable no-param-reassign */
+
+
+
+
+
+/**
+ * Represents an IPv4 address
+ * @class Address4
+ * @param {string} address - An IPv4 address string
+ */
+class Address4 {
+    constructor(address) {
+        this.groups = _v4_constants__WEBPACK_IMPORTED_MODULE_1__.GROUPS;
+        this.parsedAddress = [];
+        this.parsedSubnet = '';
+        this.subnet = '/32';
+        this.subnetMask = 32;
+        this.v4 = true;
+        /**
+         * Returns true if the address is correct, false otherwise
+         * @memberof Address4
+         * @instance
+         * @returns {Boolean}
+         */
+        this.isCorrect = _common__WEBPACK_IMPORTED_MODULE_0__.isCorrect(_v4_constants__WEBPACK_IMPORTED_MODULE_1__.BITS);
+        /**
+         * Returns true if the given address is in the subnet of the current address
+         * @memberof Address4
+         * @instance
+         * @returns {boolean}
+         */
+        this.isInSubnet = _common__WEBPACK_IMPORTED_MODULE_0__.isInSubnet;
+        this.address = address;
+        const subnet = _v4_constants__WEBPACK_IMPORTED_MODULE_1__.RE_SUBNET_STRING.exec(address);
+        if (subnet) {
+            this.parsedSubnet = subnet[0].replace('/', '');
+            this.subnetMask = parseInt(this.parsedSubnet, 10);
+            this.subnet = `/${this.subnetMask}`;
+            if (this.subnetMask < 0 || this.subnetMask > _v4_constants__WEBPACK_IMPORTED_MODULE_1__.BITS) {
+                throw new _address_error__WEBPACK_IMPORTED_MODULE_2__.AddressError('Invalid subnet mask.');
+            }
+            address = address.replace(_v4_constants__WEBPACK_IMPORTED_MODULE_1__.RE_SUBNET_STRING, '');
+        }
+        this.addressMinusSuffix = address;
+        this.parsedAddress = this.parse(address);
+    }
+    static isValid(address) {
+        try {
+            // eslint-disable-next-line no-new
+            new Address4(address);
+            return true;
+        }
+        catch (e) {
+            return false;
+        }
+    }
+    /*
+     * Parses a v4 address
+     */
+    parse(address) {
+        const groups = address.split('.');
+        if (!address.match(_v4_constants__WEBPACK_IMPORTED_MODULE_1__.RE_ADDRESS)) {
+            throw new _address_error__WEBPACK_IMPORTED_MODULE_2__.AddressError('Invalid IPv4 address.');
+        }
+        return groups;
+    }
+    /**
+     * Returns the correct form of an address
+     * @memberof Address4
+     * @instance
+     * @returns {String}
+     */
+    correctForm() {
+        return this.parsedAddress.map((part) => parseInt(part, 10)).join('.');
+    }
+    /**
+     * Converts a hex string to an IPv4 address object
+     * @memberof Address4
+     * @static
+     * @param {string} hex - a hex string to convert
+     * @returns {Address4}
+     */
+    static fromHex(hex) {
+        const padded = hex.replace(/:/g, '').padStart(8, '0');
+        const groups = [];
+        let i;
+        for (i = 0; i < 8; i += 2) {
+            const h = padded.slice(i, i + 2);
+            groups.push(parseInt(h, 16));
+        }
+        return new Address4(groups.join('.'));
+    }
+    /**
+     * Converts an integer into a IPv4 address object
+     * @memberof Address4
+     * @static
+     * @param {integer} integer - a number to convert
+     * @returns {Address4}
+     */
+    static fromInteger(integer) {
+        return Address4.fromHex(integer.toString(16));
+    }
+    /**
+     * Return an address from in-addr.arpa form
+     * @memberof Address4
+     * @static
+     * @param {string} arpaFormAddress - an 'in-addr.arpa' form ipv4 address
+     * @returns {Adress4}
+     * @example
+     * var address = Address4.fromArpa(42.2.0.192.in-addr.arpa.)
+     * address.correctForm(); // '192.0.2.42'
+     */
+    static fromArpa(arpaFormAddress) {
+        // remove ending ".in-addr.arpa." or just "."
+        const leader = arpaFormAddress.replace(/(\.in-addr\.arpa)?\.$/, '');
+        const address = leader.split('.').reverse().join('.');
+        return new Address4(address);
+    }
+    /**
+     * Converts an IPv4 address object to a hex string
+     * @memberof Address4
+     * @instance
+     * @returns {String}
+     */
+    toHex() {
+        return this.parsedAddress.map((part) => (0,sprintf_js__WEBPACK_IMPORTED_MODULE_4__.sprintf)('%02x', parseInt(part, 10))).join(':');
+    }
+    /**
+     * Converts an IPv4 address object to an array of bytes
+     * @memberof Address4
+     * @instance
+     * @returns {Array}
+     */
+    toArray() {
+        return this.parsedAddress.map((part) => parseInt(part, 10));
+    }
+    /**
+     * Converts an IPv4 address object to an IPv6 address group
+     * @memberof Address4
+     * @instance
+     * @returns {String}
+     */
+    toGroup6() {
+        const output = [];
+        let i;
+        for (i = 0; i < _v4_constants__WEBPACK_IMPORTED_MODULE_1__.GROUPS; i += 2) {
+            const hex = (0,sprintf_js__WEBPACK_IMPORTED_MODULE_4__.sprintf)('%02x%02x', parseInt(this.parsedAddress[i], 10), parseInt(this.parsedAddress[i + 1], 10));
+            output.push((0,sprintf_js__WEBPACK_IMPORTED_MODULE_4__.sprintf)('%x', parseInt(hex, 16)));
+        }
+        return output.join(':');
+    }
+    /**
+     * Returns the address as a BigInteger
+     * @memberof Address4
+     * @instance
+     * @returns {BigInteger}
+     */
+    bigInteger() {
+        return new jsbn__WEBPACK_IMPORTED_MODULE_3__.BigInteger(this.parsedAddress.map((n) => (0,sprintf_js__WEBPACK_IMPORTED_MODULE_4__.sprintf)('%02x', parseInt(n, 10))).join(''), 16);
+    }
+    /**
+     * Helper function getting start address.
+     * @memberof Address4
+     * @instance
+     * @returns {BigInteger}
+     */
+    _startAddress() {
+        return new jsbn__WEBPACK_IMPORTED_MODULE_3__.BigInteger(this.mask() + '0'.repeat(_v4_constants__WEBPACK_IMPORTED_MODULE_1__.BITS - this.subnetMask), 2);
+    }
+    /**
+     * The first address in the range given by this address' subnet.
+     * Often referred to as the Network Address.
+     * @memberof Address4
+     * @instance
+     * @returns {Address4}
+     */
+    startAddress() {
+        return Address4.fromBigInteger(this._startAddress());
+    }
+    /**
+     * The first host address in the range given by this address's subnet ie
+     * the first address after the Network Address
+     * @memberof Address4
+     * @instance
+     * @returns {Address4}
+     */
+    startAddressExclusive() {
+        const adjust = new jsbn__WEBPACK_IMPORTED_MODULE_3__.BigInteger('1');
+        return Address4.fromBigInteger(this._startAddress().add(adjust));
+    }
+    /**
+     * Helper function getting end address.
+     * @memberof Address4
+     * @instance
+     * @returns {BigInteger}
+     */
+    _endAddress() {
+        return new jsbn__WEBPACK_IMPORTED_MODULE_3__.BigInteger(this.mask() + '1'.repeat(_v4_constants__WEBPACK_IMPORTED_MODULE_1__.BITS - this.subnetMask), 2);
+    }
+    /**
+     * The last address in the range given by this address' subnet
+     * Often referred to as the Broadcast
+     * @memberof Address4
+     * @instance
+     * @returns {Address4}
+     */
+    endAddress() {
+        return Address4.fromBigInteger(this._endAddress());
+    }
+    /**
+     * The last host address in the range given by this address's subnet ie
+     * the last address prior to the Broadcast Address
+     * @memberof Address4
+     * @instance
+     * @returns {Address4}
+     */
+    endAddressExclusive() {
+        const adjust = new jsbn__WEBPACK_IMPORTED_MODULE_3__.BigInteger('1');
+        return Address4.fromBigInteger(this._endAddress().subtract(adjust));
+    }
+    /**
+     * Converts a BigInteger to a v4 address object
+     * @memberof Address4
+     * @static
+     * @param {BigInteger} bigInteger - a BigInteger to convert
+     * @returns {Address4}
+     */
+    static fromBigInteger(bigInteger) {
+        return Address4.fromInteger(parseInt(bigInteger.toString(), 10));
+    }
+    /**
+     * Returns the first n bits of the address, defaulting to the
+     * subnet mask
+     * @memberof Address4
+     * @instance
+     * @returns {String}
+     */
+    mask(mask) {
+        if (mask === undefined) {
+            mask = this.subnetMask;
+        }
+        return this.getBitsBase2(0, mask);
+    }
+    /**
+     * Returns the bits in the given range as a base-2 string
+     * @memberof Address4
+     * @instance
+     * @returns {string}
+     */
+    getBitsBase2(start, end) {
+        return this.binaryZeroPad().slice(start, end);
+    }
+    /**
+     * Return the reversed ip6.arpa form of the address
+     * @memberof Address4
+     * @param {Object} options
+     * @param {boolean} options.omitSuffix - omit the "in-addr.arpa" suffix
+     * @instance
+     * @returns {String}
+     */
+    reverseForm(options) {
+        if (!options) {
+            options = {};
+        }
+        const reversed = this.correctForm().split('.').reverse().join('.');
+        if (options.omitSuffix) {
+            return reversed;
+        }
+        return (0,sprintf_js__WEBPACK_IMPORTED_MODULE_4__.sprintf)('%s.in-addr.arpa.', reversed);
+    }
+    /**
+     * Returns true if the given address is a multicast address
+     * @memberof Address4
+     * @instance
+     * @returns {boolean}
+     */
+    isMulticast() {
+        return this.isInSubnet(new Address4('224.0.0.0/4'));
+    }
+    /**
+     * Returns a zero-padded base-2 string representation of the address
+     * @memberof Address4
+     * @instance
+     * @returns {string}
+     */
+    binaryZeroPad() {
+        return this.bigInteger().toString(2).padStart(_v4_constants__WEBPACK_IMPORTED_MODULE_1__.BITS, '0');
+    }
+    /**
+     * Groups an IPv4 address for inclusion at the end of an IPv6 address
+     * @returns {String}
+     */
+    groupForV6() {
+        const segments = this.parsedAddress;
+        return this.address.replace(_v4_constants__WEBPACK_IMPORTED_MODULE_1__.RE_ADDRESS, (0,sprintf_js__WEBPACK_IMPORTED_MODULE_4__.sprintf)('<span class="hover-group group-v4 group-6">%s</span>.<span class="hover-group group-v4 group-7">%s</span>', segments.slice(0, 2).join('.'), segments.slice(2, 4).join('.')));
+    }
+}
+//# sourceMappingURL=ipv4.js.map
+
+/***/ }),
+
+/***/ "./node_modules/ip-address/dist/esm/lib/ipv6.js":
+/*!******************************************************!*\
+  !*** ./node_modules/ip-address/dist/esm/lib/ipv6.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Address6": () => (/* binding */ Address6)
+/* harmony export */ });
+/* harmony import */ var _common__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./common */ "./node_modules/ip-address/dist/esm/lib/common.js");
+/* harmony import */ var _v4_constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./v4/constants */ "./node_modules/ip-address/dist/esm/lib/v4/constants.js");
+/* harmony import */ var _v6_constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./v6/constants */ "./node_modules/ip-address/dist/esm/lib/v6/constants.js");
+/* harmony import */ var _v6_helpers__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./v6/helpers */ "./node_modules/ip-address/dist/esm/lib/v6/helpers.js");
+/* harmony import */ var _ipv4__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./ipv4 */ "./node_modules/ip-address/dist/esm/lib/ipv4.js");
+/* harmony import */ var _v6_regular_expressions__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./v6/regular-expressions */ "./node_modules/ip-address/dist/esm/lib/v6/regular-expressions.js");
+/* harmony import */ var _address_error__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./address-error */ "./node_modules/ip-address/dist/esm/lib/address-error.js");
+/* harmony import */ var jsbn__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! jsbn */ "./node_modules/jsbn/index.js");
+/* harmony import */ var jsbn__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(jsbn__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var sprintf_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! sprintf-js */ "./node_modules/sprintf-js/src/sprintf.js");
+/* harmony import */ var sprintf_js__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(sprintf_js__WEBPACK_IMPORTED_MODULE_8__);
+/* eslint-disable prefer-destructuring */
+/* eslint-disable no-param-reassign */
+
+
+
+
+
+
+
+
+
+function assert(condition) {
+    if (!condition) {
+        throw new Error('Assertion failed.');
+    }
+}
+function addCommas(number) {
+    const r = /(\d+)(\d{3})/;
+    while (r.test(number)) {
+        number = number.replace(r, '$1,$2');
+    }
+    return number;
+}
+function spanLeadingZeroes4(n) {
+    n = n.replace(/^(0{1,})([1-9]+)$/, '<span class="parse-error">$1</span>$2');
+    n = n.replace(/^(0{1,})(0)$/, '<span class="parse-error">$1</span>$2');
+    return n;
+}
+/*
+ * A helper function to compact an array
+ */
+function compact(address, slice) {
+    const s1 = [];
+    const s2 = [];
+    let i;
+    for (i = 0; i < address.length; i++) {
+        if (i < slice[0]) {
+            s1.push(address[i]);
+        }
+        else if (i > slice[1]) {
+            s2.push(address[i]);
+        }
+    }
+    return s1.concat(['compact']).concat(s2);
+}
+function paddedHex(octet) {
+    return (0,sprintf_js__WEBPACK_IMPORTED_MODULE_8__.sprintf)('%04x', parseInt(octet, 16));
+}
+function unsignByte(b) {
+    // eslint-disable-next-line no-bitwise
+    return b & 0xff;
+}
+/**
+ * Represents an IPv6 address
+ * @class Address6
+ * @param {string} address - An IPv6 address string
+ * @param {number} [groups=8] - How many octets to parse
+ * @example
+ * var address = new Address6('2001::/32');
+ */
+class Address6 {
+    constructor(address, optionalGroups) {
+        this.addressMinusSuffix = '';
+        this.parsedSubnet = '';
+        this.subnet = '/128';
+        this.subnetMask = 128;
+        this.v4 = false;
+        this.zone = '';
+        // #region Attributes
+        /**
+         * Returns true if the given address is in the subnet of the current address
+         * @memberof Address6
+         * @instance
+         * @returns {boolean}
+         */
+        this.isInSubnet = _common__WEBPACK_IMPORTED_MODULE_0__.isInSubnet;
+        /**
+         * Returns true if the address is correct, false otherwise
+         * @memberof Address6
+         * @instance
+         * @returns {boolean}
+         */
+        this.isCorrect = _common__WEBPACK_IMPORTED_MODULE_0__.isCorrect(_v6_constants__WEBPACK_IMPORTED_MODULE_2__.BITS);
+        if (optionalGroups === undefined) {
+            this.groups = _v6_constants__WEBPACK_IMPORTED_MODULE_2__.GROUPS;
+        }
+        else {
+            this.groups = optionalGroups;
+        }
+        this.address = address;
+        const subnet = _v6_constants__WEBPACK_IMPORTED_MODULE_2__.RE_SUBNET_STRING.exec(address);
+        if (subnet) {
+            this.parsedSubnet = subnet[0].replace('/', '');
+            this.subnetMask = parseInt(this.parsedSubnet, 10);
+            this.subnet = `/${this.subnetMask}`;
+            if (Number.isNaN(this.subnetMask) ||
+                this.subnetMask < 0 ||
+                this.subnetMask > _v6_constants__WEBPACK_IMPORTED_MODULE_2__.BITS) {
+                throw new _address_error__WEBPACK_IMPORTED_MODULE_6__.AddressError('Invalid subnet mask.');
+            }
+            address = address.replace(_v6_constants__WEBPACK_IMPORTED_MODULE_2__.RE_SUBNET_STRING, '');
+        }
+        else if (/\//.test(address)) {
+            throw new _address_error__WEBPACK_IMPORTED_MODULE_6__.AddressError('Invalid subnet mask.');
+        }
+        const zone = _v6_constants__WEBPACK_IMPORTED_MODULE_2__.RE_ZONE_STRING.exec(address);
+        if (zone) {
+            this.zone = zone[0];
+            address = address.replace(_v6_constants__WEBPACK_IMPORTED_MODULE_2__.RE_ZONE_STRING, '');
+        }
+        this.addressMinusSuffix = address;
+        this.parsedAddress = this.parse(this.addressMinusSuffix);
+    }
+    static isValid(address) {
+        try {
+            // eslint-disable-next-line no-new
+            new Address6(address);
+            return true;
+        }
+        catch (e) {
+            return false;
+        }
+    }
+    /**
+     * Convert a BigInteger to a v6 address object
+     * @memberof Address6
+     * @static
+     * @param {BigInteger} bigInteger - a BigInteger to convert
+     * @returns {Address6}
+     * @example
+     * var bigInteger = new BigInteger('1000000000000');
+     * var address = Address6.fromBigInteger(bigInteger);
+     * address.correctForm(); // '::e8:d4a5:1000'
+     */
+    static fromBigInteger(bigInteger) {
+        const hex = bigInteger.toString(16).padStart(32, '0');
+        const groups = [];
+        let i;
+        for (i = 0; i < _v6_constants__WEBPACK_IMPORTED_MODULE_2__.GROUPS; i++) {
+            groups.push(hex.slice(i * 4, (i + 1) * 4));
+        }
+        return new Address6(groups.join(':'));
+    }
+    /**
+     * Convert a URL (with optional port number) to an address object
+     * @memberof Address6
+     * @static
+     * @param {string} url - a URL with optional port number
+     * @example
+     * var addressAndPort = Address6.fromURL('http://[ffff::]:8080/foo/');
+     * addressAndPort.address.correctForm(); // 'ffff::'
+     * addressAndPort.port; // 8080
+     */
+    static fromURL(url) {
+        let host;
+        let port = null;
+        let result;
+        // If we have brackets parse them and find a port
+        if (url.indexOf('[') !== -1 && url.indexOf(']:') !== -1) {
+            result = _v6_constants__WEBPACK_IMPORTED_MODULE_2__.RE_URL_WITH_PORT.exec(url);
+            if (result === null) {
+                return {
+                    error: 'failed to parse address with port',
+                    address: null,
+                    port: null,
+                };
+            }
+            host = result[1];
+            port = result[2];
+            // If there's a URL extract the address
+        }
+        else if (url.indexOf('/') !== -1) {
+            // Remove the protocol prefix
+            url = url.replace(/^[a-z0-9]+:\/\//, '');
+            // Parse the address
+            result = _v6_constants__WEBPACK_IMPORTED_MODULE_2__.RE_URL.exec(url);
+            if (result === null) {
+                return {
+                    error: 'failed to parse address from URL',
+                    address: null,
+                    port: null,
+                };
+            }
+            host = result[1];
+            // Otherwise just assign the URL to the host and let the library parse it
+        }
+        else {
+            host = url;
+        }
+        // If there's a port convert it to an integer
+        if (port) {
+            port = parseInt(port, 10);
+            // squelch out of range ports
+            if (port < 0 || port > 65536) {
+                port = null;
+            }
+        }
+        else {
+            // Standardize `undefined` to `null`
+            port = null;
+        }
+        return {
+            address: new Address6(host),
+            port,
+        };
+    }
+    /**
+     * Create an IPv6-mapped address given an IPv4 address
+     * @memberof Address6
+     * @static
+     * @param {string} address - An IPv4 address string
+     * @returns {Address6}
+     * @example
+     * var address = Address6.fromAddress4('192.168.0.1');
+     * address.correctForm(); // '::ffff:c0a8:1'
+     * address.to4in6(); // '::ffff:192.168.0.1'
+     */
+    static fromAddress4(address) {
+        const address4 = new _ipv4__WEBPACK_IMPORTED_MODULE_4__.Address4(address);
+        const mask6 = _v6_constants__WEBPACK_IMPORTED_MODULE_2__.BITS - (_v4_constants__WEBPACK_IMPORTED_MODULE_1__.BITS - address4.subnetMask);
+        return new Address6(`::ffff:${address4.correctForm()}/${mask6}`);
+    }
+    /**
+     * Return an address from ip6.arpa form
+     * @memberof Address6
+     * @static
+     * @param {string} arpaFormAddress - an 'ip6.arpa' form address
+     * @returns {Adress6}
+     * @example
+     * var address = Address6.fromArpa(e.f.f.f.3.c.2.6.f.f.f.e.6.6.8.e.1.0.6.7.9.4.e.c.0.0.0.0.1.0.0.2.ip6.arpa.)
+     * address.correctForm(); // '2001:0:ce49:7601:e866:efff:62c3:fffe'
+     */
+    static fromArpa(arpaFormAddress) {
+        // remove ending ".ip6.arpa." or just "."
+        let address = arpaFormAddress.replace(/(\.ip6\.arpa)?\.$/, '');
+        const semicolonAmount = 7;
+        // correct ip6.arpa form with ending removed will be 63 characters
+        if (address.length !== 63) {
+            throw new _address_error__WEBPACK_IMPORTED_MODULE_6__.AddressError("Invalid 'ip6.arpa' form.");
+        }
+        const parts = address.split('.').reverse();
+        for (let i = semicolonAmount; i > 0; i--) {
+            const insertIndex = i * 4;
+            parts.splice(insertIndex, 0, ':');
+        }
+        address = parts.join('');
+        return new Address6(address);
+    }
+    /**
+     * Return the Microsoft UNC transcription of the address
+     * @memberof Address6
+     * @instance
+     * @returns {String} the Microsoft UNC transcription of the address
+     */
+    microsoftTranscription() {
+        return (0,sprintf_js__WEBPACK_IMPORTED_MODULE_8__.sprintf)('%s.ipv6-literal.net', this.correctForm().replace(/:/g, '-'));
+    }
+    /**
+     * Return the first n bits of the address, defaulting to the subnet mask
+     * @memberof Address6
+     * @instance
+     * @param {number} [mask=subnet] - the number of bits to mask
+     * @returns {String} the first n bits of the address as a string
+     */
+    mask(mask = this.subnetMask) {
+        return this.getBitsBase2(0, mask);
+    }
+    /**
+     * Return the number of possible subnets of a given size in the address
+     * @memberof Address6
+     * @instance
+     * @param {number} [size=128] - the subnet size
+     * @returns {String}
+     */
+    // TODO: probably useful to have a numeric version of this too
+    possibleSubnets(subnetSize = 128) {
+        const availableBits = _v6_constants__WEBPACK_IMPORTED_MODULE_2__.BITS - this.subnetMask;
+        const subnetBits = Math.abs(subnetSize - _v6_constants__WEBPACK_IMPORTED_MODULE_2__.BITS);
+        const subnetPowers = availableBits - subnetBits;
+        if (subnetPowers < 0) {
+            return '0';
+        }
+        return addCommas(new jsbn__WEBPACK_IMPORTED_MODULE_7__.BigInteger('2', 10).pow(subnetPowers).toString(10));
+    }
+    /**
+     * Helper function getting start address.
+     * @memberof Address6
+     * @instance
+     * @returns {BigInteger}
+     */
+    _startAddress() {
+        return new jsbn__WEBPACK_IMPORTED_MODULE_7__.BigInteger(this.mask() + '0'.repeat(_v6_constants__WEBPACK_IMPORTED_MODULE_2__.BITS - this.subnetMask), 2);
+    }
+    /**
+     * The first address in the range given by this address' subnet
+     * Often referred to as the Network Address.
+     * @memberof Address6
+     * @instance
+     * @returns {Address6}
+     */
+    startAddress() {
+        return Address6.fromBigInteger(this._startAddress());
+    }
+    /**
+     * The first host address in the range given by this address's subnet ie
+     * the first address after the Network Address
+     * @memberof Address6
+     * @instance
+     * @returns {Address6}
+     */
+    startAddressExclusive() {
+        const adjust = new jsbn__WEBPACK_IMPORTED_MODULE_7__.BigInteger('1');
+        return Address6.fromBigInteger(this._startAddress().add(adjust));
+    }
+    /**
+     * Helper function getting end address.
+     * @memberof Address6
+     * @instance
+     * @returns {BigInteger}
+     */
+    _endAddress() {
+        return new jsbn__WEBPACK_IMPORTED_MODULE_7__.BigInteger(this.mask() + '1'.repeat(_v6_constants__WEBPACK_IMPORTED_MODULE_2__.BITS - this.subnetMask), 2);
+    }
+    /**
+     * The last address in the range given by this address' subnet
+     * Often referred to as the Broadcast
+     * @memberof Address6
+     * @instance
+     * @returns {Address6}
+     */
+    endAddress() {
+        return Address6.fromBigInteger(this._endAddress());
+    }
+    /**
+     * The last host address in the range given by this address's subnet ie
+     * the last address prior to the Broadcast Address
+     * @memberof Address6
+     * @instance
+     * @returns {Address6}
+     */
+    endAddressExclusive() {
+        const adjust = new jsbn__WEBPACK_IMPORTED_MODULE_7__.BigInteger('1');
+        return Address6.fromBigInteger(this._endAddress().subtract(adjust));
+    }
+    /**
+     * Return the scope of the address
+     * @memberof Address6
+     * @instance
+     * @returns {String}
+     */
+    getScope() {
+        let scope = _v6_constants__WEBPACK_IMPORTED_MODULE_2__.SCOPES[this.getBits(12, 16).intValue()];
+        if (this.getType() === 'Global unicast' && scope !== 'Link local') {
+            scope = 'Global';
+        }
+        return scope || 'Unknown';
+    }
+    /**
+     * Return the type of the address
+     * @memberof Address6
+     * @instance
+     * @returns {String}
+     */
+    getType() {
+        for (const subnet of Object.keys(_v6_constants__WEBPACK_IMPORTED_MODULE_2__.TYPES)) {
+            if (this.isInSubnet(new Address6(subnet))) {
+                return _v6_constants__WEBPACK_IMPORTED_MODULE_2__.TYPES[subnet];
+            }
+        }
+        return 'Global unicast';
+    }
+    /**
+     * Return the bits in the given range as a BigInteger
+     * @memberof Address6
+     * @instance
+     * @returns {BigInteger}
+     */
+    getBits(start, end) {
+        return new jsbn__WEBPACK_IMPORTED_MODULE_7__.BigInteger(this.getBitsBase2(start, end), 2);
+    }
+    /**
+     * Return the bits in the given range as a base-2 string
+     * @memberof Address6
+     * @instance
+     * @returns {String}
+     */
+    getBitsBase2(start, end) {
+        return this.binaryZeroPad().slice(start, end);
+    }
+    /**
+     * Return the bits in the given range as a base-16 string
+     * @memberof Address6
+     * @instance
+     * @returns {String}
+     */
+    getBitsBase16(start, end) {
+        const length = end - start;
+        if (length % 4 !== 0) {
+            throw new Error('Length of bits to retrieve must be divisible by four');
+        }
+        return this.getBits(start, end)
+            .toString(16)
+            .padStart(length / 4, '0');
+    }
+    /**
+     * Return the bits that are set past the subnet mask length
+     * @memberof Address6
+     * @instance
+     * @returns {String}
+     */
+    getBitsPastSubnet() {
+        return this.getBitsBase2(this.subnetMask, _v6_constants__WEBPACK_IMPORTED_MODULE_2__.BITS);
+    }
+    /**
+     * Return the reversed ip6.arpa form of the address
+     * @memberof Address6
+     * @param {Object} options
+     * @param {boolean} options.omitSuffix - omit the "ip6.arpa" suffix
+     * @instance
+     * @returns {String}
+     */
+    reverseForm(options) {
+        if (!options) {
+            options = {};
+        }
+        const characters = Math.floor(this.subnetMask / 4);
+        const reversed = this.canonicalForm()
+            .replace(/:/g, '')
+            .split('')
+            .slice(0, characters)
+            .reverse()
+            .join('.');
+        if (characters > 0) {
+            if (options.omitSuffix) {
+                return reversed;
+            }
+            return (0,sprintf_js__WEBPACK_IMPORTED_MODULE_8__.sprintf)('%s.ip6.arpa.', reversed);
+        }
+        if (options.omitSuffix) {
+            return '';
+        }
+        return 'ip6.arpa.';
+    }
+    /**
+     * Return the correct form of the address
+     * @memberof Address6
+     * @instance
+     * @returns {String}
+     */
+    correctForm() {
+        let i;
+        let groups = [];
+        let zeroCounter = 0;
+        const zeroes = [];
+        for (i = 0; i < this.parsedAddress.length; i++) {
+            const value = parseInt(this.parsedAddress[i], 16);
+            if (value === 0) {
+                zeroCounter++;
+            }
+            if (value !== 0 && zeroCounter > 0) {
+                if (zeroCounter > 1) {
+                    zeroes.push([i - zeroCounter, i - 1]);
+                }
+                zeroCounter = 0;
+            }
+        }
+        // Do we end with a string of zeroes?
+        if (zeroCounter > 1) {
+            zeroes.push([this.parsedAddress.length - zeroCounter, this.parsedAddress.length - 1]);
+        }
+        const zeroLengths = zeroes.map((n) => n[1] - n[0] + 1);
+        if (zeroes.length > 0) {
+            const index = zeroLengths.indexOf(Math.max(...zeroLengths));
+            groups = compact(this.parsedAddress, zeroes[index]);
+        }
+        else {
+            groups = this.parsedAddress;
+        }
+        for (i = 0; i < groups.length; i++) {
+            if (groups[i] !== 'compact') {
+                groups[i] = parseInt(groups[i], 16).toString(16);
+            }
+        }
+        let correct = groups.join(':');
+        correct = correct.replace(/^compact$/, '::');
+        correct = correct.replace(/^compact|compact$/, ':');
+        correct = correct.replace(/compact/, '');
+        return correct;
+    }
+    /**
+     * Return a zero-padded base-2 string representation of the address
+     * @memberof Address6
+     * @instance
+     * @returns {String}
+     * @example
+     * var address = new Address6('2001:4860:4001:803::1011');
+     * address.binaryZeroPad();
+     * // '0010000000000001010010000110000001000000000000010000100000000011
+     * //  0000000000000000000000000000000000000000000000000001000000010001'
+     */
+    binaryZeroPad() {
+        return this.bigInteger().toString(2).padStart(_v6_constants__WEBPACK_IMPORTED_MODULE_2__.BITS, '0');
+    }
+    // TODO: Improve the semantics of this helper function
+    parse4in6(address) {
+        const groups = address.split(':');
+        const lastGroup = groups.slice(-1)[0];
+        const address4 = lastGroup.match(_v4_constants__WEBPACK_IMPORTED_MODULE_1__.RE_ADDRESS);
+        if (address4) {
+            this.parsedAddress4 = address4[0];
+            this.address4 = new _ipv4__WEBPACK_IMPORTED_MODULE_4__.Address4(this.parsedAddress4);
+            for (let i = 0; i < this.address4.groups; i++) {
+                if (/^0[0-9]+/.test(this.address4.parsedAddress[i])) {
+                    throw new _address_error__WEBPACK_IMPORTED_MODULE_6__.AddressError("IPv4 addresses can't have leading zeroes.", address.replace(_v4_constants__WEBPACK_IMPORTED_MODULE_1__.RE_ADDRESS, this.address4.parsedAddress.map(spanLeadingZeroes4).join('.')));
+                }
+            }
+            this.v4 = true;
+            groups[groups.length - 1] = this.address4.toGroup6();
+            address = groups.join(':');
+        }
+        return address;
+    }
+    // TODO: Make private?
+    parse(address) {
+        address = this.parse4in6(address);
+        const badCharacters = address.match(_v6_constants__WEBPACK_IMPORTED_MODULE_2__.RE_BAD_CHARACTERS);
+        if (badCharacters) {
+            throw new _address_error__WEBPACK_IMPORTED_MODULE_6__.AddressError((0,sprintf_js__WEBPACK_IMPORTED_MODULE_8__.sprintf)('Bad character%s detected in address: %s', badCharacters.length > 1 ? 's' : '', badCharacters.join('')), address.replace(_v6_constants__WEBPACK_IMPORTED_MODULE_2__.RE_BAD_CHARACTERS, '<span class="parse-error">$1</span>'));
+        }
+        const badAddress = address.match(_v6_constants__WEBPACK_IMPORTED_MODULE_2__.RE_BAD_ADDRESS);
+        if (badAddress) {
+            throw new _address_error__WEBPACK_IMPORTED_MODULE_6__.AddressError((0,sprintf_js__WEBPACK_IMPORTED_MODULE_8__.sprintf)('Address failed regex: %s', badAddress.join('')), address.replace(_v6_constants__WEBPACK_IMPORTED_MODULE_2__.RE_BAD_ADDRESS, '<span class="parse-error">$1</span>'));
+        }
+        let groups = [];
+        const halves = address.split('::');
+        if (halves.length === 2) {
+            let first = halves[0].split(':');
+            let last = halves[1].split(':');
+            if (first.length === 1 && first[0] === '') {
+                first = [];
+            }
+            if (last.length === 1 && last[0] === '') {
+                last = [];
+            }
+            const remaining = this.groups - (first.length + last.length);
+            if (!remaining) {
+                throw new _address_error__WEBPACK_IMPORTED_MODULE_6__.AddressError('Error parsing groups');
+            }
+            this.elidedGroups = remaining;
+            this.elisionBegin = first.length;
+            this.elisionEnd = first.length + this.elidedGroups;
+            groups = groups.concat(first);
+            for (let i = 0; i < remaining; i++) {
+                groups.push('0');
+            }
+            groups = groups.concat(last);
+        }
+        else if (halves.length === 1) {
+            groups = address.split(':');
+            this.elidedGroups = 0;
+        }
+        else {
+            throw new _address_error__WEBPACK_IMPORTED_MODULE_6__.AddressError('Too many :: groups found');
+        }
+        groups = groups.map((group) => (0,sprintf_js__WEBPACK_IMPORTED_MODULE_8__.sprintf)('%x', parseInt(group, 16)));
+        if (groups.length !== this.groups) {
+            throw new _address_error__WEBPACK_IMPORTED_MODULE_6__.AddressError('Incorrect number of groups found');
+        }
+        return groups;
+    }
+    /**
+     * Return the canonical form of the address
+     * @memberof Address6
+     * @instance
+     * @returns {String}
+     */
+    canonicalForm() {
+        return this.parsedAddress.map(paddedHex).join(':');
+    }
+    /**
+     * Return the decimal form of the address
+     * @memberof Address6
+     * @instance
+     * @returns {String}
+     */
+    decimal() {
+        return this.parsedAddress.map((n) => (0,sprintf_js__WEBPACK_IMPORTED_MODULE_8__.sprintf)('%05d', parseInt(n, 16))).join(':');
+    }
+    /**
+     * Return the address as a BigInteger
+     * @memberof Address6
+     * @instance
+     * @returns {BigInteger}
+     */
+    bigInteger() {
+        return new jsbn__WEBPACK_IMPORTED_MODULE_7__.BigInteger(this.parsedAddress.map(paddedHex).join(''), 16);
+    }
+    /**
+     * Return the last two groups of this address as an IPv4 address string
+     * @memberof Address6
+     * @instance
+     * @returns {Address4}
+     * @example
+     * var address = new Address6('2001:4860:4001::1825:bf11');
+     * address.to4().correctForm(); // '24.37.191.17'
+     */
+    to4() {
+        const binary = this.binaryZeroPad().split('');
+        return _ipv4__WEBPACK_IMPORTED_MODULE_4__.Address4.fromHex(new jsbn__WEBPACK_IMPORTED_MODULE_7__.BigInteger(binary.slice(96, 128).join(''), 2).toString(16));
+    }
+    /**
+     * Return the v4-in-v6 form of the address
+     * @memberof Address6
+     * @instance
+     * @returns {String}
+     */
+    to4in6() {
+        const address4 = this.to4();
+        const address6 = new Address6(this.parsedAddress.slice(0, 6).join(':'), 6);
+        const correct = address6.correctForm();
+        let infix = '';
+        if (!/:$/.test(correct)) {
+            infix = ':';
+        }
+        return correct + infix + address4.address;
+    }
+    /**
+     * Return an object containing the Teredo properties of the address
+     * @memberof Address6
+     * @instance
+     * @returns {Object}
+     */
+    inspectTeredo() {
+        /*
+        - Bits 0 to 31 are set to the Teredo prefix (normally 2001:0000::/32).
+        - Bits 32 to 63 embed the primary IPv4 address of the Teredo server that
+          is used.
+        - Bits 64 to 79 can be used to define some flags. Currently only the
+          higher order bit is used; it is set to 1 if the Teredo client is
+          located behind a cone NAT, 0 otherwise. For Microsoft's Windows Vista
+          and Windows Server 2008 implementations, more bits are used. In those
+          implementations, the format for these 16 bits is "CRAAAAUG AAAAAAAA",
+          where "C" remains the "Cone" flag. The "R" bit is reserved for future
+          use. The "U" bit is for the Universal/Local flag (set to 0). The "G" bit
+          is Individual/Group flag (set to 0). The A bits are set to a 12-bit
+          randomly generated number chosen by the Teredo client to introduce
+          additional protection for the Teredo node against IPv6-based scanning
+          attacks.
+        - Bits 80 to 95 contains the obfuscated UDP port number. This is the
+          port number that is mapped by the NAT to the Teredo client with all
+          bits inverted.
+        - Bits 96 to 127 contains the obfuscated IPv4 address. This is the
+          public IPv4 address of the NAT with all bits inverted.
+        */
+        const prefix = this.getBitsBase16(0, 32);
+        const udpPort = this.getBits(80, 96).xor(new jsbn__WEBPACK_IMPORTED_MODULE_7__.BigInteger('ffff', 16)).toString();
+        const server4 = _ipv4__WEBPACK_IMPORTED_MODULE_4__.Address4.fromHex(this.getBitsBase16(32, 64));
+        const client4 = _ipv4__WEBPACK_IMPORTED_MODULE_4__.Address4.fromHex(this.getBits(96, 128).xor(new jsbn__WEBPACK_IMPORTED_MODULE_7__.BigInteger('ffffffff', 16)).toString(16));
+        const flags = this.getBits(64, 80);
+        const flagsBase2 = this.getBitsBase2(64, 80);
+        const coneNat = flags.testBit(15);
+        const reserved = flags.testBit(14);
+        const groupIndividual = flags.testBit(8);
+        const universalLocal = flags.testBit(9);
+        const nonce = new jsbn__WEBPACK_IMPORTED_MODULE_7__.BigInteger(flagsBase2.slice(2, 6) + flagsBase2.slice(8, 16), 2).toString(10);
+        return {
+            prefix: (0,sprintf_js__WEBPACK_IMPORTED_MODULE_8__.sprintf)('%s:%s', prefix.slice(0, 4), prefix.slice(4, 8)),
+            server4: server4.address,
+            client4: client4.address,
+            flags: flagsBase2,
+            coneNat,
+            microsoft: {
+                reserved,
+                universalLocal,
+                groupIndividual,
+                nonce,
+            },
+            udpPort,
+        };
+    }
+    /**
+     * Return an object containing the 6to4 properties of the address
+     * @memberof Address6
+     * @instance
+     * @returns {Object}
+     */
+    inspect6to4() {
+        /*
+        - Bits 0 to 15 are set to the 6to4 prefix (2002::/16).
+        - Bits 16 to 48 embed the IPv4 address of the 6to4 gateway that is used.
+        */
+        const prefix = this.getBitsBase16(0, 16);
+        const gateway = _ipv4__WEBPACK_IMPORTED_MODULE_4__.Address4.fromHex(this.getBitsBase16(16, 48));
+        return {
+            prefix: (0,sprintf_js__WEBPACK_IMPORTED_MODULE_8__.sprintf)('%s', prefix.slice(0, 4)),
+            gateway: gateway.address,
+        };
+    }
+    /**
+     * Return a v6 6to4 address from a v6 v4inv6 address
+     * @memberof Address6
+     * @instance
+     * @returns {Address6}
+     */
+    to6to4() {
+        if (!this.is4()) {
+            return null;
+        }
+        const addr6to4 = [
+            '2002',
+            this.getBitsBase16(96, 112),
+            this.getBitsBase16(112, 128),
+            '',
+            '/16',
+        ].join(':');
+        return new Address6(addr6to4);
+    }
+    /**
+     * Return a byte array
+     * @memberof Address6
+     * @instance
+     * @returns {Array}
+     */
+    toByteArray() {
+        const byteArray = this.bigInteger().toByteArray();
+        // work around issue where `toByteArray` returns a leading 0 element
+        if (byteArray.length === 17 && byteArray[0] === 0) {
+            return byteArray.slice(1);
+        }
+        return byteArray;
+    }
+    /**
+     * Return an unsigned byte array
+     * @memberof Address6
+     * @instance
+     * @returns {Array}
+     */
+    toUnsignedByteArray() {
+        return this.toByteArray().map(unsignByte);
+    }
+    /**
+     * Convert a byte array to an Address6 object
+     * @memberof Address6
+     * @static
+     * @returns {Address6}
+     */
+    static fromByteArray(bytes) {
+        return this.fromUnsignedByteArray(bytes.map(unsignByte));
+    }
+    /**
+     * Convert an unsigned byte array to an Address6 object
+     * @memberof Address6
+     * @static
+     * @returns {Address6}
+     */
+    static fromUnsignedByteArray(bytes) {
+        const BYTE_MAX = new jsbn__WEBPACK_IMPORTED_MODULE_7__.BigInteger('256', 10);
+        let result = new jsbn__WEBPACK_IMPORTED_MODULE_7__.BigInteger('0', 10);
+        let multiplier = new jsbn__WEBPACK_IMPORTED_MODULE_7__.BigInteger('1', 10);
+        for (let i = bytes.length - 1; i >= 0; i--) {
+            result = result.add(multiplier.multiply(new jsbn__WEBPACK_IMPORTED_MODULE_7__.BigInteger(bytes[i].toString(10), 10)));
+            multiplier = multiplier.multiply(BYTE_MAX);
+        }
+        return Address6.fromBigInteger(result);
+    }
+    /**
+     * Returns true if the address is in the canonical form, false otherwise
+     * @memberof Address6
+     * @instance
+     * @returns {boolean}
+     */
+    isCanonical() {
+        return this.addressMinusSuffix === this.canonicalForm();
+    }
+    /**
+     * Returns true if the address is a link local address, false otherwise
+     * @memberof Address6
+     * @instance
+     * @returns {boolean}
+     */
+    isLinkLocal() {
+        // Zeroes are required, i.e. we can't check isInSubnet with 'fe80::/10'
+        if (this.getBitsBase2(0, 64) ===
+            '1111111010000000000000000000000000000000000000000000000000000000') {
+            return true;
+        }
+        return false;
+    }
+    /**
+     * Returns true if the address is a multicast address, false otherwise
+     * @memberof Address6
+     * @instance
+     * @returns {boolean}
+     */
+    isMulticast() {
+        return this.getType() === 'Multicast';
+    }
+    /**
+     * Returns true if the address is a v4-in-v6 address, false otherwise
+     * @memberof Address6
+     * @instance
+     * @returns {boolean}
+     */
+    is4() {
+        return this.v4;
+    }
+    /**
+     * Returns true if the address is a Teredo address, false otherwise
+     * @memberof Address6
+     * @instance
+     * @returns {boolean}
+     */
+    isTeredo() {
+        return this.isInSubnet(new Address6('2001::/32'));
+    }
+    /**
+     * Returns true if the address is a 6to4 address, false otherwise
+     * @memberof Address6
+     * @instance
+     * @returns {boolean}
+     */
+    is6to4() {
+        return this.isInSubnet(new Address6('2002::/16'));
+    }
+    /**
+     * Returns true if the address is a loopback address, false otherwise
+     * @memberof Address6
+     * @instance
+     * @returns {boolean}
+     */
+    isLoopback() {
+        return this.getType() === 'Loopback';
+    }
+    // #endregion
+    // #region HTML
+    /**
+     * @returns {String} the address in link form with a default port of 80
+     */
+    href(optionalPort) {
+        if (optionalPort === undefined) {
+            optionalPort = '';
+        }
+        else {
+            optionalPort = (0,sprintf_js__WEBPACK_IMPORTED_MODULE_8__.sprintf)(':%s', optionalPort);
+        }
+        return (0,sprintf_js__WEBPACK_IMPORTED_MODULE_8__.sprintf)('http://[%s]%s/', this.correctForm(), optionalPort);
+    }
+    /**
+     * @returns {String} a link suitable for conveying the address via a URL hash
+     */
+    link(options) {
+        if (!options) {
+            options = {};
+        }
+        if (options.className === undefined) {
+            options.className = '';
+        }
+        if (options.prefix === undefined) {
+            options.prefix = '/#address=';
+        }
+        if (options.v4 === undefined) {
+            options.v4 = false;
+        }
+        let formFunction = this.correctForm;
+        if (options.v4) {
+            formFunction = this.to4in6;
+        }
+        if (options.className) {
+            return (0,sprintf_js__WEBPACK_IMPORTED_MODULE_8__.sprintf)('<a href="%1$s%2$s" class="%3$s">%2$s</a>', options.prefix, formFunction.call(this), options.className);
+        }
+        return (0,sprintf_js__WEBPACK_IMPORTED_MODULE_8__.sprintf)('<a href="%1$s%2$s">%2$s</a>', options.prefix, formFunction.call(this));
+    }
+    /**
+     * Groups an address
+     * @returns {String}
+     */
+    group() {
+        if (this.elidedGroups === 0) {
+            // The simple case
+            return _v6_helpers__WEBPACK_IMPORTED_MODULE_3__.simpleGroup(this.address).join(':');
+        }
+        assert(typeof this.elidedGroups === 'number');
+        assert(typeof this.elisionBegin === 'number');
+        // The elided case
+        const output = [];
+        const [left, right] = this.address.split('::');
+        if (left.length) {
+            output.push(..._v6_helpers__WEBPACK_IMPORTED_MODULE_3__.simpleGroup(left));
+        }
+        else {
+            output.push('');
+        }
+        const classes = ['hover-group'];
+        for (let i = this.elisionBegin; i < this.elisionBegin + this.elidedGroups; i++) {
+            classes.push((0,sprintf_js__WEBPACK_IMPORTED_MODULE_8__.sprintf)('group-%d', i));
+        }
+        output.push((0,sprintf_js__WEBPACK_IMPORTED_MODULE_8__.sprintf)('<span class="%s"></span>', classes.join(' ')));
+        if (right.length) {
+            output.push(..._v6_helpers__WEBPACK_IMPORTED_MODULE_3__.simpleGroup(right, this.elisionEnd));
+        }
+        else {
+            output.push('');
+        }
+        if (this.is4()) {
+            assert(this.address4 instanceof _ipv4__WEBPACK_IMPORTED_MODULE_4__.Address4);
+            output.pop();
+            output.push(this.address4.groupForV6());
+        }
+        return output.join(':');
+    }
+    // #endregion
+    // #region Regular expressions
+    /**
+     * Generate a regular expression string that can be used to find or validate
+     * all variations of this address
+     * @memberof Address6
+     * @instance
+     * @param {boolean} substringSearch
+     * @returns {string}
+     */
+    regularExpressionString(substringSearch = false) {
+        let output = [];
+        // TODO: revisit why this is necessary
+        const address6 = new Address6(this.correctForm());
+        if (address6.elidedGroups === 0) {
+            // The simple case
+            output.push((0,_v6_regular_expressions__WEBPACK_IMPORTED_MODULE_5__.simpleRegularExpression)(address6.parsedAddress));
+        }
+        else if (address6.elidedGroups === _v6_constants__WEBPACK_IMPORTED_MODULE_2__.GROUPS) {
+            // A completely elided address
+            output.push((0,_v6_regular_expressions__WEBPACK_IMPORTED_MODULE_5__.possibleElisions)(_v6_constants__WEBPACK_IMPORTED_MODULE_2__.GROUPS));
+        }
+        else {
+            // A partially elided address
+            const halves = address6.address.split('::');
+            if (halves[0].length) {
+                output.push((0,_v6_regular_expressions__WEBPACK_IMPORTED_MODULE_5__.simpleRegularExpression)(halves[0].split(':')));
+            }
+            assert(typeof address6.elidedGroups === 'number');
+            output.push((0,_v6_regular_expressions__WEBPACK_IMPORTED_MODULE_5__.possibleElisions)(address6.elidedGroups, halves[0].length !== 0, halves[1].length !== 0));
+            if (halves[1].length) {
+                output.push((0,_v6_regular_expressions__WEBPACK_IMPORTED_MODULE_5__.simpleRegularExpression)(halves[1].split(':')));
+            }
+            output = [output.join(':')];
+        }
+        if (!substringSearch) {
+            output = [
+                '(?=^|',
+                _v6_regular_expressions__WEBPACK_IMPORTED_MODULE_5__.ADDRESS_BOUNDARY,
+                '|[^\\w\\:])(',
+                ...output,
+                ')(?=[^\\w\\:]|',
+                _v6_regular_expressions__WEBPACK_IMPORTED_MODULE_5__.ADDRESS_BOUNDARY,
+                '|$)',
+            ];
+        }
+        return output.join('');
+    }
+    /**
+     * Generate a regular expression that can be used to find or validate all
+     * variations of this address.
+     * @memberof Address6
+     * @instance
+     * @param {boolean} substringSearch
+     * @returns {RegExp}
+     */
+    regularExpression(substringSearch = false) {
+        return new RegExp(this.regularExpressionString(substringSearch), 'i');
+    }
+}
+//# sourceMappingURL=ipv6.js.map
+
+/***/ }),
+
+/***/ "./node_modules/ip-address/dist/esm/lib/v4/constants.js":
+/*!**************************************************************!*\
+  !*** ./node_modules/ip-address/dist/esm/lib/v4/constants.js ***!
+  \**************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "BITS": () => (/* binding */ BITS),
+/* harmony export */   "GROUPS": () => (/* binding */ GROUPS),
+/* harmony export */   "RE_ADDRESS": () => (/* binding */ RE_ADDRESS),
+/* harmony export */   "RE_SUBNET_STRING": () => (/* binding */ RE_SUBNET_STRING)
+/* harmony export */ });
+const BITS = 32;
+const GROUPS = 4;
+const RE_ADDRESS = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/g;
+const RE_SUBNET_STRING = /\/\d{1,2}$/;
+//# sourceMappingURL=constants.js.map
+
+/***/ }),
+
+/***/ "./node_modules/ip-address/dist/esm/lib/v6/constants.js":
+/*!**************************************************************!*\
+  !*** ./node_modules/ip-address/dist/esm/lib/v6/constants.js ***!
+  \**************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "BITS": () => (/* binding */ BITS),
+/* harmony export */   "GROUPS": () => (/* binding */ GROUPS),
+/* harmony export */   "RE_BAD_ADDRESS": () => (/* binding */ RE_BAD_ADDRESS),
+/* harmony export */   "RE_BAD_CHARACTERS": () => (/* binding */ RE_BAD_CHARACTERS),
+/* harmony export */   "RE_SUBNET_STRING": () => (/* binding */ RE_SUBNET_STRING),
+/* harmony export */   "RE_URL": () => (/* binding */ RE_URL),
+/* harmony export */   "RE_URL_WITH_PORT": () => (/* binding */ RE_URL_WITH_PORT),
+/* harmony export */   "RE_ZONE_STRING": () => (/* binding */ RE_ZONE_STRING),
+/* harmony export */   "SCOPES": () => (/* binding */ SCOPES),
+/* harmony export */   "TYPES": () => (/* binding */ TYPES)
+/* harmony export */ });
+const BITS = 128;
+const GROUPS = 8;
+/**
+ * Represents IPv6 address scopes
+ * @memberof Address6
+ * @static
+ */
+const SCOPES = {
+    0: 'Reserved',
+    1: 'Interface local',
+    2: 'Link local',
+    4: 'Admin local',
+    5: 'Site local',
+    8: 'Organization local',
+    14: 'Global',
+    15: 'Reserved',
+};
+/**
+ * Represents IPv6 address types
+ * @memberof Address6
+ * @static
+ */
+const TYPES = {
+    'ff01::1/128': 'Multicast (All nodes on this interface)',
+    'ff01::2/128': 'Multicast (All routers on this interface)',
+    'ff02::1/128': 'Multicast (All nodes on this link)',
+    'ff02::2/128': 'Multicast (All routers on this link)',
+    'ff05::2/128': 'Multicast (All routers in this site)',
+    'ff02::5/128': 'Multicast (OSPFv3 AllSPF routers)',
+    'ff02::6/128': 'Multicast (OSPFv3 AllDR routers)',
+    'ff02::9/128': 'Multicast (RIP routers)',
+    'ff02::a/128': 'Multicast (EIGRP routers)',
+    'ff02::d/128': 'Multicast (PIM routers)',
+    'ff02::16/128': 'Multicast (MLDv2 reports)',
+    'ff01::fb/128': 'Multicast (mDNSv6)',
+    'ff02::fb/128': 'Multicast (mDNSv6)',
+    'ff05::fb/128': 'Multicast (mDNSv6)',
+    'ff02::1:2/128': 'Multicast (All DHCP servers and relay agents on this link)',
+    'ff05::1:2/128': 'Multicast (All DHCP servers and relay agents in this site)',
+    'ff02::1:3/128': 'Multicast (All DHCP servers on this link)',
+    'ff05::1:3/128': 'Multicast (All DHCP servers in this site)',
+    '::/128': 'Unspecified',
+    '::1/128': 'Loopback',
+    'ff00::/8': 'Multicast',
+    'fe80::/10': 'Link-local unicast',
+};
+/**
+ * A regular expression that matches bad characters in an IPv6 address
+ * @memberof Address6
+ * @static
+ */
+const RE_BAD_CHARACTERS = /([^0-9a-f:/%])/gi;
+/**
+ * A regular expression that matches an incorrect IPv6 address
+ * @memberof Address6
+ * @static
+ */
+const RE_BAD_ADDRESS = /([0-9a-f]{5,}|:{3,}|[^:]:$|^:[^:]|\/$)/gi;
+/**
+ * A regular expression that matches an IPv6 subnet
+ * @memberof Address6
+ * @static
+ */
+const RE_SUBNET_STRING = /\/\d{1,3}(?=%|$)/;
+/**
+ * A regular expression that matches an IPv6 zone
+ * @memberof Address6
+ * @static
+ */
+const RE_ZONE_STRING = /%.*$/;
+const RE_URL = new RegExp(/^\[{0,1}([0-9a-f:]+)\]{0,1}/);
+const RE_URL_WITH_PORT = new RegExp(/\[([0-9a-f:]+)\]:([0-9]{1,5})/);
+//# sourceMappingURL=constants.js.map
+
+/***/ }),
+
+/***/ "./node_modules/ip-address/dist/esm/lib/v6/helpers.js":
+/*!************************************************************!*\
+  !*** ./node_modules/ip-address/dist/esm/lib/v6/helpers.js ***!
+  \************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "simpleGroup": () => (/* binding */ simpleGroup),
+/* harmony export */   "spanAll": () => (/* binding */ spanAll),
+/* harmony export */   "spanAllZeroes": () => (/* binding */ spanAllZeroes),
+/* harmony export */   "spanLeadingZeroes": () => (/* binding */ spanLeadingZeroes)
+/* harmony export */ });
+/* harmony import */ var sprintf_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! sprintf-js */ "./node_modules/sprintf-js/src/sprintf.js");
+/* harmony import */ var sprintf_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(sprintf_js__WEBPACK_IMPORTED_MODULE_0__);
+
+/**
+ * @returns {String} the string with all zeroes contained in a <span>
+ */
+function spanAllZeroes(s) {
+    return s.replace(/(0+)/g, '<span class="zero">$1</span>');
+}
+/**
+ * @returns {String} the string with each character contained in a <span>
+ */
+function spanAll(s, offset = 0) {
+    const letters = s.split('');
+    return letters
+        .map((n, i) => (0,sprintf_js__WEBPACK_IMPORTED_MODULE_0__.sprintf)('<span class="digit value-%s position-%d">%s</span>', n, i + offset, spanAllZeroes(n)) // XXX Use #base-2 .value-0 instead?
+    )
+        .join('');
+}
+function spanLeadingZeroesSimple(group) {
+    return group.replace(/^(0+)/, '<span class="zero">$1</span>');
+}
+/**
+ * @returns {String} the string with leading zeroes contained in a <span>
+ */
+function spanLeadingZeroes(address) {
+    const groups = address.split(':');
+    return groups.map((g) => spanLeadingZeroesSimple(g)).join(':');
+}
+/**
+ * Groups an address
+ * @returns {String} a grouped address
+ */
+function simpleGroup(addressString, offset = 0) {
+    const groups = addressString.split(':');
+    return groups.map((g, i) => {
+        if (/group-v4/.test(g)) {
+            return g;
+        }
+        return (0,sprintf_js__WEBPACK_IMPORTED_MODULE_0__.sprintf)('<span class="hover-group group-%d">%s</span>', i + offset, spanLeadingZeroesSimple(g));
+    });
+}
+//# sourceMappingURL=helpers.js.map
+
+/***/ }),
+
+/***/ "./node_modules/ip-address/dist/esm/lib/v6/regular-expressions.js":
+/*!************************************************************************!*\
+  !*** ./node_modules/ip-address/dist/esm/lib/v6/regular-expressions.js ***!
+  \************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ADDRESS_BOUNDARY": () => (/* binding */ ADDRESS_BOUNDARY),
+/* harmony export */   "groupPossibilities": () => (/* binding */ groupPossibilities),
+/* harmony export */   "padGroup": () => (/* binding */ padGroup),
+/* harmony export */   "possibleElisions": () => (/* binding */ possibleElisions),
+/* harmony export */   "simpleRegularExpression": () => (/* binding */ simpleRegularExpression)
+/* harmony export */ });
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./constants */ "./node_modules/ip-address/dist/esm/lib/v6/constants.js");
+/* harmony import */ var sprintf_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! sprintf-js */ "./node_modules/sprintf-js/src/sprintf.js");
+/* harmony import */ var sprintf_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(sprintf_js__WEBPACK_IMPORTED_MODULE_1__);
+
+
+function groupPossibilities(possibilities) {
+    return (0,sprintf_js__WEBPACK_IMPORTED_MODULE_1__.sprintf)('(%s)', possibilities.join('|'));
+}
+function padGroup(group) {
+    if (group.length < 4) {
+        return (0,sprintf_js__WEBPACK_IMPORTED_MODULE_1__.sprintf)('0{0,%d}%s', 4 - group.length, group);
+    }
+    return group;
+}
+const ADDRESS_BOUNDARY = '[^A-Fa-f0-9:]';
+function simpleRegularExpression(groups) {
+    const zeroIndexes = [];
+    groups.forEach((group, i) => {
+        const groupInteger = parseInt(group, 16);
+        if (groupInteger === 0) {
+            zeroIndexes.push(i);
+        }
+    });
+    // You can technically elide a single 0, this creates the regular expressions
+    // to match that eventuality
+    const possibilities = zeroIndexes.map((zeroIndex) => groups
+        .map((group, i) => {
+        if (i === zeroIndex) {
+            const elision = i === 0 || i === _constants__WEBPACK_IMPORTED_MODULE_0__.GROUPS - 1 ? ':' : '';
+            return groupPossibilities([padGroup(group), elision]);
+        }
+        return padGroup(group);
+    })
+        .join(':'));
+    // The simplest case
+    possibilities.push(groups.map(padGroup).join(':'));
+    return groupPossibilities(possibilities);
+}
+function possibleElisions(elidedGroups, moreLeft, moreRight) {
+    const left = moreLeft ? '' : ':';
+    const right = moreRight ? '' : ':';
+    const possibilities = [];
+    // 1. elision of everything (::)
+    if (!moreLeft && !moreRight) {
+        possibilities.push('::');
+    }
+    // 2. complete elision of the middle
+    if (moreLeft && moreRight) {
+        possibilities.push('');
+    }
+    if ((moreRight && !moreLeft) || (!moreRight && moreLeft)) {
+        // 3. complete elision of one side
+        possibilities.push(':');
+    }
+    // 4. elision from the left side
+    possibilities.push((0,sprintf_js__WEBPACK_IMPORTED_MODULE_1__.sprintf)('%s(:0{1,4}){1,%d}', left, elidedGroups - 1));
+    // 5. elision from the right side
+    possibilities.push((0,sprintf_js__WEBPACK_IMPORTED_MODULE_1__.sprintf)('(0{1,4}:){1,%d}%s', elidedGroups - 1, right));
+    // 6. no elision
+    possibilities.push((0,sprintf_js__WEBPACK_IMPORTED_MODULE_1__.sprintf)('(0{1,4}:){%d}0{1,4}', elidedGroups - 1));
+    // 7. elision (including sloppy elision) from the middle
+    for (let groups = 1; groups < elidedGroups - 1; groups++) {
+        for (let position = 1; position < elidedGroups - groups; position++) {
+            possibilities.push((0,sprintf_js__WEBPACK_IMPORTED_MODULE_1__.sprintf)('(0{1,4}:){%d}:(0{1,4}:){%d}0{1,4}', position, elidedGroups - position - groups - 1));
+        }
+    }
+    return groupPossibilities(possibilities);
+}
+//# sourceMappingURL=regular-expressions.js.map
+
+/***/ }),
+
 /***/ "./node_modules/is-arguments/index.js":
 /*!********************************************!*\
   !*** ./node_modules/is-arguments/index.js ***!
@@ -69335,6 +71006,1372 @@ if ( typeof noGlobal === "undefined" ) {
 
 return jQuery;
 } );
+
+
+/***/ }),
+
+/***/ "./node_modules/jsbn/index.js":
+/*!************************************!*\
+  !*** ./node_modules/jsbn/index.js ***!
+  \************************************/
+/***/ (function(module, exports) {
+
+(function(){
+
+    // Copyright (c) 2005  Tom Wu
+    // All Rights Reserved.
+    // See "LICENSE" for details.
+
+    // Basic JavaScript BN library - subset useful for RSA encryption.
+
+    // Bits per digit
+    var dbits;
+
+    // JavaScript engine analysis
+    var canary = 0xdeadbeefcafe;
+    var j_lm = ((canary&0xffffff)==0xefcafe);
+
+    // (public) Constructor
+    function BigInteger(a,b,c) {
+      if(a != null)
+        if("number" == typeof a) this.fromNumber(a,b,c);
+        else if(b == null && "string" != typeof a) this.fromString(a,256);
+        else this.fromString(a,b);
+    }
+
+    // return new, unset BigInteger
+    function nbi() { return new BigInteger(null); }
+
+    // am: Compute w_j += (x*this_i), propagate carries,
+    // c is initial carry, returns final carry.
+    // c < 3*dvalue, x < 2*dvalue, this_i < dvalue
+    // We need to select the fastest one that works in this environment.
+
+    // am1: use a single mult and divide to get the high bits,
+    // max digit bits should be 26 because
+    // max internal value = 2*dvalue^2-2*dvalue (< 2^53)
+    function am1(i,x,w,j,c,n) {
+      while(--n >= 0) {
+        var v = x*this[i++]+w[j]+c;
+        c = Math.floor(v/0x4000000);
+        w[j++] = v&0x3ffffff;
+      }
+      return c;
+    }
+    // am2 avoids a big mult-and-extract completely.
+    // Max digit bits should be <= 30 because we do bitwise ops
+    // on values up to 2*hdvalue^2-hdvalue-1 (< 2^31)
+    function am2(i,x,w,j,c,n) {
+      var xl = x&0x7fff, xh = x>>15;
+      while(--n >= 0) {
+        var l = this[i]&0x7fff;
+        var h = this[i++]>>15;
+        var m = xh*l+h*xl;
+        l = xl*l+((m&0x7fff)<<15)+w[j]+(c&0x3fffffff);
+        c = (l>>>30)+(m>>>15)+xh*h+(c>>>30);
+        w[j++] = l&0x3fffffff;
+      }
+      return c;
+    }
+    // Alternately, set max digit bits to 28 since some
+    // browsers slow down when dealing with 32-bit numbers.
+    function am3(i,x,w,j,c,n) {
+      var xl = x&0x3fff, xh = x>>14;
+      while(--n >= 0) {
+        var l = this[i]&0x3fff;
+        var h = this[i++]>>14;
+        var m = xh*l+h*xl;
+        l = xl*l+((m&0x3fff)<<14)+w[j]+c;
+        c = (l>>28)+(m>>14)+xh*h;
+        w[j++] = l&0xfffffff;
+      }
+      return c;
+    }
+    var inBrowser = typeof navigator !== "undefined";
+    if(inBrowser && j_lm && (navigator.appName == "Microsoft Internet Explorer")) {
+      BigInteger.prototype.am = am2;
+      dbits = 30;
+    }
+    else if(inBrowser && j_lm && (navigator.appName != "Netscape")) {
+      BigInteger.prototype.am = am1;
+      dbits = 26;
+    }
+    else { // Mozilla/Netscape seems to prefer am3
+      BigInteger.prototype.am = am3;
+      dbits = 28;
+    }
+
+    BigInteger.prototype.DB = dbits;
+    BigInteger.prototype.DM = ((1<<dbits)-1);
+    BigInteger.prototype.DV = (1<<dbits);
+
+    var BI_FP = 52;
+    BigInteger.prototype.FV = Math.pow(2,BI_FP);
+    BigInteger.prototype.F1 = BI_FP-dbits;
+    BigInteger.prototype.F2 = 2*dbits-BI_FP;
+
+    // Digit conversions
+    var BI_RM = "0123456789abcdefghijklmnopqrstuvwxyz";
+    var BI_RC = new Array();
+    var rr,vv;
+    rr = "0".charCodeAt(0);
+    for(vv = 0; vv <= 9; ++vv) BI_RC[rr++] = vv;
+    rr = "a".charCodeAt(0);
+    for(vv = 10; vv < 36; ++vv) BI_RC[rr++] = vv;
+    rr = "A".charCodeAt(0);
+    for(vv = 10; vv < 36; ++vv) BI_RC[rr++] = vv;
+
+    function int2char(n) { return BI_RM.charAt(n); }
+    function intAt(s,i) {
+      var c = BI_RC[s.charCodeAt(i)];
+      return (c==null)?-1:c;
+    }
+
+    // (protected) copy this to r
+    function bnpCopyTo(r) {
+      for(var i = this.t-1; i >= 0; --i) r[i] = this[i];
+      r.t = this.t;
+      r.s = this.s;
+    }
+
+    // (protected) set from integer value x, -DV <= x < DV
+    function bnpFromInt(x) {
+      this.t = 1;
+      this.s = (x<0)?-1:0;
+      if(x > 0) this[0] = x;
+      else if(x < -1) this[0] = x+this.DV;
+      else this.t = 0;
+    }
+
+    // return bigint initialized to value
+    function nbv(i) { var r = nbi(); r.fromInt(i); return r; }
+
+    // (protected) set from string and radix
+    function bnpFromString(s,b) {
+      var k;
+      if(b == 16) k = 4;
+      else if(b == 8) k = 3;
+      else if(b == 256) k = 8; // byte array
+      else if(b == 2) k = 1;
+      else if(b == 32) k = 5;
+      else if(b == 4) k = 2;
+      else { this.fromRadix(s,b); return; }
+      this.t = 0;
+      this.s = 0;
+      var i = s.length, mi = false, sh = 0;
+      while(--i >= 0) {
+        var x = (k==8)?s[i]&0xff:intAt(s,i);
+        if(x < 0) {
+          if(s.charAt(i) == "-") mi = true;
+          continue;
+        }
+        mi = false;
+        if(sh == 0)
+          this[this.t++] = x;
+        else if(sh+k > this.DB) {
+          this[this.t-1] |= (x&((1<<(this.DB-sh))-1))<<sh;
+          this[this.t++] = (x>>(this.DB-sh));
+        }
+        else
+          this[this.t-1] |= x<<sh;
+        sh += k;
+        if(sh >= this.DB) sh -= this.DB;
+      }
+      if(k == 8 && (s[0]&0x80) != 0) {
+        this.s = -1;
+        if(sh > 0) this[this.t-1] |= ((1<<(this.DB-sh))-1)<<sh;
+      }
+      this.clamp();
+      if(mi) BigInteger.ZERO.subTo(this,this);
+    }
+
+    // (protected) clamp off excess high words
+    function bnpClamp() {
+      var c = this.s&this.DM;
+      while(this.t > 0 && this[this.t-1] == c) --this.t;
+    }
+
+    // (public) return string representation in given radix
+    function bnToString(b) {
+      if(this.s < 0) return "-"+this.negate().toString(b);
+      var k;
+      if(b == 16) k = 4;
+      else if(b == 8) k = 3;
+      else if(b == 2) k = 1;
+      else if(b == 32) k = 5;
+      else if(b == 4) k = 2;
+      else return this.toRadix(b);
+      var km = (1<<k)-1, d, m = false, r = "", i = this.t;
+      var p = this.DB-(i*this.DB)%k;
+      if(i-- > 0) {
+        if(p < this.DB && (d = this[i]>>p) > 0) { m = true; r = int2char(d); }
+        while(i >= 0) {
+          if(p < k) {
+            d = (this[i]&((1<<p)-1))<<(k-p);
+            d |= this[--i]>>(p+=this.DB-k);
+          }
+          else {
+            d = (this[i]>>(p-=k))&km;
+            if(p <= 0) { p += this.DB; --i; }
+          }
+          if(d > 0) m = true;
+          if(m) r += int2char(d);
+        }
+      }
+      return m?r:"0";
+    }
+
+    // (public) -this
+    function bnNegate() { var r = nbi(); BigInteger.ZERO.subTo(this,r); return r; }
+
+    // (public) |this|
+    function bnAbs() { return (this.s<0)?this.negate():this; }
+
+    // (public) return + if this > a, - if this < a, 0 if equal
+    function bnCompareTo(a) {
+      var r = this.s-a.s;
+      if(r != 0) return r;
+      var i = this.t;
+      r = i-a.t;
+      if(r != 0) return (this.s<0)?-r:r;
+      while(--i >= 0) if((r=this[i]-a[i]) != 0) return r;
+      return 0;
+    }
+
+    // returns bit length of the integer x
+    function nbits(x) {
+      var r = 1, t;
+      if((t=x>>>16) != 0) { x = t; r += 16; }
+      if((t=x>>8) != 0) { x = t; r += 8; }
+      if((t=x>>4) != 0) { x = t; r += 4; }
+      if((t=x>>2) != 0) { x = t; r += 2; }
+      if((t=x>>1) != 0) { x = t; r += 1; }
+      return r;
+    }
+
+    // (public) return the number of bits in "this"
+    function bnBitLength() {
+      if(this.t <= 0) return 0;
+      return this.DB*(this.t-1)+nbits(this[this.t-1]^(this.s&this.DM));
+    }
+
+    // (protected) r = this << n*DB
+    function bnpDLShiftTo(n,r) {
+      var i;
+      for(i = this.t-1; i >= 0; --i) r[i+n] = this[i];
+      for(i = n-1; i >= 0; --i) r[i] = 0;
+      r.t = this.t+n;
+      r.s = this.s;
+    }
+
+    // (protected) r = this >> n*DB
+    function bnpDRShiftTo(n,r) {
+      for(var i = n; i < this.t; ++i) r[i-n] = this[i];
+      r.t = Math.max(this.t-n,0);
+      r.s = this.s;
+    }
+
+    // (protected) r = this << n
+    function bnpLShiftTo(n,r) {
+      var bs = n%this.DB;
+      var cbs = this.DB-bs;
+      var bm = (1<<cbs)-1;
+      var ds = Math.floor(n/this.DB), c = (this.s<<bs)&this.DM, i;
+      for(i = this.t-1; i >= 0; --i) {
+        r[i+ds+1] = (this[i]>>cbs)|c;
+        c = (this[i]&bm)<<bs;
+      }
+      for(i = ds-1; i >= 0; --i) r[i] = 0;
+      r[ds] = c;
+      r.t = this.t+ds+1;
+      r.s = this.s;
+      r.clamp();
+    }
+
+    // (protected) r = this >> n
+    function bnpRShiftTo(n,r) {
+      r.s = this.s;
+      var ds = Math.floor(n/this.DB);
+      if(ds >= this.t) { r.t = 0; return; }
+      var bs = n%this.DB;
+      var cbs = this.DB-bs;
+      var bm = (1<<bs)-1;
+      r[0] = this[ds]>>bs;
+      for(var i = ds+1; i < this.t; ++i) {
+        r[i-ds-1] |= (this[i]&bm)<<cbs;
+        r[i-ds] = this[i]>>bs;
+      }
+      if(bs > 0) r[this.t-ds-1] |= (this.s&bm)<<cbs;
+      r.t = this.t-ds;
+      r.clamp();
+    }
+
+    // (protected) r = this - a
+    function bnpSubTo(a,r) {
+      var i = 0, c = 0, m = Math.min(a.t,this.t);
+      while(i < m) {
+        c += this[i]-a[i];
+        r[i++] = c&this.DM;
+        c >>= this.DB;
+      }
+      if(a.t < this.t) {
+        c -= a.s;
+        while(i < this.t) {
+          c += this[i];
+          r[i++] = c&this.DM;
+          c >>= this.DB;
+        }
+        c += this.s;
+      }
+      else {
+        c += this.s;
+        while(i < a.t) {
+          c -= a[i];
+          r[i++] = c&this.DM;
+          c >>= this.DB;
+        }
+        c -= a.s;
+      }
+      r.s = (c<0)?-1:0;
+      if(c < -1) r[i++] = this.DV+c;
+      else if(c > 0) r[i++] = c;
+      r.t = i;
+      r.clamp();
+    }
+
+    // (protected) r = this * a, r != this,a (HAC 14.12)
+    // "this" should be the larger one if appropriate.
+    function bnpMultiplyTo(a,r) {
+      var x = this.abs(), y = a.abs();
+      var i = x.t;
+      r.t = i+y.t;
+      while(--i >= 0) r[i] = 0;
+      for(i = 0; i < y.t; ++i) r[i+x.t] = x.am(0,y[i],r,i,0,x.t);
+      r.s = 0;
+      r.clamp();
+      if(this.s != a.s) BigInteger.ZERO.subTo(r,r);
+    }
+
+    // (protected) r = this^2, r != this (HAC 14.16)
+    function bnpSquareTo(r) {
+      var x = this.abs();
+      var i = r.t = 2*x.t;
+      while(--i >= 0) r[i] = 0;
+      for(i = 0; i < x.t-1; ++i) {
+        var c = x.am(i,x[i],r,2*i,0,1);
+        if((r[i+x.t]+=x.am(i+1,2*x[i],r,2*i+1,c,x.t-i-1)) >= x.DV) {
+          r[i+x.t] -= x.DV;
+          r[i+x.t+1] = 1;
+        }
+      }
+      if(r.t > 0) r[r.t-1] += x.am(i,x[i],r,2*i,0,1);
+      r.s = 0;
+      r.clamp();
+    }
+
+    // (protected) divide this by m, quotient and remainder to q, r (HAC 14.20)
+    // r != q, this != m.  q or r may be null.
+    function bnpDivRemTo(m,q,r) {
+      var pm = m.abs();
+      if(pm.t <= 0) return;
+      var pt = this.abs();
+      if(pt.t < pm.t) {
+        if(q != null) q.fromInt(0);
+        if(r != null) this.copyTo(r);
+        return;
+      }
+      if(r == null) r = nbi();
+      var y = nbi(), ts = this.s, ms = m.s;
+      var nsh = this.DB-nbits(pm[pm.t-1]);   // normalize modulus
+      if(nsh > 0) { pm.lShiftTo(nsh,y); pt.lShiftTo(nsh,r); }
+      else { pm.copyTo(y); pt.copyTo(r); }
+      var ys = y.t;
+      var y0 = y[ys-1];
+      if(y0 == 0) return;
+      var yt = y0*(1<<this.F1)+((ys>1)?y[ys-2]>>this.F2:0);
+      var d1 = this.FV/yt, d2 = (1<<this.F1)/yt, e = 1<<this.F2;
+      var i = r.t, j = i-ys, t = (q==null)?nbi():q;
+      y.dlShiftTo(j,t);
+      if(r.compareTo(t) >= 0) {
+        r[r.t++] = 1;
+        r.subTo(t,r);
+      }
+      BigInteger.ONE.dlShiftTo(ys,t);
+      t.subTo(y,y);  // "negative" y so we can replace sub with am later
+      while(y.t < ys) y[y.t++] = 0;
+      while(--j >= 0) {
+        // Estimate quotient digit
+        var qd = (r[--i]==y0)?this.DM:Math.floor(r[i]*d1+(r[i-1]+e)*d2);
+        if((r[i]+=y.am(0,qd,r,j,0,ys)) < qd) {   // Try it out
+          y.dlShiftTo(j,t);
+          r.subTo(t,r);
+          while(r[i] < --qd) r.subTo(t,r);
+        }
+      }
+      if(q != null) {
+        r.drShiftTo(ys,q);
+        if(ts != ms) BigInteger.ZERO.subTo(q,q);
+      }
+      r.t = ys;
+      r.clamp();
+      if(nsh > 0) r.rShiftTo(nsh,r); // Denormalize remainder
+      if(ts < 0) BigInteger.ZERO.subTo(r,r);
+    }
+
+    // (public) this mod a
+    function bnMod(a) {
+      var r = nbi();
+      this.abs().divRemTo(a,null,r);
+      if(this.s < 0 && r.compareTo(BigInteger.ZERO) > 0) a.subTo(r,r);
+      return r;
+    }
+
+    // Modular reduction using "classic" algorithm
+    function Classic(m) { this.m = m; }
+    function cConvert(x) {
+      if(x.s < 0 || x.compareTo(this.m) >= 0) return x.mod(this.m);
+      else return x;
+    }
+    function cRevert(x) { return x; }
+    function cReduce(x) { x.divRemTo(this.m,null,x); }
+    function cMulTo(x,y,r) { x.multiplyTo(y,r); this.reduce(r); }
+    function cSqrTo(x,r) { x.squareTo(r); this.reduce(r); }
+
+    Classic.prototype.convert = cConvert;
+    Classic.prototype.revert = cRevert;
+    Classic.prototype.reduce = cReduce;
+    Classic.prototype.mulTo = cMulTo;
+    Classic.prototype.sqrTo = cSqrTo;
+
+    // (protected) return "-1/this % 2^DB"; useful for Mont. reduction
+    // justification:
+    //         xy == 1 (mod m)
+    //         xy =  1+km
+    //   xy(2-xy) = (1+km)(1-km)
+    // x[y(2-xy)] = 1-k^2m^2
+    // x[y(2-xy)] == 1 (mod m^2)
+    // if y is 1/x mod m, then y(2-xy) is 1/x mod m^2
+    // should reduce x and y(2-xy) by m^2 at each step to keep size bounded.
+    // JS multiply "overflows" differently from C/C++, so care is needed here.
+    function bnpInvDigit() {
+      if(this.t < 1) return 0;
+      var x = this[0];
+      if((x&1) == 0) return 0;
+      var y = x&3;       // y == 1/x mod 2^2
+      y = (y*(2-(x&0xf)*y))&0xf; // y == 1/x mod 2^4
+      y = (y*(2-(x&0xff)*y))&0xff;   // y == 1/x mod 2^8
+      y = (y*(2-(((x&0xffff)*y)&0xffff)))&0xffff;    // y == 1/x mod 2^16
+      // last step - calculate inverse mod DV directly;
+      // assumes 16 < DB <= 32 and assumes ability to handle 48-bit ints
+      y = (y*(2-x*y%this.DV))%this.DV;       // y == 1/x mod 2^dbits
+      // we really want the negative inverse, and -DV < y < DV
+      return (y>0)?this.DV-y:-y;
+    }
+
+    // Montgomery reduction
+    function Montgomery(m) {
+      this.m = m;
+      this.mp = m.invDigit();
+      this.mpl = this.mp&0x7fff;
+      this.mph = this.mp>>15;
+      this.um = (1<<(m.DB-15))-1;
+      this.mt2 = 2*m.t;
+    }
+
+    // xR mod m
+    function montConvert(x) {
+      var r = nbi();
+      x.abs().dlShiftTo(this.m.t,r);
+      r.divRemTo(this.m,null,r);
+      if(x.s < 0 && r.compareTo(BigInteger.ZERO) > 0) this.m.subTo(r,r);
+      return r;
+    }
+
+    // x/R mod m
+    function montRevert(x) {
+      var r = nbi();
+      x.copyTo(r);
+      this.reduce(r);
+      return r;
+    }
+
+    // x = x/R mod m (HAC 14.32)
+    function montReduce(x) {
+      while(x.t <= this.mt2) // pad x so am has enough room later
+        x[x.t++] = 0;
+      for(var i = 0; i < this.m.t; ++i) {
+        // faster way of calculating u0 = x[i]*mp mod DV
+        var j = x[i]&0x7fff;
+        var u0 = (j*this.mpl+(((j*this.mph+(x[i]>>15)*this.mpl)&this.um)<<15))&x.DM;
+        // use am to combine the multiply-shift-add into one call
+        j = i+this.m.t;
+        x[j] += this.m.am(0,u0,x,i,0,this.m.t);
+        // propagate carry
+        while(x[j] >= x.DV) { x[j] -= x.DV; x[++j]++; }
+      }
+      x.clamp();
+      x.drShiftTo(this.m.t,x);
+      if(x.compareTo(this.m) >= 0) x.subTo(this.m,x);
+    }
+
+    // r = "x^2/R mod m"; x != r
+    function montSqrTo(x,r) { x.squareTo(r); this.reduce(r); }
+
+    // r = "xy/R mod m"; x,y != r
+    function montMulTo(x,y,r) { x.multiplyTo(y,r); this.reduce(r); }
+
+    Montgomery.prototype.convert = montConvert;
+    Montgomery.prototype.revert = montRevert;
+    Montgomery.prototype.reduce = montReduce;
+    Montgomery.prototype.mulTo = montMulTo;
+    Montgomery.prototype.sqrTo = montSqrTo;
+
+    // (protected) true iff this is even
+    function bnpIsEven() { return ((this.t>0)?(this[0]&1):this.s) == 0; }
+
+    // (protected) this^e, e < 2^32, doing sqr and mul with "r" (HAC 14.79)
+    function bnpExp(e,z) {
+      if(e > 0xffffffff || e < 1) return BigInteger.ONE;
+      var r = nbi(), r2 = nbi(), g = z.convert(this), i = nbits(e)-1;
+      g.copyTo(r);
+      while(--i >= 0) {
+        z.sqrTo(r,r2);
+        if((e&(1<<i)) > 0) z.mulTo(r2,g,r);
+        else { var t = r; r = r2; r2 = t; }
+      }
+      return z.revert(r);
+    }
+
+    // (public) this^e % m, 0 <= e < 2^32
+    function bnModPowInt(e,m) {
+      var z;
+      if(e < 256 || m.isEven()) z = new Classic(m); else z = new Montgomery(m);
+      return this.exp(e,z);
+    }
+
+    // protected
+    BigInteger.prototype.copyTo = bnpCopyTo;
+    BigInteger.prototype.fromInt = bnpFromInt;
+    BigInteger.prototype.fromString = bnpFromString;
+    BigInteger.prototype.clamp = bnpClamp;
+    BigInteger.prototype.dlShiftTo = bnpDLShiftTo;
+    BigInteger.prototype.drShiftTo = bnpDRShiftTo;
+    BigInteger.prototype.lShiftTo = bnpLShiftTo;
+    BigInteger.prototype.rShiftTo = bnpRShiftTo;
+    BigInteger.prototype.subTo = bnpSubTo;
+    BigInteger.prototype.multiplyTo = bnpMultiplyTo;
+    BigInteger.prototype.squareTo = bnpSquareTo;
+    BigInteger.prototype.divRemTo = bnpDivRemTo;
+    BigInteger.prototype.invDigit = bnpInvDigit;
+    BigInteger.prototype.isEven = bnpIsEven;
+    BigInteger.prototype.exp = bnpExp;
+
+    // public
+    BigInteger.prototype.toString = bnToString;
+    BigInteger.prototype.negate = bnNegate;
+    BigInteger.prototype.abs = bnAbs;
+    BigInteger.prototype.compareTo = bnCompareTo;
+    BigInteger.prototype.bitLength = bnBitLength;
+    BigInteger.prototype.mod = bnMod;
+    BigInteger.prototype.modPowInt = bnModPowInt;
+
+    // "constants"
+    BigInteger.ZERO = nbv(0);
+    BigInteger.ONE = nbv(1);
+
+    // Copyright (c) 2005-2009  Tom Wu
+    // All Rights Reserved.
+    // See "LICENSE" for details.
+
+    // Extended JavaScript BN functions, required for RSA private ops.
+
+    // Version 1.1: new BigInteger("0", 10) returns "proper" zero
+    // Version 1.2: square() API, isProbablePrime fix
+
+    // (public)
+    function bnClone() { var r = nbi(); this.copyTo(r); return r; }
+
+    // (public) return value as integer
+    function bnIntValue() {
+      if(this.s < 0) {
+        if(this.t == 1) return this[0]-this.DV;
+        else if(this.t == 0) return -1;
+      }
+      else if(this.t == 1) return this[0];
+      else if(this.t == 0) return 0;
+      // assumes 16 < DB < 32
+      return ((this[1]&((1<<(32-this.DB))-1))<<this.DB)|this[0];
+    }
+
+    // (public) return value as byte
+    function bnByteValue() { return (this.t==0)?this.s:(this[0]<<24)>>24; }
+
+    // (public) return value as short (assumes DB>=16)
+    function bnShortValue() { return (this.t==0)?this.s:(this[0]<<16)>>16; }
+
+    // (protected) return x s.t. r^x < DV
+    function bnpChunkSize(r) { return Math.floor(Math.LN2*this.DB/Math.log(r)); }
+
+    // (public) 0 if this == 0, 1 if this > 0
+    function bnSigNum() {
+      if(this.s < 0) return -1;
+      else if(this.t <= 0 || (this.t == 1 && this[0] <= 0)) return 0;
+      else return 1;
+    }
+
+    // (protected) convert to radix string
+    function bnpToRadix(b) {
+      if(b == null) b = 10;
+      if(this.signum() == 0 || b < 2 || b > 36) return "0";
+      var cs = this.chunkSize(b);
+      var a = Math.pow(b,cs);
+      var d = nbv(a), y = nbi(), z = nbi(), r = "";
+      this.divRemTo(d,y,z);
+      while(y.signum() > 0) {
+        r = (a+z.intValue()).toString(b).substr(1) + r;
+        y.divRemTo(d,y,z);
+      }
+      return z.intValue().toString(b) + r;
+    }
+
+    // (protected) convert from radix string
+    function bnpFromRadix(s,b) {
+      this.fromInt(0);
+      if(b == null) b = 10;
+      var cs = this.chunkSize(b);
+      var d = Math.pow(b,cs), mi = false, j = 0, w = 0;
+      for(var i = 0; i < s.length; ++i) {
+        var x = intAt(s,i);
+        if(x < 0) {
+          if(s.charAt(i) == "-" && this.signum() == 0) mi = true;
+          continue;
+        }
+        w = b*w+x;
+        if(++j >= cs) {
+          this.dMultiply(d);
+          this.dAddOffset(w,0);
+          j = 0;
+          w = 0;
+        }
+      }
+      if(j > 0) {
+        this.dMultiply(Math.pow(b,j));
+        this.dAddOffset(w,0);
+      }
+      if(mi) BigInteger.ZERO.subTo(this,this);
+    }
+
+    // (protected) alternate constructor
+    function bnpFromNumber(a,b,c) {
+      if("number" == typeof b) {
+        // new BigInteger(int,int,RNG)
+        if(a < 2) this.fromInt(1);
+        else {
+          this.fromNumber(a,c);
+          if(!this.testBit(a-1))    // force MSB set
+            this.bitwiseTo(BigInteger.ONE.shiftLeft(a-1),op_or,this);
+          if(this.isEven()) this.dAddOffset(1,0); // force odd
+          while(!this.isProbablePrime(b)) {
+            this.dAddOffset(2,0);
+            if(this.bitLength() > a) this.subTo(BigInteger.ONE.shiftLeft(a-1),this);
+          }
+        }
+      }
+      else {
+        // new BigInteger(int,RNG)
+        var x = new Array(), t = a&7;
+        x.length = (a>>3)+1;
+        b.nextBytes(x);
+        if(t > 0) x[0] &= ((1<<t)-1); else x[0] = 0;
+        this.fromString(x,256);
+      }
+    }
+
+    // (public) convert to bigendian byte array
+    function bnToByteArray() {
+      var i = this.t, r = new Array();
+      r[0] = this.s;
+      var p = this.DB-(i*this.DB)%8, d, k = 0;
+      if(i-- > 0) {
+        if(p < this.DB && (d = this[i]>>p) != (this.s&this.DM)>>p)
+          r[k++] = d|(this.s<<(this.DB-p));
+        while(i >= 0) {
+          if(p < 8) {
+            d = (this[i]&((1<<p)-1))<<(8-p);
+            d |= this[--i]>>(p+=this.DB-8);
+          }
+          else {
+            d = (this[i]>>(p-=8))&0xff;
+            if(p <= 0) { p += this.DB; --i; }
+          }
+          if((d&0x80) != 0) d |= -256;
+          if(k == 0 && (this.s&0x80) != (d&0x80)) ++k;
+          if(k > 0 || d != this.s) r[k++] = d;
+        }
+      }
+      return r;
+    }
+
+    function bnEquals(a) { return(this.compareTo(a)==0); }
+    function bnMin(a) { return(this.compareTo(a)<0)?this:a; }
+    function bnMax(a) { return(this.compareTo(a)>0)?this:a; }
+
+    // (protected) r = this op a (bitwise)
+    function bnpBitwiseTo(a,op,r) {
+      var i, f, m = Math.min(a.t,this.t);
+      for(i = 0; i < m; ++i) r[i] = op(this[i],a[i]);
+      if(a.t < this.t) {
+        f = a.s&this.DM;
+        for(i = m; i < this.t; ++i) r[i] = op(this[i],f);
+        r.t = this.t;
+      }
+      else {
+        f = this.s&this.DM;
+        for(i = m; i < a.t; ++i) r[i] = op(f,a[i]);
+        r.t = a.t;
+      }
+      r.s = op(this.s,a.s);
+      r.clamp();
+    }
+
+    // (public) this & a
+    function op_and(x,y) { return x&y; }
+    function bnAnd(a) { var r = nbi(); this.bitwiseTo(a,op_and,r); return r; }
+
+    // (public) this | a
+    function op_or(x,y) { return x|y; }
+    function bnOr(a) { var r = nbi(); this.bitwiseTo(a,op_or,r); return r; }
+
+    // (public) this ^ a
+    function op_xor(x,y) { return x^y; }
+    function bnXor(a) { var r = nbi(); this.bitwiseTo(a,op_xor,r); return r; }
+
+    // (public) this & ~a
+    function op_andnot(x,y) { return x&~y; }
+    function bnAndNot(a) { var r = nbi(); this.bitwiseTo(a,op_andnot,r); return r; }
+
+    // (public) ~this
+    function bnNot() {
+      var r = nbi();
+      for(var i = 0; i < this.t; ++i) r[i] = this.DM&~this[i];
+      r.t = this.t;
+      r.s = ~this.s;
+      return r;
+    }
+
+    // (public) this << n
+    function bnShiftLeft(n) {
+      var r = nbi();
+      if(n < 0) this.rShiftTo(-n,r); else this.lShiftTo(n,r);
+      return r;
+    }
+
+    // (public) this >> n
+    function bnShiftRight(n) {
+      var r = nbi();
+      if(n < 0) this.lShiftTo(-n,r); else this.rShiftTo(n,r);
+      return r;
+    }
+
+    // return index of lowest 1-bit in x, x < 2^31
+    function lbit(x) {
+      if(x == 0) return -1;
+      var r = 0;
+      if((x&0xffff) == 0) { x >>= 16; r += 16; }
+      if((x&0xff) == 0) { x >>= 8; r += 8; }
+      if((x&0xf) == 0) { x >>= 4; r += 4; }
+      if((x&3) == 0) { x >>= 2; r += 2; }
+      if((x&1) == 0) ++r;
+      return r;
+    }
+
+    // (public) returns index of lowest 1-bit (or -1 if none)
+    function bnGetLowestSetBit() {
+      for(var i = 0; i < this.t; ++i)
+        if(this[i] != 0) return i*this.DB+lbit(this[i]);
+      if(this.s < 0) return this.t*this.DB;
+      return -1;
+    }
+
+    // return number of 1 bits in x
+    function cbit(x) {
+      var r = 0;
+      while(x != 0) { x &= x-1; ++r; }
+      return r;
+    }
+
+    // (public) return number of set bits
+    function bnBitCount() {
+      var r = 0, x = this.s&this.DM;
+      for(var i = 0; i < this.t; ++i) r += cbit(this[i]^x);
+      return r;
+    }
+
+    // (public) true iff nth bit is set
+    function bnTestBit(n) {
+      var j = Math.floor(n/this.DB);
+      if(j >= this.t) return(this.s!=0);
+      return((this[j]&(1<<(n%this.DB)))!=0);
+    }
+
+    // (protected) this op (1<<n)
+    function bnpChangeBit(n,op) {
+      var r = BigInteger.ONE.shiftLeft(n);
+      this.bitwiseTo(r,op,r);
+      return r;
+    }
+
+    // (public) this | (1<<n)
+    function bnSetBit(n) { return this.changeBit(n,op_or); }
+
+    // (public) this & ~(1<<n)
+    function bnClearBit(n) { return this.changeBit(n,op_andnot); }
+
+    // (public) this ^ (1<<n)
+    function bnFlipBit(n) { return this.changeBit(n,op_xor); }
+
+    // (protected) r = this + a
+    function bnpAddTo(a,r) {
+      var i = 0, c = 0, m = Math.min(a.t,this.t);
+      while(i < m) {
+        c += this[i]+a[i];
+        r[i++] = c&this.DM;
+        c >>= this.DB;
+      }
+      if(a.t < this.t) {
+        c += a.s;
+        while(i < this.t) {
+          c += this[i];
+          r[i++] = c&this.DM;
+          c >>= this.DB;
+        }
+        c += this.s;
+      }
+      else {
+        c += this.s;
+        while(i < a.t) {
+          c += a[i];
+          r[i++] = c&this.DM;
+          c >>= this.DB;
+        }
+        c += a.s;
+      }
+      r.s = (c<0)?-1:0;
+      if(c > 0) r[i++] = c;
+      else if(c < -1) r[i++] = this.DV+c;
+      r.t = i;
+      r.clamp();
+    }
+
+    // (public) this + a
+    function bnAdd(a) { var r = nbi(); this.addTo(a,r); return r; }
+
+    // (public) this - a
+    function bnSubtract(a) { var r = nbi(); this.subTo(a,r); return r; }
+
+    // (public) this * a
+    function bnMultiply(a) { var r = nbi(); this.multiplyTo(a,r); return r; }
+
+    // (public) this^2
+    function bnSquare() { var r = nbi(); this.squareTo(r); return r; }
+
+    // (public) this / a
+    function bnDivide(a) { var r = nbi(); this.divRemTo(a,r,null); return r; }
+
+    // (public) this % a
+    function bnRemainder(a) { var r = nbi(); this.divRemTo(a,null,r); return r; }
+
+    // (public) [this/a,this%a]
+    function bnDivideAndRemainder(a) {
+      var q = nbi(), r = nbi();
+      this.divRemTo(a,q,r);
+      return new Array(q,r);
+    }
+
+    // (protected) this *= n, this >= 0, 1 < n < DV
+    function bnpDMultiply(n) {
+      this[this.t] = this.am(0,n-1,this,0,0,this.t);
+      ++this.t;
+      this.clamp();
+    }
+
+    // (protected) this += n << w words, this >= 0
+    function bnpDAddOffset(n,w) {
+      if(n == 0) return;
+      while(this.t <= w) this[this.t++] = 0;
+      this[w] += n;
+      while(this[w] >= this.DV) {
+        this[w] -= this.DV;
+        if(++w >= this.t) this[this.t++] = 0;
+        ++this[w];
+      }
+    }
+
+    // A "null" reducer
+    function NullExp() {}
+    function nNop(x) { return x; }
+    function nMulTo(x,y,r) { x.multiplyTo(y,r); }
+    function nSqrTo(x,r) { x.squareTo(r); }
+
+    NullExp.prototype.convert = nNop;
+    NullExp.prototype.revert = nNop;
+    NullExp.prototype.mulTo = nMulTo;
+    NullExp.prototype.sqrTo = nSqrTo;
+
+    // (public) this^e
+    function bnPow(e) { return this.exp(e,new NullExp()); }
+
+    // (protected) r = lower n words of "this * a", a.t <= n
+    // "this" should be the larger one if appropriate.
+    function bnpMultiplyLowerTo(a,n,r) {
+      var i = Math.min(this.t+a.t,n);
+      r.s = 0; // assumes a,this >= 0
+      r.t = i;
+      while(i > 0) r[--i] = 0;
+      var j;
+      for(j = r.t-this.t; i < j; ++i) r[i+this.t] = this.am(0,a[i],r,i,0,this.t);
+      for(j = Math.min(a.t,n); i < j; ++i) this.am(0,a[i],r,i,0,n-i);
+      r.clamp();
+    }
+
+    // (protected) r = "this * a" without lower n words, n > 0
+    // "this" should be the larger one if appropriate.
+    function bnpMultiplyUpperTo(a,n,r) {
+      --n;
+      var i = r.t = this.t+a.t-n;
+      r.s = 0; // assumes a,this >= 0
+      while(--i >= 0) r[i] = 0;
+      for(i = Math.max(n-this.t,0); i < a.t; ++i)
+        r[this.t+i-n] = this.am(n-i,a[i],r,0,0,this.t+i-n);
+      r.clamp();
+      r.drShiftTo(1,r);
+    }
+
+    // Barrett modular reduction
+    function Barrett(m) {
+      // setup Barrett
+      this.r2 = nbi();
+      this.q3 = nbi();
+      BigInteger.ONE.dlShiftTo(2*m.t,this.r2);
+      this.mu = this.r2.divide(m);
+      this.m = m;
+    }
+
+    function barrettConvert(x) {
+      if(x.s < 0 || x.t > 2*this.m.t) return x.mod(this.m);
+      else if(x.compareTo(this.m) < 0) return x;
+      else { var r = nbi(); x.copyTo(r); this.reduce(r); return r; }
+    }
+
+    function barrettRevert(x) { return x; }
+
+    // x = x mod m (HAC 14.42)
+    function barrettReduce(x) {
+      x.drShiftTo(this.m.t-1,this.r2);
+      if(x.t > this.m.t+1) { x.t = this.m.t+1; x.clamp(); }
+      this.mu.multiplyUpperTo(this.r2,this.m.t+1,this.q3);
+      this.m.multiplyLowerTo(this.q3,this.m.t+1,this.r2);
+      while(x.compareTo(this.r2) < 0) x.dAddOffset(1,this.m.t+1);
+      x.subTo(this.r2,x);
+      while(x.compareTo(this.m) >= 0) x.subTo(this.m,x);
+    }
+
+    // r = x^2 mod m; x != r
+    function barrettSqrTo(x,r) { x.squareTo(r); this.reduce(r); }
+
+    // r = x*y mod m; x,y != r
+    function barrettMulTo(x,y,r) { x.multiplyTo(y,r); this.reduce(r); }
+
+    Barrett.prototype.convert = barrettConvert;
+    Barrett.prototype.revert = barrettRevert;
+    Barrett.prototype.reduce = barrettReduce;
+    Barrett.prototype.mulTo = barrettMulTo;
+    Barrett.prototype.sqrTo = barrettSqrTo;
+
+    // (public) this^e % m (HAC 14.85)
+    function bnModPow(e,m) {
+      var i = e.bitLength(), k, r = nbv(1), z;
+      if(i <= 0) return r;
+      else if(i < 18) k = 1;
+      else if(i < 48) k = 3;
+      else if(i < 144) k = 4;
+      else if(i < 768) k = 5;
+      else k = 6;
+      if(i < 8)
+        z = new Classic(m);
+      else if(m.isEven())
+        z = new Barrett(m);
+      else
+        z = new Montgomery(m);
+
+      // precomputation
+      var g = new Array(), n = 3, k1 = k-1, km = (1<<k)-1;
+      g[1] = z.convert(this);
+      if(k > 1) {
+        var g2 = nbi();
+        z.sqrTo(g[1],g2);
+        while(n <= km) {
+          g[n] = nbi();
+          z.mulTo(g2,g[n-2],g[n]);
+          n += 2;
+        }
+      }
+
+      var j = e.t-1, w, is1 = true, r2 = nbi(), t;
+      i = nbits(e[j])-1;
+      while(j >= 0) {
+        if(i >= k1) w = (e[j]>>(i-k1))&km;
+        else {
+          w = (e[j]&((1<<(i+1))-1))<<(k1-i);
+          if(j > 0) w |= e[j-1]>>(this.DB+i-k1);
+        }
+
+        n = k;
+        while((w&1) == 0) { w >>= 1; --n; }
+        if((i -= n) < 0) { i += this.DB; --j; }
+        if(is1) {    // ret == 1, don't bother squaring or multiplying it
+          g[w].copyTo(r);
+          is1 = false;
+        }
+        else {
+          while(n > 1) { z.sqrTo(r,r2); z.sqrTo(r2,r); n -= 2; }
+          if(n > 0) z.sqrTo(r,r2); else { t = r; r = r2; r2 = t; }
+          z.mulTo(r2,g[w],r);
+        }
+
+        while(j >= 0 && (e[j]&(1<<i)) == 0) {
+          z.sqrTo(r,r2); t = r; r = r2; r2 = t;
+          if(--i < 0) { i = this.DB-1; --j; }
+        }
+      }
+      return z.revert(r);
+    }
+
+    // (public) gcd(this,a) (HAC 14.54)
+    function bnGCD(a) {
+      var x = (this.s<0)?this.negate():this.clone();
+      var y = (a.s<0)?a.negate():a.clone();
+      if(x.compareTo(y) < 0) { var t = x; x = y; y = t; }
+      var i = x.getLowestSetBit(), g = y.getLowestSetBit();
+      if(g < 0) return x;
+      if(i < g) g = i;
+      if(g > 0) {
+        x.rShiftTo(g,x);
+        y.rShiftTo(g,y);
+      }
+      while(x.signum() > 0) {
+        if((i = x.getLowestSetBit()) > 0) x.rShiftTo(i,x);
+        if((i = y.getLowestSetBit()) > 0) y.rShiftTo(i,y);
+        if(x.compareTo(y) >= 0) {
+          x.subTo(y,x);
+          x.rShiftTo(1,x);
+        }
+        else {
+          y.subTo(x,y);
+          y.rShiftTo(1,y);
+        }
+      }
+      if(g > 0) y.lShiftTo(g,y);
+      return y;
+    }
+
+    // (protected) this % n, n < 2^26
+    function bnpModInt(n) {
+      if(n <= 0) return 0;
+      var d = this.DV%n, r = (this.s<0)?n-1:0;
+      if(this.t > 0)
+        if(d == 0) r = this[0]%n;
+        else for(var i = this.t-1; i >= 0; --i) r = (d*r+this[i])%n;
+      return r;
+    }
+
+    // (public) 1/this % m (HAC 14.61)
+    function bnModInverse(m) {
+      var ac = m.isEven();
+      if((this.isEven() && ac) || m.signum() == 0) return BigInteger.ZERO;
+      var u = m.clone(), v = this.clone();
+      var a = nbv(1), b = nbv(0), c = nbv(0), d = nbv(1);
+      while(u.signum() != 0) {
+        while(u.isEven()) {
+          u.rShiftTo(1,u);
+          if(ac) {
+            if(!a.isEven() || !b.isEven()) { a.addTo(this,a); b.subTo(m,b); }
+            a.rShiftTo(1,a);
+          }
+          else if(!b.isEven()) b.subTo(m,b);
+          b.rShiftTo(1,b);
+        }
+        while(v.isEven()) {
+          v.rShiftTo(1,v);
+          if(ac) {
+            if(!c.isEven() || !d.isEven()) { c.addTo(this,c); d.subTo(m,d); }
+            c.rShiftTo(1,c);
+          }
+          else if(!d.isEven()) d.subTo(m,d);
+          d.rShiftTo(1,d);
+        }
+        if(u.compareTo(v) >= 0) {
+          u.subTo(v,u);
+          if(ac) a.subTo(c,a);
+          b.subTo(d,b);
+        }
+        else {
+          v.subTo(u,v);
+          if(ac) c.subTo(a,c);
+          d.subTo(b,d);
+        }
+      }
+      if(v.compareTo(BigInteger.ONE) != 0) return BigInteger.ZERO;
+      if(d.compareTo(m) >= 0) return d.subtract(m);
+      if(d.signum() < 0) d.addTo(m,d); else return d;
+      if(d.signum() < 0) return d.add(m); else return d;
+    }
+
+    var lowprimes = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,409,419,421,431,433,439,443,449,457,461,463,467,479,487,491,499,503,509,521,523,541,547,557,563,569,571,577,587,593,599,601,607,613,617,619,631,641,643,647,653,659,661,673,677,683,691,701,709,719,727,733,739,743,751,757,761,769,773,787,797,809,811,821,823,827,829,839,853,857,859,863,877,881,883,887,907,911,919,929,937,941,947,953,967,971,977,983,991,997];
+    var lplim = (1<<26)/lowprimes[lowprimes.length-1];
+
+    // (public) test primality with certainty >= 1-.5^t
+    function bnIsProbablePrime(t) {
+      var i, x = this.abs();
+      if(x.t == 1 && x[0] <= lowprimes[lowprimes.length-1]) {
+        for(i = 0; i < lowprimes.length; ++i)
+          if(x[0] == lowprimes[i]) return true;
+        return false;
+      }
+      if(x.isEven()) return false;
+      i = 1;
+      while(i < lowprimes.length) {
+        var m = lowprimes[i], j = i+1;
+        while(j < lowprimes.length && m < lplim) m *= lowprimes[j++];
+        m = x.modInt(m);
+        while(i < j) if(m%lowprimes[i++] == 0) return false;
+      }
+      return x.millerRabin(t);
+    }
+
+    // (protected) true if probably prime (HAC 4.24, Miller-Rabin)
+    function bnpMillerRabin(t) {
+      var n1 = this.subtract(BigInteger.ONE);
+      var k = n1.getLowestSetBit();
+      if(k <= 0) return false;
+      var r = n1.shiftRight(k);
+      t = (t+1)>>1;
+      if(t > lowprimes.length) t = lowprimes.length;
+      var a = nbi();
+      for(var i = 0; i < t; ++i) {
+        //Pick bases at random, instead of starting at 2
+        a.fromInt(lowprimes[Math.floor(Math.random()*lowprimes.length)]);
+        var y = a.modPow(r,this);
+        if(y.compareTo(BigInteger.ONE) != 0 && y.compareTo(n1) != 0) {
+          var j = 1;
+          while(j++ < k && y.compareTo(n1) != 0) {
+            y = y.modPowInt(2,this);
+            if(y.compareTo(BigInteger.ONE) == 0) return false;
+          }
+          if(y.compareTo(n1) != 0) return false;
+        }
+      }
+      return true;
+    }
+
+    // protected
+    BigInteger.prototype.chunkSize = bnpChunkSize;
+    BigInteger.prototype.toRadix = bnpToRadix;
+    BigInteger.prototype.fromRadix = bnpFromRadix;
+    BigInteger.prototype.fromNumber = bnpFromNumber;
+    BigInteger.prototype.bitwiseTo = bnpBitwiseTo;
+    BigInteger.prototype.changeBit = bnpChangeBit;
+    BigInteger.prototype.addTo = bnpAddTo;
+    BigInteger.prototype.dMultiply = bnpDMultiply;
+    BigInteger.prototype.dAddOffset = bnpDAddOffset;
+    BigInteger.prototype.multiplyLowerTo = bnpMultiplyLowerTo;
+    BigInteger.prototype.multiplyUpperTo = bnpMultiplyUpperTo;
+    BigInteger.prototype.modInt = bnpModInt;
+    BigInteger.prototype.millerRabin = bnpMillerRabin;
+
+    // public
+    BigInteger.prototype.clone = bnClone;
+    BigInteger.prototype.intValue = bnIntValue;
+    BigInteger.prototype.byteValue = bnByteValue;
+    BigInteger.prototype.shortValue = bnShortValue;
+    BigInteger.prototype.signum = bnSigNum;
+    BigInteger.prototype.toByteArray = bnToByteArray;
+    BigInteger.prototype.equals = bnEquals;
+    BigInteger.prototype.min = bnMin;
+    BigInteger.prototype.max = bnMax;
+    BigInteger.prototype.and = bnAnd;
+    BigInteger.prototype.or = bnOr;
+    BigInteger.prototype.xor = bnXor;
+    BigInteger.prototype.andNot = bnAndNot;
+    BigInteger.prototype.not = bnNot;
+    BigInteger.prototype.shiftLeft = bnShiftLeft;
+    BigInteger.prototype.shiftRight = bnShiftRight;
+    BigInteger.prototype.getLowestSetBit = bnGetLowestSetBit;
+    BigInteger.prototype.bitCount = bnBitCount;
+    BigInteger.prototype.testBit = bnTestBit;
+    BigInteger.prototype.setBit = bnSetBit;
+    BigInteger.prototype.clearBit = bnClearBit;
+    BigInteger.prototype.flipBit = bnFlipBit;
+    BigInteger.prototype.add = bnAdd;
+    BigInteger.prototype.subtract = bnSubtract;
+    BigInteger.prototype.multiply = bnMultiply;
+    BigInteger.prototype.divide = bnDivide;
+    BigInteger.prototype.remainder = bnRemainder;
+    BigInteger.prototype.divideAndRemainder = bnDivideAndRemainder;
+    BigInteger.prototype.modPow = bnModPow;
+    BigInteger.prototype.modInverse = bnModInverse;
+    BigInteger.prototype.pow = bnPow;
+    BigInteger.prototype.gcd = bnGCD;
+    BigInteger.prototype.isProbablePrime = bnIsProbablePrime;
+
+    // JSBN-specific extension
+    BigInteger.prototype.square = bnSquare;
+
+    // Expose the Barrett function
+    BigInteger.prototype.Barrett = Barrett
+
+    // BigInteger interfaces not implemented in jsbn:
+
+    // BigInteger(int signum, byte[] magnitude)
+    // double doubleValue()
+    // float floatValue()
+    // int hashCode()
+    // long longValue()
+    // static BigInteger valueOf(long val)
+
+    // Random number generator - requires a PRNG backend, e.g. prng4.js
+
+    // For best results, put code like
+    // <body onClick='rng_seed_time();' onKeyPress='rng_seed_time();'>
+    // in your main HTML document.
+
+    var rng_state;
+    var rng_pool;
+    var rng_pptr;
+
+    // Mix in a 32-bit integer into the pool
+    function rng_seed_int(x) {
+      rng_pool[rng_pptr++] ^= x & 255;
+      rng_pool[rng_pptr++] ^= (x >> 8) & 255;
+      rng_pool[rng_pptr++] ^= (x >> 16) & 255;
+      rng_pool[rng_pptr++] ^= (x >> 24) & 255;
+      if(rng_pptr >= rng_psize) rng_pptr -= rng_psize;
+    }
+
+    // Mix in the current time (w/milliseconds) into the pool
+    function rng_seed_time() {
+      rng_seed_int(new Date().getTime());
+    }
+
+    // Initialize the pool with junk if needed.
+    if(rng_pool == null) {
+      rng_pool = new Array();
+      rng_pptr = 0;
+      var t;
+      if(typeof window !== "undefined" && window.crypto) {
+        if (window.crypto.getRandomValues) {
+          // Use webcrypto if available
+          var ua = new Uint8Array(32);
+          window.crypto.getRandomValues(ua);
+          for(t = 0; t < 32; ++t)
+            rng_pool[rng_pptr++] = ua[t];
+        }
+        else if(navigator.appName == "Netscape" && navigator.appVersion < "5") {
+          // Extract entropy (256 bits) from NS4 RNG if available
+          var z = window.crypto.random(32);
+          for(t = 0; t < z.length; ++t)
+            rng_pool[rng_pptr++] = z.charCodeAt(t) & 255;
+        }
+      }
+      while(rng_pptr < rng_psize) {  // extract some randomness from Math.random()
+        t = Math.floor(65536 * Math.random());
+        rng_pool[rng_pptr++] = t >>> 8;
+        rng_pool[rng_pptr++] = t & 255;
+      }
+      rng_pptr = 0;
+      rng_seed_time();
+      //rng_seed_int(window.screenX);
+      //rng_seed_int(window.screenY);
+    }
+
+    function rng_get_byte() {
+      if(rng_state == null) {
+        rng_seed_time();
+        rng_state = prng_newstate();
+        rng_state.init(rng_pool);
+        for(rng_pptr = 0; rng_pptr < rng_pool.length; ++rng_pptr)
+          rng_pool[rng_pptr] = 0;
+        rng_pptr = 0;
+        //rng_pool = null;
+      }
+      // TODO: allow reseeding after first request
+      return rng_state.next();
+    }
+
+    function rng_get_bytes(ba) {
+      var i;
+      for(i = 0; i < ba.length; ++i) ba[i] = rng_get_byte();
+    }
+
+    function SecureRandom() {}
+
+    SecureRandom.prototype.nextBytes = rng_get_bytes;
+
+    // prng4.js - uses Arcfour as a PRNG
+
+    function Arcfour() {
+      this.i = 0;
+      this.j = 0;
+      this.S = new Array();
+    }
+
+    // Initialize arcfour context from key, an array of ints, each from [0..255]
+    function ARC4init(key) {
+      var i, j, t;
+      for(i = 0; i < 256; ++i)
+        this.S[i] = i;
+      j = 0;
+      for(i = 0; i < 256; ++i) {
+        j = (j + this.S[i] + key[i % key.length]) & 255;
+        t = this.S[i];
+        this.S[i] = this.S[j];
+        this.S[j] = t;
+      }
+      this.i = 0;
+      this.j = 0;
+    }
+
+    function ARC4next() {
+      var t;
+      this.i = (this.i + 1) & 255;
+      this.j = (this.j + this.S[this.i]) & 255;
+      t = this.S[this.i];
+      this.S[this.i] = this.S[this.j];
+      this.S[this.j] = t;
+      return this.S[(t + this.S[this.i]) & 255];
+    }
+
+    Arcfour.prototype.init = ARC4init;
+    Arcfour.prototype.next = ARC4next;
+
+    // Plug in your RNG constructor here
+    function prng_newstate() {
+      return new Arcfour();
+    }
+
+    // Pool size must be a multiple of 4 and greater than 32.
+    // An array of bytes the size of the pool will be passed to init()
+    var rng_psize = 256;
+
+    if (true) {
+        exports = module.exports = {
+            default: BigInteger,
+            BigInteger: BigInteger,
+            SecureRandom: SecureRandom,
+        };
+    } else {}
+
+}).call(this);
 
 
 /***/ }),
@@ -108715,6 +111752,248 @@ module.exports = Sha512
 
 /***/ }),
 
+/***/ "./node_modules/sprintf-js/src/sprintf.js":
+/*!************************************************!*\
+  !*** ./node_modules/sprintf-js/src/sprintf.js ***!
+  \************************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+var __WEBPACK_AMD_DEFINE_RESULT__;/* global window, exports, define */
+
+!function() {
+    'use strict'
+
+    var re = {
+        not_string: /[^s]/,
+        not_bool: /[^t]/,
+        not_type: /[^T]/,
+        not_primitive: /[^v]/,
+        number: /[diefg]/,
+        numeric_arg: /[bcdiefguxX]/,
+        json: /[j]/,
+        not_json: /[^j]/,
+        text: /^[^\x25]+/,
+        modulo: /^\x25{2}/,
+        placeholder: /^\x25(?:([1-9]\d*)\$|\(([^)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-gijostTuvxX])/,
+        key: /^([a-z_][a-z_\d]*)/i,
+        key_access: /^\.([a-z_][a-z_\d]*)/i,
+        index_access: /^\[(\d+)\]/,
+        sign: /^[+-]/
+    }
+
+    function sprintf(key) {
+        // `arguments` is not an array, but should be fine for this call
+        return sprintf_format(sprintf_parse(key), arguments)
+    }
+
+    function vsprintf(fmt, argv) {
+        return sprintf.apply(null, [fmt].concat(argv || []))
+    }
+
+    function sprintf_format(parse_tree, argv) {
+        var cursor = 1, tree_length = parse_tree.length, arg, output = '', i, k, ph, pad, pad_character, pad_length, is_positive, sign
+        for (i = 0; i < tree_length; i++) {
+            if (typeof parse_tree[i] === 'string') {
+                output += parse_tree[i]
+            }
+            else if (typeof parse_tree[i] === 'object') {
+                ph = parse_tree[i] // convenience purposes only
+                if (ph.keys) { // keyword argument
+                    arg = argv[cursor]
+                    for (k = 0; k < ph.keys.length; k++) {
+                        if (arg == undefined) {
+                            throw new Error(sprintf('[sprintf] Cannot access property "%s" of undefined value "%s"', ph.keys[k], ph.keys[k-1]))
+                        }
+                        arg = arg[ph.keys[k]]
+                    }
+                }
+                else if (ph.param_no) { // positional argument (explicit)
+                    arg = argv[ph.param_no]
+                }
+                else { // positional argument (implicit)
+                    arg = argv[cursor++]
+                }
+
+                if (re.not_type.test(ph.type) && re.not_primitive.test(ph.type) && arg instanceof Function) {
+                    arg = arg()
+                }
+
+                if (re.numeric_arg.test(ph.type) && (typeof arg !== 'number' && isNaN(arg))) {
+                    throw new TypeError(sprintf('[sprintf] expecting number but found %T', arg))
+                }
+
+                if (re.number.test(ph.type)) {
+                    is_positive = arg >= 0
+                }
+
+                switch (ph.type) {
+                    case 'b':
+                        arg = parseInt(arg, 10).toString(2)
+                        break
+                    case 'c':
+                        arg = String.fromCharCode(parseInt(arg, 10))
+                        break
+                    case 'd':
+                    case 'i':
+                        arg = parseInt(arg, 10)
+                        break
+                    case 'j':
+                        arg = JSON.stringify(arg, null, ph.width ? parseInt(ph.width) : 0)
+                        break
+                    case 'e':
+                        arg = ph.precision ? parseFloat(arg).toExponential(ph.precision) : parseFloat(arg).toExponential()
+                        break
+                    case 'f':
+                        arg = ph.precision ? parseFloat(arg).toFixed(ph.precision) : parseFloat(arg)
+                        break
+                    case 'g':
+                        arg = ph.precision ? String(Number(arg.toPrecision(ph.precision))) : parseFloat(arg)
+                        break
+                    case 'o':
+                        arg = (parseInt(arg, 10) >>> 0).toString(8)
+                        break
+                    case 's':
+                        arg = String(arg)
+                        arg = (ph.precision ? arg.substring(0, ph.precision) : arg)
+                        break
+                    case 't':
+                        arg = String(!!arg)
+                        arg = (ph.precision ? arg.substring(0, ph.precision) : arg)
+                        break
+                    case 'T':
+                        arg = Object.prototype.toString.call(arg).slice(8, -1).toLowerCase()
+                        arg = (ph.precision ? arg.substring(0, ph.precision) : arg)
+                        break
+                    case 'u':
+                        arg = parseInt(arg, 10) >>> 0
+                        break
+                    case 'v':
+                        arg = arg.valueOf()
+                        arg = (ph.precision ? arg.substring(0, ph.precision) : arg)
+                        break
+                    case 'x':
+                        arg = (parseInt(arg, 10) >>> 0).toString(16)
+                        break
+                    case 'X':
+                        arg = (parseInt(arg, 10) >>> 0).toString(16).toUpperCase()
+                        break
+                }
+                if (re.json.test(ph.type)) {
+                    output += arg
+                }
+                else {
+                    if (re.number.test(ph.type) && (!is_positive || ph.sign)) {
+                        sign = is_positive ? '+' : '-'
+                        arg = arg.toString().replace(re.sign, '')
+                    }
+                    else {
+                        sign = ''
+                    }
+                    pad_character = ph.pad_char ? ph.pad_char === '0' ? '0' : ph.pad_char.charAt(1) : ' '
+                    pad_length = ph.width - (sign + arg).length
+                    pad = ph.width ? (pad_length > 0 ? pad_character.repeat(pad_length) : '') : ''
+                    output += ph.align ? sign + arg + pad : (pad_character === '0' ? sign + pad + arg : pad + sign + arg)
+                }
+            }
+        }
+        return output
+    }
+
+    var sprintf_cache = Object.create(null)
+
+    function sprintf_parse(fmt) {
+        if (sprintf_cache[fmt]) {
+            return sprintf_cache[fmt]
+        }
+
+        var _fmt = fmt, match, parse_tree = [], arg_names = 0
+        while (_fmt) {
+            if ((match = re.text.exec(_fmt)) !== null) {
+                parse_tree.push(match[0])
+            }
+            else if ((match = re.modulo.exec(_fmt)) !== null) {
+                parse_tree.push('%')
+            }
+            else if ((match = re.placeholder.exec(_fmt)) !== null) {
+                if (match[2]) {
+                    arg_names |= 1
+                    var field_list = [], replacement_field = match[2], field_match = []
+                    if ((field_match = re.key.exec(replacement_field)) !== null) {
+                        field_list.push(field_match[1])
+                        while ((replacement_field = replacement_field.substring(field_match[0].length)) !== '') {
+                            if ((field_match = re.key_access.exec(replacement_field)) !== null) {
+                                field_list.push(field_match[1])
+                            }
+                            else if ((field_match = re.index_access.exec(replacement_field)) !== null) {
+                                field_list.push(field_match[1])
+                            }
+                            else {
+                                throw new SyntaxError('[sprintf] failed to parse named argument key')
+                            }
+                        }
+                    }
+                    else {
+                        throw new SyntaxError('[sprintf] failed to parse named argument key')
+                    }
+                    match[2] = field_list
+                }
+                else {
+                    arg_names |= 2
+                }
+                if (arg_names === 3) {
+                    throw new Error('[sprintf] mixing positional and named placeholders is not (yet) supported')
+                }
+
+                parse_tree.push(
+                    {
+                        placeholder: match[0],
+                        param_no:    match[1],
+                        keys:        match[2],
+                        sign:        match[3],
+                        pad_char:    match[4],
+                        align:       match[5],
+                        width:       match[6],
+                        precision:   match[7],
+                        type:        match[8]
+                    }
+                )
+            }
+            else {
+                throw new SyntaxError('[sprintf] unexpected placeholder')
+            }
+            _fmt = _fmt.substring(match[0].length)
+        }
+        return sprintf_cache[fmt] = parse_tree
+    }
+
+    /**
+     * export to either browser or node.js
+     */
+    /* eslint-disable quote-props */
+    if (true) {
+        exports.sprintf = sprintf
+        exports.vsprintf = vsprintf
+    }
+    if (typeof window !== 'undefined') {
+        window['sprintf'] = sprintf
+        window['vsprintf'] = vsprintf
+
+        if (true) {
+            !(__WEBPACK_AMD_DEFINE_RESULT__ = (function() {
+                return {
+                    'sprintf': sprintf,
+                    'vsprintf': vsprintf
+                }
+            }).call(exports, __webpack_require__, exports, module),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))
+        }
+    }
+    /* eslint-enable quote-props */
+}(); // eslint-disable-line
+
+
+/***/ }),
+
 /***/ "./node_modules/stream-browserify/index.js":
 /*!*************************************************!*\
   !*** ./node_modules/stream-browserify/index.js ***!
@@ -115988,8 +119267,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _aes_gcm_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./aes-gcm.js */ "./scripts/aes-gcm.js");
 /* harmony import */ var _native_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./native.js */ "./scripts/native.js");
 /* harmony import */ var _prices_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./prices.js */ "./scripts/prices.js");
+/* harmony import */ var ip_address__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ip-address */ "./node_modules/ip-address/dist/esm/ip-address.js");
 /* provided dependency */ var console = __webpack_require__(/*! ./node_modules/console-browserify/index.js */ "./node_modules/console-browserify/index.js");
 /* provided dependency */ var $ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
+
 
 
 
@@ -116118,11 +119399,7 @@ function start() {
         domMnemonicModalButton: document.getElementById(
             'modalMnemonicConfirmButton'
         ),
-        domExportDiv: document.getElementById('exportKeyDiv'),
-        domExportPublicKey: document.getElementById('exportPublicKeyText'),
-        domExportPrivateKeyHold: document.getElementById('exportPrivateKey'),
-        domExportPrivateKey: document.getElementById('exportPrivateKeyText'),
-        domExportWallet: document.getElementById('guiExportWallet'),
+        domExportWallet: document.getElementById('guiExportWalletItem'),
         domWipeWallet: document.getElementById('guiWipeWallet'),
         domRestoreWallet: document.getElementById('guiRestoreWallet'),
         domNewAddress: document.getElementById('guiNewAddress'),
@@ -116546,22 +119823,52 @@ function destroyMasternode() {
     }
 }
 
+/**
+ * Takes an ip address and adds the port.
+ * If it's an IPv4 address, ip:port will be used, (e.g. 127.0.0.1:12345)
+ * If it's an IPv6 address, [ip]:port will be used, (e.g. [::1]:12345)
+ * @param {String} ip - Ip address with or without port
+ * @returns {String}
+ */
+function parseIpAddress(ip) {
+    // IPv4 without port
+    if (ip.match(/\d+\.\d+\.\d+\.\d+/)) {
+        return `${ip}:${_chain_params_js__WEBPACK_IMPORTED_MODULE_8__.cChainParams.current.MASTERNODE_PORT}`;
+    }
+    // IPv4 with port
+    if (ip.match(/\d+\.\d+\.\d+\.\d+:\d+/)) {
+        return ip;
+    }
+    // IPv6 without port
+    if (ip_address__WEBPACK_IMPORTED_MODULE_12__.Address6.isValid(ip)) {
+        return `[${ip}]:${_chain_params_js__WEBPACK_IMPORTED_MODULE_8__.cChainParams.current.MASTERNODE_PORT}`;
+    }
+
+    const groups = /\[(.*)\]:\d+/.exec(ip);
+    if (groups !== null && groups.length > 1) {
+        // IPv6 with port
+        if (ip_address__WEBPACK_IMPORTED_MODULE_12__.Address6.isValid(groups[1])) {
+            return ip;
+        }
+    }
+
+    // If we haven't returned yet, the address was invalid.
+    return null;
+}
+
 async function importMasternode() {
     const mnPrivKey = doms.domMnPrivateKey.value;
+    const address = parseIpAddress(doms.domMnIP.value);
+    if (!address) {
+        (0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.createAlert)('warning', 'The ip address is invalid!', 5000);
+        return;
+    }
 
-    const ip = doms.domMnIP.value;
-    let address;
     let collateralTxId;
     let outidx;
     let collateralPrivKeyPath;
     doms.domMnIP.value = '';
     doms.domMnPrivateKey.value = '';
-
-    if (!ip.includes(':')) {
-        address = `${ip}:${_chain_params_js__WEBPACK_IMPORTED_MODULE_8__.cChainParams.current.MASTERNODE_PORT}`;
-    } else {
-        address = ip;
-    }
 
     if (!_wallet_js__WEBPACK_IMPORTED_MODULE_4__.masterKey.isHD) {
         // Find the first UTXO matching the expected collateral size
@@ -117450,8 +120757,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wallet_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./wallet.js */ "./scripts/wallet.js");
 /* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./utils.js */ "./scripts/utils.js");
 /* harmony import */ var buffer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! buffer */ "./node_modules/buffer/index.js");
-/* harmony import */ var _noble_secp256k1__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @noble/secp256k1 */ "./node_modules/@noble/secp256k1/lib/esm/index.js");
+/* harmony import */ var ip_address__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ip-address */ "./node_modules/ip-address/dist/esm/ip-address.js");
+/* harmony import */ var _noble_secp256k1__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @noble/secp256k1 */ "./node_modules/@noble/secp256k1/lib/esm/index.js");
 /* provided dependency */ var console = __webpack_require__(/*! ./node_modules/console-browserify/index.js */ "./node_modules/console-browserify/index.js");
+
 
 
 
@@ -117515,14 +120824,20 @@ class Masternode {
         return cMasternode ? cMasternode.status : 'MISSING';
     }
 
+    /**
+     * @param {String} ip
+     * @param {Number} port
+     * @returns {string} hex representation of the IP + port pair
+     */
     static _decodeIpAddress(ip, port) {
-        // Only IPV4 for now
-        let start = '00000000000000000000ffff';
-        for (const digit of ip.split('.').map((n) => parseInt(n))) {
-            start += ('0' + digit.toString(16)).slice(-2);
-        }
-        start += (0,_utils_js__WEBPACK_IMPORTED_MODULE_3__.bytesToHex)(Masternode._numToBytes(port, 2, false));
-        return start;
+        const address = ip.includes('.')
+            ? ip_address__WEBPACK_IMPORTED_MODULE_5__.Address6.fromAddress4(ip)
+            : new ip_address__WEBPACK_IMPORTED_MODULE_5__.Address6(ip);
+        const bytes = address.toUnsignedByteArray();
+        const res =
+            (0,_utils_js__WEBPACK_IMPORTED_MODULE_3__.bytesToHex)([...new Array(16 - bytes.length).fill(0), ...bytes]) +
+            (0,_utils_js__WEBPACK_IMPORTED_MODULE_3__.bytesToHex)(Masternode._numToBytes(port, 2, false));
+        return res;
     }
 
     static _numToBytes(number, numBytes = 8, littleEndian = true) {
@@ -117564,7 +120879,15 @@ class Masternode {
      * Then hashed two times with SHA256
      */
     static getToSign({ walletPrivateKey, addr, mnPrivateKey, sigTime }) {
-        const [ip, port] = addr.split(':');
+        let ip, port;
+        if (addr.includes('.')) {
+            // IPv4
+            [ip, port] = addr.split(':');
+        } else {
+            // IPv6
+            [ip, port] = addr.slice(1).split(']');
+            port = port.slice(1);
+        }
         const publicKey = (0,_utils_js__WEBPACK_IMPORTED_MODULE_3__.hexToBytes)(
             (0,_wallet_js__WEBPACK_IMPORTED_MODULE_2__.deriveAddress)({
                 pkBytes: (0,_wallet_js__WEBPACK_IMPORTED_MODULE_2__.parseWIF)(walletPrivateKey, true),
@@ -117620,7 +120943,7 @@ class Masternode {
             .split('')
             .map((c) => c.charCodeAt(0));
         const hash = (0,_utils_js__WEBPACK_IMPORTED_MODULE_3__.dSHA256)(padding.concat(toSign.length).concat(toSign));
-        const [signature, v] = await _noble_secp256k1__WEBPACK_IMPORTED_MODULE_5__.sign(
+        const [signature, v] = await _noble_secp256k1__WEBPACK_IMPORTED_MODULE_6__.sign(
             hash,
             (0,_wallet_js__WEBPACK_IMPORTED_MODULE_2__.parseWIF)(walletPrivateKey, true),
             { der: false, recovered: true }
@@ -117639,7 +120962,7 @@ class Masternode {
             blockHash,
             sigTime,
         });
-        const [signature, v] = await _noble_secp256k1__WEBPACK_IMPORTED_MODULE_5__.sign(
+        const [signature, v] = await _noble_secp256k1__WEBPACK_IMPORTED_MODULE_6__.sign(
             toSign,
             (0,_wallet_js__WEBPACK_IMPORTED_MODULE_2__.parseWIF)(this.mnPrivateKey, true),
             { der: false, recovered: true }
@@ -117760,7 +121083,7 @@ class Masternode {
             ...Masternode._numToBytes(sigTime, 8, true),
         ];
 
-        const [signature, v] = await _noble_secp256k1__WEBPACK_IMPORTED_MODULE_5__.sign(
+        const [signature, v] = await _noble_secp256k1__WEBPACK_IMPORTED_MODULE_6__.sign(
             (0,_utils_js__WEBPACK_IMPORTED_MODULE_3__.dSHA256)(msg),
             (0,_wallet_js__WEBPACK_IMPORTED_MODULE_2__.parseWIF)(this.mnPrivateKey, true),
             { der: false, recovered: true }
@@ -119494,18 +122817,17 @@ function fillNodeSelect() {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "createMasternode": () => (/* binding */ createMasternode),
-/* harmony export */   "createRawTransaction": () => (/* binding */ createRawTransaction),
 /* harmony export */   "createTxGUI": () => (/* binding */ createTxGUI),
 /* harmony export */   "delegateGUI": () => (/* binding */ delegateGUI),
 /* harmony export */   "undelegateGUI": () => (/* binding */ undelegateGUI)
 /* harmony export */ });
 /* harmony import */ var _bitTrx_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./bitTrx.js */ "./scripts/bitTrx.js");
 /* harmony import */ var _settings_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./settings.js */ "./scripts/settings.js");
-/* harmony import */ var _global_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./global.js */ "./scripts/global.js");
-/* harmony import */ var _network_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./network.js */ "./scripts/network.js");
-/* harmony import */ var _mempool_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./mempool.js */ "./scripts/mempool.js");
-/* harmony import */ var _i18n_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./i18n.js */ "./scripts/i18n.js");
-/* harmony import */ var _wallet_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./wallet.js */ "./scripts/wallet.js");
+/* harmony import */ var _i18n_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./i18n.js */ "./scripts/i18n.js");
+/* harmony import */ var _global_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./global.js */ "./scripts/global.js");
+/* harmony import */ var _wallet_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./wallet.js */ "./scripts/wallet.js");
+/* harmony import */ var _mempool_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./mempool.js */ "./scripts/mempool.js");
+/* harmony import */ var _network_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./network.js */ "./scripts/network.js");
 /* harmony import */ var _chain_params_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./chain_params.js */ "./scripts/chain_params.js");
 /* harmony import */ var _misc_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./misc.js */ "./scripts/misc.js");
 /* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./utils.js */ "./scripts/utils.js");
@@ -119526,7 +122848,7 @@ function validateAmount(nAmountSats, nMinSats = 10000) {
     if (nAmountSats < nMinSats || isNaN(nAmountSats)) {
         (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
             'warning',
-            _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.INVALID_AMOUNT + _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.VALIDATE_AMOUNT_LOW,
+            _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.INVALID_AMOUNT + _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.VALIDATE_AMOUNT_LOW,
             [
                 { minimumAmount: nMinSats / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN },
                 { coinTicker: _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.cChainParams.current.TICKER },
@@ -119540,7 +122862,7 @@ function validateAmount(nAmountSats, nMinSats = 10000) {
     if (!Number.isSafeInteger(nAmountSats)) {
         (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
             'warning',
-            _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.INVALID_AMOUNT + '<br>' + _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.VALIDATE_AMOUNT_DECIMAL,
+            _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.INVALID_AMOUNT + '<br>' + _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.VALIDATE_AMOUNT_DECIMAL,
             [{ coinDecimal: _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN_DECIMALS }],
             2500
         );
@@ -119551,8 +122873,101 @@ function validateAmount(nAmountSats, nMinSats = 10000) {
     return true;
 }
 
-function undelegateGUI() {
-    if (_wallet_js__WEBPACK_IMPORTED_MODULE_6__.masterKey.isViewOnly) {
+async function createTxGUI() {
+    if (!(0,_wallet_js__WEBPACK_IMPORTED_MODULE_4__.hasWalletUnlocked)(true)) return;
+
+    if (_wallet_js__WEBPACK_IMPORTED_MODULE_4__.masterKey.isViewOnly) {
+        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
+            'warning',
+            'Attempting to send funds in view only mode.',
+            6000
+        );
+    }
+
+    // Clear the inputs on 'Continue'
+    if (_global_js__WEBPACK_IMPORTED_MODULE_3__.doms.domGenIt.innerHTML === 'Continue') {
+        _global_js__WEBPACK_IMPORTED_MODULE_3__.doms.domGenIt.innerHTML = 'Send Transaction';
+        _global_js__WEBPACK_IMPORTED_MODULE_3__.doms.domTxOutput.innerHTML = '';
+        _global_js__WEBPACK_IMPORTED_MODULE_3__.doms.domHumanReadable.innerHTML = '';
+        _global_js__WEBPACK_IMPORTED_MODULE_3__.doms.domValue1s.value = '';
+        _global_js__WEBPACK_IMPORTED_MODULE_3__.doms.domAddress1s.value = '';
+        _global_js__WEBPACK_IMPORTED_MODULE_3__.doms.domReqDesc.value = '';
+        _global_js__WEBPACK_IMPORTED_MODULE_3__.doms.domReqDisplay.style.display = 'none';
+        return;
+    }
+
+    // Sanity check the address
+    const address = _global_js__WEBPACK_IMPORTED_MODULE_3__.doms.domAddress1s.value.trim();
+
+    // If Staking address: redirect to staking page
+    if (address.startsWith(_chain_params_js__WEBPACK_IMPORTED_MODULE_7__.cChainParams.current.STAKING_PREFIX)) {
+        (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)('warning', _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.STAKE_NOT_SEND, [], 7500);
+        return _global_js__WEBPACK_IMPORTED_MODULE_3__.doms.domStakeTab.click();
+    }
+
+    if (address.length !== 34)
+        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
+            'warning',
+            _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.BAD_ADDR_LENGTH,
+            [{ addressLength: address.length }],
+            2500
+        );
+
+    // Sanity check the amount
+    let nValue = Math.round(Number(_global_js__WEBPACK_IMPORTED_MODULE_3__.doms.domValue1s.value.trim()) * _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN);
+    if (nValue <= 0 || isNaN(nValue))
+        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
+            'warning',
+            _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.INVALID_AMOUNT + _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.SENT_NOTHING,
+            [],
+            2500
+        );
+    if (!Number.isSafeInteger(nValue))
+        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
+            'warning',
+            _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.INVALID_AMOUNT + _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.MORE_THEN_8_DECIMALS,
+            [],
+            2500
+        );
+    createAndSendTransaction({ address, amount: nValue, isDelegation: false });
+}
+
+async function delegateGUI() {
+    if (_wallet_js__WEBPACK_IMPORTED_MODULE_4__.masterKey.isViewOnly) {
+        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
+            'warning',
+            'Attempting to delegate in view only mode.',
+            6000
+        );
+    }
+    // Verify the amount; Delegations must be a minimum of 1 PIV, enforced by the network
+    const nAmount = Number(_global_js__WEBPACK_IMPORTED_MODULE_3__.doms.domGuiDelegateAmount.value.trim()) * _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN;
+    if (!validateAmount(nAmount, _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN)) return;
+
+    // Ensure the user has an address set - if not, request one!
+    if (!(0,_global_js__WEBPACK_IMPORTED_MODULE_3__.askForCSAddr)()) return;
+
+    // Sanity
+    if (
+        _global_js__WEBPACK_IMPORTED_MODULE_3__.cachedColdStakeAddr.length !== 34 ||
+        !_global_js__WEBPACK_IMPORTED_MODULE_3__.cachedColdStakeAddr.startsWith(_chain_params_js__WEBPACK_IMPORTED_MODULE_7__.cChainParams.current.STAKING_PREFIX)
+    ) {
+        (0,_global_js__WEBPACK_IMPORTED_MODULE_3__.askForCSAddr)(true);
+        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)('success', _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.SUCCESS_STAKING_ADDR_SET, []);
+    }
+    createAndSendTransaction({
+        amount: nAmount,
+        address: _global_js__WEBPACK_IMPORTED_MODULE_3__.cachedColdStakeAddr,
+        isDelegation: true,
+        useDelegatedInputs: false,
+    });
+}
+
+async function undelegateGUI() {
+    if (_wallet_js__WEBPACK_IMPORTED_MODULE_4__.masterKey.isHardwareWallet) {
+        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)('warning', 'Ledger not supported', 6000);
+    }
+    if (_wallet_js__WEBPACK_IMPORTED_MODULE_4__.masterKey.isViewOnly) {
         return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
             'warning',
             'Attempting to undelegate in view only mode.',
@@ -119561,430 +122976,272 @@ function undelegateGUI() {
     }
     // Verify the amount
     const nAmount = Math.round(
-        Number(_global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domGuiUndelegateAmount.value.trim()) * _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN
+        Number(_global_js__WEBPACK_IMPORTED_MODULE_3__.doms.domGuiUndelegateAmount.value.trim()) * _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN
     );
     if (!validateAmount(nAmount)) return;
-
-    undelegate(nAmount);
+    const [address] = await (0,_wallet_js__WEBPACK_IMPORTED_MODULE_4__.getNewAddress)();
+    const result = await createAndSendTransaction({
+        address,
+        amount: nAmount,
+        isDelegation: false,
+        useDelegatedInputs: true,
+        delegateChange: true,
+        changeDelegationAddress: _global_js__WEBPACK_IMPORTED_MODULE_3__.cachedColdStakeAddr,
+    });
+    if (!result.ok && result.err === 'No change addr') {
+        (0,_global_js__WEBPACK_IMPORTED_MODULE_3__.askForCSAddr)(true);
+        await undelegateGUI();
+    }
 }
 
-async function undelegate(nValue) {
-    if (!(0,_wallet_js__WEBPACK_IMPORTED_MODULE_6__.hasWalletUnlocked)(true)) return;
-
-    // Construct a TX and fetch Cold inputs
-    const nBalance = (0,_global_js__WEBPACK_IMPORTED_MODULE_2__.getStakingBalance)();
-    const cTx = new _bitTrx_js__WEBPACK_IMPORTED_MODULE_0__["default"].transaction();
-    const cCoinControl = chooseUTXOs(cTx, nValue, 0, true);
-    if (!cCoinControl.success) return alert(cCoinControl.msg);
-
-    // Compute fee and change (or lack thereof)
-    const nFee = (0,_network_js__WEBPACK_IMPORTED_MODULE_3__.getFee)(cTx.serialize().length);
-    const nChange = cCoinControl.nValue - (nFee + nValue);
-    const fReDelegateChange = nChange > 1.01 * _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN;
-    let reDelegateAddress;
-    let reDelegateAddressPath;
-    if (fReDelegateChange) {
-        // Enough change to resume cold staking, so we'll re-delegate change to the cold staking address
-        // Ensure the user has an address set - if not, request one!, Sanity
-        if (
-            !_global_js__WEBPACK_IMPORTED_MODULE_2__.cachedColdStakeAddr ||
-            _global_js__WEBPACK_IMPORTED_MODULE_2__.cachedColdStakeAddr.length !== 34 ||
-            !_global_js__WEBPACK_IMPORTED_MODULE_2__.cachedColdStakeAddr.startsWith(_chain_params_js__WEBPACK_IMPORTED_MODULE_7__.cChainParams.current.STAKING_PREFIX)
-        ) {
-            (0,_global_js__WEBPACK_IMPORTED_MODULE_2__.askForCSAddr)(true);
-            return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)('success', _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.SUCCESS_STAKING_ADDR, []);
-        }
-        // The re-delegated change output
-        [reDelegateAddress, reDelegateAddressPath] = await (0,_wallet_js__WEBPACK_IMPORTED_MODULE_6__.getNewAddress)();
-        cTx.addcoldstakingoutput(
-            reDelegateAddress,
-            _global_js__WEBPACK_IMPORTED_MODULE_2__.cachedColdStakeAddr,
-            nChange / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN
-        );
-        console.log('Re-delegated delegation spend change!');
-    } else {
-        // Not enough change to cold stake, so we'll just unstake everything (and deduct the fee from the value)
-        nValue -= nFee;
-        console.log('Spent all CS dust into redeem address!');
-    }
-
-    const [outputKey, outputKeyPath] = await (0,_wallet_js__WEBPACK_IMPORTED_MODULE_6__.getNewAddress)();
-    // The primary Cold-to-Public output
-    cTx.addoutput(outputKey, nValue / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN);
-
-    // Debug-only verbose response
-    if (_settings_js__WEBPACK_IMPORTED_MODULE_1__.debug)
-        _global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domHumanReadable.innerHTML =
-            'Balance: ' +
-            nBalance / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN +
-            '<br>Fee: ' +
-            nFee / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN +
-            '<br>To: ' +
-            outputKey +
-            '<br>Sent: ' +
-            nValue / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN +
-            (nChange > 0
-                ? '<br>Change Address: ' +
-                  (fReDelegateChange ? _global_js__WEBPACK_IMPORTED_MODULE_2__.cachedColdStakeAddr : outputKey) +
-                  '<br>Change: ' +
-                  nChange / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN
-                : '');
-
-    if ((0,_wallet_js__WEBPACK_IMPORTED_MODULE_6__.hasHardwareWallet)()) {
-        // Format the inputs how the Ledger SDK prefers
-        const arrInputs = [];
-        const arrAssociatedKeysets = [];
-        for (const cInput of cTx.inputs) {
-            const cInputFull = await (0,_network_js__WEBPACK_IMPORTED_MODULE_3__.getTxInfo)(cInput.outpoint.hash);
-            arrInputs.push([
-                await _wallet_js__WEBPACK_IMPORTED_MODULE_6__.cHardwareWallet.splitTransaction(cInputFull.hex),
-                cInput.outpoint.index,
-            ]);
-            arrAssociatedKeysets.push(cInput.path);
-        }
-
-        // Construct the Ledger transaction
-        const cLedgerTx = await _wallet_js__WEBPACK_IMPORTED_MODULE_6__.cHardwareWallet.splitTransaction(
-            cTx.serialize()
-        );
-        const strOutputScriptHex = await _wallet_js__WEBPACK_IMPORTED_MODULE_6__.cHardwareWallet.serializeTransactionOutputs(cLedgerTx)
-            .toString('hex');
-
-        // Sign the transaction via Ledger
-        (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
-            'info',
-            _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.CONFIRM_UNSTAKE_H_WALLET,
-            [{ strHardwareName: _wallet_js__WEBPACK_IMPORTED_MODULE_6__.strHardwareName }],
-            7500
-        );
-        const cLedgerSignedTx = await _wallet_js__WEBPACK_IMPORTED_MODULE_6__.cHardwareWallet.createPaymentTransaction({
-            inputs: arrInputs,
-            associatedKeysets: arrAssociatedKeysets,
-            outputScriptHex: strOutputScriptHex,
-        });
-        const nInputLen = cTx.inputs.length;
-
-        // Put public key bytes instead of [3,195,174...]
-        const arrSignedTxBytes = (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.hexToBytes)(cLedgerSignedTx);
-        const arrPubkey = findCompressedPubKey(arrSignedTxBytes);
-        const arrPubkeyWithScriptLen = addScriptLength(
-            arrSignedTxBytes,
-            arrPubkey,
-            nInputLen
-        );
-        const arrPubkeyWithScript = addExtraBytes(
-            arrPubkeyWithScriptLen,
-            arrPubkey,
-            nInputLen
-        );
-
-        const strSerialisedTx = (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(arrPubkeyWithScript);
-
-        // Broadcast the Hardware (Ledger) TX
-        const result = await (0,_network_js__WEBPACK_IMPORTED_MODULE_3__.sendTransaction)(
-            strSerialisedTx,
-            '<b>Delegation successfully spent!</b>'
-        );
-        if (result) {
-            for (const tx of cTx.inputs) {
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.autoRemoveUTXO({
-                    id: tx.outpoint.hash,
-                    path: tx.path,
-                    vout: tx.outpoint.index,
-                });
-            }
-            // Add our undelegation + change re-delegation (if any) to the local mempool
-            const futureTxid = (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(
-                (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.dSHA256)((0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.hexToBytes)(strSerialisedTx)).reverse()
-            );
-            if (fReDelegateChange) {
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                    id: futureTxid,
-                    path: reDelegateAddressPath,
-                    script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[0].script),
-                    sats: nChange,
-                    vout: 0,
-                    status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-                    isDelegate: true,
-                });
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                    id: futureTxid,
-                    path: outputKeyPath,
-                    script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[1].script),
-                    sats: nValue,
-                    vout: 1,
-                    status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-                });
-            } else {
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                    id: futureTxid,
-                    path: outputKeyPath,
-                    sats: nValue,
-                    script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[0].script),
-                    vout: 0,
-                    status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-                });
-            }
-        }
-    } else {
-        let sign = await cTx.sign(_wallet_js__WEBPACK_IMPORTED_MODULE_6__.masterKey, 1, 'coldstake');
-        // Broadcast the software TX
-
-        const result = await (0,_network_js__WEBPACK_IMPORTED_MODULE_3__.sendTransaction)(
-            sign,
-            '<b>Delegation successfully spent!</b>'
-        );
-        if (result) {
-            for (const tx of cTx.inputs) {
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.autoRemoveUTXO({
-                    id: tx.outpoint.hash,
-                    path: tx.path,
-                    vout: tx.outpoint.index,
-                });
-            }
-            // Add our undelegation + change re-delegation (if any) to the local mempool
-            const futureTxid = (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)((0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.dSHA256)((0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.hexToBytes)(sign)).reverse());
-            if (fReDelegateChange) {
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                    id: futureTxid,
-                    path: reDelegateAddressPath,
-                    script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[0].script),
-                    sats: nChange,
-                    vout: 0,
-                    status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-                    isDelegate: true,
-                });
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                    id: futureTxid,
-                    path: outputKeyPath,
-                    script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[1].script),
-                    sats: nValue,
-                    vout: 1,
-                    status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-                });
-            } else {
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                    id: futureTxid,
-                    path: outputKeyPath,
-                    sats: nValue,
-                    script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[0].script),
-                    vout: 0,
-                    status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-                });
-            }
-        }
-    }
-
-    _global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domGenIt.innerHTML = 'Continue';
-}
-
-function delegateGUI() {
-    if (_wallet_js__WEBPACK_IMPORTED_MODULE_6__.masterKey.isViewOnly) {
+/**
+ * Creates and sends a transaction to the network.
+ * @param {Object} options
+ * @param {string} options.address - base58 encoded address to send funds to
+ * @param {Number} options.amount - Number of satoshi to send
+ * @param {boolean} options.isDelegation - Whether to delegate the amount. Address will be the cold staking address
+ * @param {boolean} options.useDelegatedInputs - If true, only delegated coins will be used in the transaction
+ * @param {delegateChange} options.delegateChange - If there is at least 1.01 PIV of change, the change will be delegated to options.changeDelegationAddress
+ * @param {string|null} options.changeDelegationAddress - See options.delegateChange
+ * @returns {{ok: boolean, err: string?}}
+ */
+async function createAndSendTransaction({
+    address,
+    amount,
+    isDelegation = false,
+    useDelegatedInputs = false,
+    delegateChange = false,
+    changeDelegationAddress = null,
+}) {
+    if (!(0,_wallet_js__WEBPACK_IMPORTED_MODULE_4__.hasWalletUnlocked)(true)) return;
+    if ((isDelegation || useDelegatedInputs) && _wallet_js__WEBPACK_IMPORTED_MODULE_4__.masterKey.isHardwareWallet) {
         return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
             'warning',
-            'Attempting to delegate in view only mode.',
+            'Ledger is currently not supported.',
             6000
         );
     }
-    // Verify the amount; Delegations must be a minimum of 1 PIV, enforced by the network
-    const nAmount = Number(_global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domGuiDelegateAmount.value.trim()) * _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN;
-    if (!validateAmount(nAmount, _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN)) return;
 
-    // Ensure the user has an address set - if not, request one!
-    if (!(0,_global_js__WEBPACK_IMPORTED_MODULE_2__.askForCSAddr)()) return;
-
-    // Sanity
-    if (
-        _global_js__WEBPACK_IMPORTED_MODULE_2__.cachedColdStakeAddr.length !== 34 ||
-        !_global_js__WEBPACK_IMPORTED_MODULE_2__.cachedColdStakeAddr.startsWith(_chain_params_js__WEBPACK_IMPORTED_MODULE_7__.cChainParams.current.STAKING_PREFIX)
-    ) {
-        (0,_global_js__WEBPACK_IMPORTED_MODULE_2__.askForCSAddr)(true);
-        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)('success', _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.SUCCESS_STAKING_ADDR_SET, []);
+    if (_wallet_js__WEBPACK_IMPORTED_MODULE_4__.masterKey.isViewOnly) {
+        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
+            'warning',
+            'Attempting to send funds in view only mode.',
+            6000
+        );
     }
-    delegate(nAmount, _global_js__WEBPACK_IMPORTED_MODULE_2__.cachedColdStakeAddr);
-}
-
-async function delegate(nValue, coldAddr) {
-    if (!(0,_wallet_js__WEBPACK_IMPORTED_MODULE_6__.hasWalletUnlocked)(true)) return;
 
     // Construct a TX and fetch Standard inputs
-    const nBalance = (0,_global_js__WEBPACK_IMPORTED_MODULE_2__.getBalance)();
+    const nBalance = (0,_global_js__WEBPACK_IMPORTED_MODULE_3__.getBalance)();
     const cTx = new _bitTrx_js__WEBPACK_IMPORTED_MODULE_0__["default"].transaction();
-    const cCoinControl = chooseUTXOs(cTx, nValue, 0, false);
+    const cCoinControl = chooseUTXOs(cTx, amount, 0, useDelegatedInputs);
     if (!cCoinControl.success)
         return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)('warning', cCoinControl.msg, 5000);
+    // Compute fee
+    const nFee = (0,_network_js__WEBPACK_IMPORTED_MODULE_6__.getFee)(cTx.serialize().length);
 
-    // Compute fee and change (or lack thereof)
-    const nFee = (0,_network_js__WEBPACK_IMPORTED_MODULE_3__.getFee)(cTx.serialize().length);
-    const nChange = cCoinControl.nValue - (nFee + nValue);
-    const [changeAddress, changeAddressPath] = await (0,_wallet_js__WEBPACK_IMPORTED_MODULE_6__.getNewAddress)();
+    // Compute change (or lack thereof)
+    const nChange = cCoinControl.nValue - (nFee + amount);
+    const [changeAddress, changeAddressPath] = await (0,_wallet_js__WEBPACK_IMPORTED_MODULE_4__.getNewAddress)({
+        verify: _wallet_js__WEBPACK_IMPORTED_MODULE_4__.masterKey.isHardwareWallet,
+    });
+
+    /**
+     * Array containing known UTXOs we can spend after the transaction is complete
+     * @type{Array<UTXO>}
+     */
+    const knownUTXOs = [];
+    /**
+     * Array containing the transaction outputs, useful for showing confirmation screen
+     */
+    const outputs = [];
     if (nChange > 0) {
-        // Change output
-        cTx.addoutput(changeAddress, nChange / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN);
+        if (delegateChange && nChange > 1.01 * _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN) {
+            if (!changeDelegationAddress)
+                return { ok: false, error: 'No change addr' };
+            cTx.addcoldstakingoutput(
+                changeAddress,
+                changeDelegationAddress,
+                nChange / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN
+            );
+            outputs.push([
+                changeAddress,
+                changeDelegationAddress,
+                nChange / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN,
+            ]);
+        } else {
+            // Change output
+            cTx.addoutput(changeAddress, nChange / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN);
+            outputs.push([changeAddress, nChange / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN]);
+        }
+        knownUTXOs.push(
+            new _mempool_js__WEBPACK_IMPORTED_MODULE_5__.UTXO({
+                id: null, // We still don't know the txid
+                path: changeAddressPath,
+                script: cTx.outputs[0].script,
+                sats: nChange,
+                vout: 0,
+                status: _mempool_js__WEBPACK_IMPORTED_MODULE_5__.Mempool.PENDING,
+                isDelegate: delegateChange && nChange > 1.01 * _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN,
+            })
+        );
     } else {
         // We're sending alot! So we deduct the fee from the send amount. There's not enough change to pay it with!
-        nValue -= nFee;
+        amount -= nFee;
     }
 
-    // The primary Standard-to-Cold output
-    const [primaryAddress, primaryAddressPath] = await (0,_wallet_js__WEBPACK_IMPORTED_MODULE_6__.getNewAddress)();
-    cTx.addcoldstakingoutput(primaryAddress, coldAddr, nValue / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN);
+    // Primary output (receiver)
+    if (isDelegation) {
+        const [primaryAddress, primaryAddressPath] = await (0,_wallet_js__WEBPACK_IMPORTED_MODULE_4__.getNewAddress)();
+        cTx.addcoldstakingoutput(primaryAddress, address, amount / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN);
+        outputs.push([primaryAddress, address, amount / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN]);
+
+        knownUTXOs.push(
+            new _mempool_js__WEBPACK_IMPORTED_MODULE_5__.UTXO({
+                id: null,
+                path: primaryAddressPath,
+                script: cTx.outputs[cTx.outputs.length - 1].script,
+                sats: amount,
+                vout: cTx.outputs.length - 1,
+                status: _mempool_js__WEBPACK_IMPORTED_MODULE_5__.Mempool.PENDING,
+                isDelegate: true,
+            })
+        );
+    } else {
+        cTx.addoutput(address, amount / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN);
+        outputs.push([address, amount / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN]);
+    }
 
     // Debug-only verbose response
     if (_settings_js__WEBPACK_IMPORTED_MODULE_1__.debug)
-        _global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domHumanReadable.innerHTML =
+        _global_js__WEBPACK_IMPORTED_MODULE_3__.doms.domHumanReadable.innerHTML =
             'Balance: ' +
             nBalance / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN +
             '<br>Fee: ' +
             nFee / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN +
             '<br>To: ' +
-            coldAddr +
+            address +
             '<br>Sent: ' +
-            nValue / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN +
+            amount / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN +
             (nChange > 0
                 ? '<br>Change Address: ' +
                   changeAddress +
                   '<br>Change: ' +
                   nChange / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN
                 : '');
-
-    // Sign and broadcast!
-    if ((0,_wallet_js__WEBPACK_IMPORTED_MODULE_6__.hasHardwareWallet)()) {
-        // Format the inputs how the Ledger SDK prefers
-        const arrInputs = [];
-        const arrAssociatedKeysets = [];
-        for (const cInput of cTx.inputs) {
-            const cInputFull = await (0,_network_js__WEBPACK_IMPORTED_MODULE_3__.getTxInfo)(cInput.outpoint.hash);
-            arrInputs.push([
-                await _wallet_js__WEBPACK_IMPORTED_MODULE_6__.cHardwareWallet.splitTransaction(cInputFull.hex),
-                cInput.outpoint.index,
-            ]);
-            arrAssociatedKeysets.push(cInput.path);
+    const sign = await signTransaction(cTx, _wallet_js__WEBPACK_IMPORTED_MODULE_4__.masterKey, outputs, delegateChange);
+    const result = await (0,_network_js__WEBPACK_IMPORTED_MODULE_6__.sendTransaction)(sign);
+    // Update the mempool
+    if (result) {
+        // Remove spent inputs
+        for (const tx of cTx.inputs) {
+            _global_js__WEBPACK_IMPORTED_MODULE_3__.mempool.autoRemoveUTXO({
+                id: tx.outpoint.hash,
+                path: tx.path,
+                vout: tx.outpoint.index,
+            });
         }
 
-        // Construct the Ledger transaction
-        const cLedgerTx = await _wallet_js__WEBPACK_IMPORTED_MODULE_6__.cHardwareWallet.splitTransaction(
-            cTx.serialize()
-        );
-        const strOutputScriptHex = await _wallet_js__WEBPACK_IMPORTED_MODULE_6__.cHardwareWallet.serializeTransactionOutputs(cLedgerTx)
-            .toString('hex');
+        const futureTxid = (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)((0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.dSHA256)((0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.hexToBytes)(sign)).reverse());
 
-        // Sign the transaction via Ledger
-        (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
-            'info',
-            _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.CONFIRM_UNSTAKE_H_WALLET,
-            [{ strHardwareName: _wallet_js__WEBPACK_IMPORTED_MODULE_6__.strHardwareName }],
-            7500
-        );
-        const strSerialisedTx = await _wallet_js__WEBPACK_IMPORTED_MODULE_6__.cHardwareWallet.createPaymentTransaction({
-            inputs: arrInputs,
-            associatedKeysets: arrAssociatedKeysets,
-            outputScriptHex: strOutputScriptHex,
-        });
-
-        // Broadcast the Hardware (Ledger) tx
-        const result = await (0,_network_js__WEBPACK_IMPORTED_MODULE_3__.sendTransaction)(
-            strSerialisedTx,
-            '<b>Delegation successful!</b>'
-        );
-        if (result) {
-            for (const tx of cTx.inputs) {
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.autoRemoveUTXO({
-                    id: tx.outpoint.hash,
-                    path: tx.path,
-                    vout: tx.outpoint.index,
-                });
-            }
-            const futureTxid = (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(
-                (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.dSHA256)((0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.hexToBytes)(strSerialisedTx)).reverse()
-            );
-
-            if (nChange > 0) {
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                    id: futureTxid,
-                    path: changeAddressPath,
-                    sats: nChange,
-                    script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[0].script),
-                    vout: 0,
-                    status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-                });
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                    id: futureTxid,
-                    path: primaryAddressPath,
-                    sats: nValue,
-                    vout: 1,
-                    script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[1].script),
-                    status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-                    isDelegate: true,
-                });
-            } else {
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                    id: futureTxid,
-                    path: primaryAddressPath,
-                    script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[0].script),
-                    sats: nValue,
-                    vout: 0,
-                    status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-                    isDelegate: true,
-                });
-            }
+        for (const utxo of knownUTXOs) {
+            utxo.id = futureTxid;
+            _global_js__WEBPACK_IMPORTED_MODULE_3__.mempool.addUTXO(utxo);
         }
-    } else {
-        const sign = await cTx.sign(_wallet_js__WEBPACK_IMPORTED_MODULE_6__.masterKey, 1);
 
-        // Broadcast the software TX
-        const result = await (0,_network_js__WEBPACK_IMPORTED_MODULE_3__.sendTransaction)(
-            sign,
-            '<b>Delegation successful!</b>'
-        );
-        if (result) {
-            for (const tx of cTx.inputs) {
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.autoRemoveUTXO({
-                    id: tx.outpoint.hash,
-                    path: tx.path,
-                    vout: tx.outpoint.index,
-                });
-            }
-            // Add our delegation + change (if any) to the local mempool
-            const futureTxid = (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)((0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.dSHA256)((0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.hexToBytes)(sign)).reverse());
-            if (nChange > 0) {
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                    id: futureTxid,
-                    path: changeAddressPath,
-                    sats: nChange,
-                    script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[0].script),
-                    vout: 0,
-                    status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-                });
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                    id: futureTxid,
-                    path: primaryAddressPath,
-                    sats: nValue,
-                    vout: 1,
-                    script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[1].script),
-                    status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-                    isDelegate: true,
-                });
-            } else {
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                    id: futureTxid,
-                    path: primaryAddressPath,
-                    script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[0].script),
-                    sats: nValue,
-                    vout: 0,
-                    status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-                    isDelegate: true,
-                });
+        if (!isDelegation) {
+            const [isYours, yourPath] = await (0,_wallet_js__WEBPACK_IMPORTED_MODULE_4__.isYourAddress)(address);
+
+            // If the tx was sent to yourself, add it to the mempool
+            if (isYours) {
+                const vout = nChange > 0 ? 1 : 0;
+                _global_js__WEBPACK_IMPORTED_MODULE_3__.mempool.addUTXO(
+                    new _mempool_js__WEBPACK_IMPORTED_MODULE_5__.UTXO({
+                        id: futureTxid,
+                        path: yourPath,
+                        sats: amount,
+                        vout,
+                        script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[vout].script),
+                        status: _mempool_js__WEBPACK_IMPORTED_MODULE_5__.Mempool.PENDING,
+                    })
+                );
             }
         }
     }
-    _global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domGenIt.innerHTML = 'Continue';
+    return { ok: result };
+}
+
+async function createMasternode() {
+    if (_wallet_js__WEBPACK_IMPORTED_MODULE_4__.masterKey.isViewOnly) {
+        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
+            'warning',
+            "Can't create a masternode in view only mode",
+            6000
+        );
+    }
+    const fGeneratePrivkey = _global_js__WEBPACK_IMPORTED_MODULE_3__.doms.domMnCreateType.value === 'VPS';
+    const [address] = await (0,_wallet_js__WEBPACK_IMPORTED_MODULE_4__.getNewAddress)();
+    const result = await createAndSendTransaction({
+        amount: _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.cChainParams.current.collateralInSats,
+        address,
+    });
+    if (!result.ok) {
+        return;
+    }
+    if (fGeneratePrivkey) {
+        const masternodePrivateKey = await (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.generateMnPrivkey)();
+        await (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.confirmPopup)({
+            title: _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.CONFIRM_POPUP_MN_P_KEY,
+            html: masternodePrivateKey + _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.CONFIRM_POPUP_MN_P_KEY_HTML,
+        });
+    }
+    (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
+        'success',
+        '<b>Masternode Created!<b><br>Wait 15 confirmations to proceed further'
+    );
+    // Remove any previous Masternode data, if there were any
+    localStorage.removeItem('masternode');
+}
+
+async function signTransaction(cTx, masterKey, outputs, undelegate) {
+    if (!masterKey.isHardwareWallet) {
+        return await cTx.sign(
+            masterKey,
+            1,
+            undelegate ? 'coldstake' : undefined
+        );
+    }
+    // Format the inputs how the Ledger SDK prefers
+    const arrInputs = [];
+    const arrAssociatedKeysets = [];
+    for (const cInput of cTx.inputs) {
+        const cInputFull = await (0,_network_js__WEBPACK_IMPORTED_MODULE_6__.getTxInfo)(cInput.outpoint.hash);
+        arrInputs.push([
+            await _wallet_js__WEBPACK_IMPORTED_MODULE_4__.cHardwareWallet.splitTransaction(cInputFull.hex),
+            cInput.outpoint.index,
+        ]);
+        arrAssociatedKeysets.push(cInput.path);
+    }
+    const cLedgerTx = await _wallet_js__WEBPACK_IMPORTED_MODULE_4__.cHardwareWallet.splitTransaction(cTx.serialize());
+    const strOutputScriptHex = await _wallet_js__WEBPACK_IMPORTED_MODULE_4__.cHardwareWallet.serializeTransactionOutputs(cLedgerTx)
+        .toString('hex');
+
+    // Sign the transaction via Ledger
+    return await (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.confirmPopup)({
+        title: _i18n_js__WEBPACK_IMPORTED_MODULE_2__.ALERTS.CONFIRM_POPUP_TRANSACTION,
+        html: createTxConfirmation(outputs),
+        resolvePromise: _wallet_js__WEBPACK_IMPORTED_MODULE_4__.cHardwareWallet.createPaymentTransaction({
+            inputs: arrInputs,
+            associatedKeysets: arrAssociatedKeysets,
+            outputScriptHex: strOutputScriptHex,
+        }),
+    });
 }
 
 // Coin Control response formats
 function ccError(msg = '') {
     return { success: false, msg };
 }
+
 function ccSuccess(data) {
     return { success: true, ...data };
 }
@@ -120006,24 +123263,24 @@ function chooseUTXOs(
 
     //const arrUTXOs
     const arrUTXOs = fColdOnly
-        ? _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.getDelegatedUTXOs()
-        : _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.getStandardUTXOs();
+        ? _global_js__WEBPACK_IMPORTED_MODULE_3__.mempool.getDelegatedUTXOs()
+        : _global_js__WEBPACK_IMPORTED_MODULE_3__.mempool.getStandardUTXOs();
 
     // Select and return UTXO pointers (filters applied)
     const cCoinControl = { nValue: 0, nChange: 0, arrSelectedUTXOs: [] };
 
     for (let i = 0; i < arrUTXOs.length; i++) {
         const cUTXO = arrUTXOs[i];
-        if (!_mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.isValidUTXO(cUTXO)) {
+        if (!_mempool_js__WEBPACK_IMPORTED_MODULE_5__.Mempool.isValidUTXO(cUTXO)) {
             continue;
         }
         // Don't spend locked Masternode collaterals
-        if ((0,_global_js__WEBPACK_IMPORTED_MODULE_2__.isMasternodeUTXO)(cUTXO)) continue; //CHANGE THIS
+        if ((0,_global_js__WEBPACK_IMPORTED_MODULE_3__.isMasternodeUTXO)(cUTXO)) continue; //CHANGE THIS
 
         // Have we met the required sats threshold?
         if (
             cCoinControl.nValue >=
-            nTotalSatsRequired + (0,_network_js__WEBPACK_IMPORTED_MODULE_3__.getFee)(cTx.serialize().length)
+            nTotalSatsRequired + (0,_network_js__WEBPACK_IMPORTED_MODULE_6__.getFee)(cTx.serialize().length)
         ) {
             // Required Coin Control value met, yahoo!
             console.log(
@@ -120082,539 +123339,10 @@ function chooseUTXOs(
     return ccSuccess(cCoinControl);
 }
 
-async function createTxGUI() {
-    if (!(0,_wallet_js__WEBPACK_IMPORTED_MODULE_6__.hasWalletUnlocked)(true)) return;
-
-    if (_wallet_js__WEBPACK_IMPORTED_MODULE_6__.masterKey.isViewOnly) {
-        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
-            'warning',
-            'Attempting to send funds in view only mode.',
-            6000
-        );
-    }
-
-    // Clear the inputs on 'Continue'
-    if (_global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domGenIt.innerHTML === 'Continue') {
-        _global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domGenIt.innerHTML = 'Send Transaction';
-        _global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domTxOutput.innerHTML = '';
-        _global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domHumanReadable.innerHTML = '';
-        _global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domValue1s.value = '';
-        _global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domAddress1s.value = '';
-        _global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domReqDesc.value = '';
-        _global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domReqDisplay.style.display = 'none';
-        return;
-    }
-    // Sanity check the address
-    const address = _global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domAddress1s.value.trim();
-    // If Staking address: redirect to staking page
-    if (address.startsWith(_chain_params_js__WEBPACK_IMPORTED_MODULE_7__.cChainParams.current.STAKING_PREFIX)) {
-        (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)('warning', _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.STAKE_NOT_SEND, [], 7500);
-        return _global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domStakeTab.click();
-    }
-    if (address.length !== 34)
-        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
-            'warning',
-            _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.BAD_ADDR_LENGTH,
-            [{ addressLength: address.length }],
-            2500
-        );
-    if (!_chain_params_js__WEBPACK_IMPORTED_MODULE_7__.cChainParams.current.PUBKEY_PREFIX.includes(address[0]))
-        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
-            'warning',
-            _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.BAD_ADDR_PREFIX,
-            [
-                { address: address[0] },
-                {
-                    addressPrefix:
-                        _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.cChainParams.current.PUBKEY_PREFIX.join(' or '),
-                },
-            ],
-            3500
-        );
-    if (!_bitTrx_js__WEBPACK_IMPORTED_MODULE_0__["default"].isValidDestination(address, _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.cChainParams.current.PUBKEY_ADDRESS))
-        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
-            'warning',
-            _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.INVALID_ADDRESS,
-            [{ address: address }],
-            3500
-        );
-
-    // Sanity check the amount
-    let nValue = Math.round(Number(_global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domValue1s.value.trim()) * _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN);
-    if (nValue <= 0 || isNaN(nValue))
-        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
-            'warning',
-            _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.INVALID_AMOUNT + _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.SENT_NOTHING,
-            [],
-            2500
-        );
-    if (!Number.isSafeInteger(nValue))
-        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
-            'warning',
-            _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.INVALID_AMOUNT + _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.MORE_THEN_8_DECIMALS,
-            [],
-            2500
-        );
-
-    // Construct a TX and fetch Standard inputs
-    const nBalance = (0,_global_js__WEBPACK_IMPORTED_MODULE_2__.getBalance)();
-    const cTx = new _bitTrx_js__WEBPACK_IMPORTED_MODULE_0__["default"].transaction();
-    const cCoinControl = chooseUTXOs(cTx, nValue, 0, false);
-    if (!cCoinControl.success)
-        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)('warning', cCoinControl.msg, 5000);
-    // Compute fee
-    const nFee = (0,_network_js__WEBPACK_IMPORTED_MODULE_3__.getFee)(cTx.serialize().length);
-
-    // Compute change (or lack thereof)
-    const nChange = cCoinControl.nValue - (nFee + nValue);
-    const [changeAddress, changeAddressPath] = await (0,_wallet_js__WEBPACK_IMPORTED_MODULE_6__.getNewAddress)({
-        verify: _wallet_js__WEBPACK_IMPORTED_MODULE_6__.masterKey.isHardwareWallet,
-    });
-
-    const outputs = [];
-    if (nChange > 0) {
-        // Change output
-        outputs.push([changeAddress, nChange / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN]);
-    } else {
-        // We're sending alot! So we deduct the fee from the send amount. There's not enough change to pay it with!
-        nValue -= nFee;
-    }
-
-    // Primary output (receiver)
-    outputs.push([address, nValue / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN]);
-
-    // Debug-only verbose response
-    if (_settings_js__WEBPACK_IMPORTED_MODULE_1__.debug)
-        _global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domHumanReadable.innerHTML =
-            'Balance: ' +
-            nBalance / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN +
-            '<br>Fee: ' +
-            nFee / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN +
-            '<br>To: ' +
-            address +
-            '<br>Sent: ' +
-            nValue / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN +
-            (nChange > 0
-                ? '<br>Change Address: ' +
-                  changeAddress +
-                  '<br>Change: ' +
-                  nChange / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN
-                : '');
-
-    // Add outputs to the Tx
-    for (const output of outputs) {
-        cTx.addoutput(output[0], output[1]);
-    }
-
-    // Sign and broadcast!
-    if (!_wallet_js__WEBPACK_IMPORTED_MODULE_6__.masterKey.isHardwareWallet) {
-        const sign = await cTx.sign(_wallet_js__WEBPACK_IMPORTED_MODULE_6__.masterKey, 1);
-
-        const result = await (0,_network_js__WEBPACK_IMPORTED_MODULE_3__.sendTransaction)(sign);
-        // Add our change (if any) to the local mempool
-        if (result) {
-            for (const tx of cTx.inputs) {
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.autoRemoveUTXO({
-                    id: tx.outpoint.hash,
-                    path: tx.path,
-                    vout: tx.outpoint.index,
-                });
-            }
-            const futureTxid = (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)((0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.dSHA256)((0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.hexToBytes)(sign)).reverse());
-
-            const [isYours, yourPath] = await (0,_wallet_js__WEBPACK_IMPORTED_MODULE_6__.isYourAddress)(address);
-            if (nChange > 0) {
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                    id: futureTxid,
-                    path: changeAddressPath,
-                    sats: nChange,
-                    script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[0].script),
-                    vout: 0,
-                    status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-                });
-                if (isYours) {
-                    _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                        id: futureTxid,
-                        path: yourPath,
-                        sats: nValue,
-                        vout: 1,
-                        script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[1].script),
-                        status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-                    });
-                }
-            } else {
-                if (isYours) {
-                    _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                        id: futureTxid,
-                        path: yourPath,
-                        sats: nValue,
-                        vout: 0,
-                        script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[0].script),
-                        status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-                    });
-                }
-            }
-        }
-    } else {
-        // Format the inputs how the Ledger SDK prefers
-        const arrInputs = [];
-        const arrAssociatedKeysets = [];
-        for (const cInput of cTx.inputs) {
-            const cInputFull = await (0,_network_js__WEBPACK_IMPORTED_MODULE_3__.getTxInfo)(cInput.outpoint.hash);
-            arrInputs.push([
-                await _wallet_js__WEBPACK_IMPORTED_MODULE_6__.cHardwareWallet.splitTransaction(cInputFull.hex),
-                cInput.outpoint.index,
-            ]);
-            arrAssociatedKeysets.push(cInput.path);
-        }
-        const cLedgerTx = await _wallet_js__WEBPACK_IMPORTED_MODULE_6__.cHardwareWallet.splitTransaction(
-            cTx.serialize()
-        );
-        const strOutputScriptHex = await _wallet_js__WEBPACK_IMPORTED_MODULE_6__.cHardwareWallet.serializeTransactionOutputs(cLedgerTx)
-            .toString('hex');
-
-        // Sign the transaction via Ledger
-        const strSerialisedTx = await (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.confirmPopup)({
-            title: _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.CONFIRM_POPUP_TRANSACTION,
-            html: createTxConfirmation(outputs),
-            resolvePromise: _wallet_js__WEBPACK_IMPORTED_MODULE_6__.cHardwareWallet.createPaymentTransaction({
-                inputs: arrInputs,
-                associatedKeysets: arrAssociatedKeysets,
-                outputScriptHex: strOutputScriptHex,
-            }),
-        });
-
-        // Broadcast the Hardware (Ledger) TX
-        const result = await (0,_network_js__WEBPACK_IMPORTED_MODULE_3__.sendTransaction)(strSerialisedTx);
-        if (result) {
-            for (const tx of cTx.inputs) {
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.autoRemoveUTXO({
-                    id: tx.outpoint.hash,
-                    path: tx.path,
-                    vout: tx.outpoint.index,
-                });
-            }
-            // Add our change (if any) to the local mempool
-            const [isYours, yourPath] = await (0,_wallet_js__WEBPACK_IMPORTED_MODULE_6__.isYourAddress)(address);
-            const futureTxid = (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(
-                (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.dSHA256)((0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.hexToBytes)(strSerialisedTx)).reverse()
-            );
-
-            if (nChange > 0) {
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                    id: futureTxid,
-                    path: changeAddressPath,
-                    sats: nChange,
-                    script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[0].script),
-                    vout: 0,
-                    status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-                });
-                if (isYours) {
-                    _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                        id: futureTxid,
-                        path: yourPath,
-                        sats: nValue,
-                        vout: 1,
-                        script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[1].script),
-                        status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-                    });
-                }
-            } else {
-                if (isYours) {
-                    _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                        id: futureTxid,
-                        path: yourPath,
-                        sats: nValue,
-                        vout: 0,
-                        script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[0].script),
-                        status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-                    });
-                }
-            }
-        }
-    }
-    _global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domGenIt.innerHTML = 'Continue';
-}
-
-async function createRawTransaction() {
-    // Prepare a TX
-    const cTx = new _bitTrx_js__WEBPACK_IMPORTED_MODULE_0__["default"].transaction();
-    const txid = document.getElementById('prevTrxHash').value;
-    const index = document.getElementById('index').value;
-    const script = document.getElementById('script').value;
-
-    // Primary input
-    cTx.addinput({ txid, index, script });
-
-    // Primary output
-    const strAddress = document.getElementById('address1').value;
-    const nValue = document.getElementById('value1').value;
-    cTx.addoutput(strAddress, nValue);
-
-    // Change output
-    const strChange = document.getElementById('address2').value;
-    const nChangeValue = document.getElementById('value2').value;
-    cTx.addoutput(strChange, nChangeValue);
-
-    // Sign via WIF key
-    const wif = document.getElementById('wif').value;
-    document.getElementById('rawTrx').value = await cTx.sign(wif, 1); //SIGHASH_ALL DEFAULT 1
-}
-
-async function createMasternode() {
-    if (_wallet_js__WEBPACK_IMPORTED_MODULE_6__.masterKey.isViewOnly) {
-        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
-            'warning',
-            "Can't create a masternode in view only mode",
-            6000
-        );
-    }
-    const fGeneratePrivkey = _global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domMnCreateType.value === 'VPS';
-    const [strAddress, strAddressPath] = await (0,_wallet_js__WEBPACK_IMPORTED_MODULE_6__.getNewAddress)();
-    const nValue = _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.cChainParams.current.collateralInSats;
-
-    const nBalance = (0,_global_js__WEBPACK_IMPORTED_MODULE_2__.getBalance)();
-    const cTx = new _bitTrx_js__WEBPACK_IMPORTED_MODULE_0__["default"].transaction();
-    const cCoinControl = chooseUTXOs(cTx, nValue, 0, false);
-
-    if (!cCoinControl.success)
-        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)('warning', cCoinControl.msg, 5000);
-    // Compute fee
-    const nFee = (0,_network_js__WEBPACK_IMPORTED_MODULE_3__.getFee)(cTx.serialize().length);
-
-    // Compute change (or lack thereof)
-    const nChange = cCoinControl.nValue - (nFee + nValue);
-    const [changeAddress, changeAddressPath] = await (0,_wallet_js__WEBPACK_IMPORTED_MODULE_6__.getNewAddress)({
-        verify: _wallet_js__WEBPACK_IMPORTED_MODULE_6__.masterKey.isHardwareWallet,
-    });
-    const outputs = [];
-    if (nChange > 0) {
-        // Change output
-        outputs.push([changeAddress, nChange / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN]);
-    } else {
-        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
-            'warning',
-            "You don't have enough " +
-                _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.cChainParams.current.TICKER +
-                ' to create a masternode',
-            5000
-        );
-    }
-
-    // Primary output (receiver)
-    outputs.push([strAddress, nValue / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN]);
-
-    // Debug-only verbose response
-    if (_settings_js__WEBPACK_IMPORTED_MODULE_1__.debug)
-        _global_js__WEBPACK_IMPORTED_MODULE_2__.doms.domHumanReadable.innerHTML =
-            'Balance: ' +
-            nBalance / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN +
-            '<br>Fee: ' +
-            nFee / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN +
-            '<br>To: ' +
-            strAddress +
-            '<br>Sent: ' +
-            nValue / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN +
-            (nChange > 0
-                ? '<br>Change Address: ' +
-                  changeAddress +
-                  '<br>Change: ' +
-                  nChange / _chain_params_js__WEBPACK_IMPORTED_MODULE_7__.COIN
-                : '');
-
-    // Add outputs to the Tx
-    for (const output of outputs) {
-        cTx.addoutput(output[0], output[1]);
-    }
-
-    // Sign and broadcast!
-    if (!_wallet_js__WEBPACK_IMPORTED_MODULE_6__.masterKey.isHardwareWallet) {
-        const sign = await cTx.sign(_wallet_js__WEBPACK_IMPORTED_MODULE_6__.masterKey, 1);
-        const result = await (0,_network_js__WEBPACK_IMPORTED_MODULE_3__.sendTransaction)(sign);
-        if (result) {
-            for (const tx of cTx.inputs) {
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.autoRemoveUTXO({
-                    id: tx.outpoint.hash,
-                    path: tx.path,
-                    vout: tx.outpoint.index,
-                });
-            }
-            const futureTxid = (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)((0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.dSHA256)((0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.hexToBytes)(sign)).reverse());
-            _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                id: futureTxid,
-                path: changeAddressPath,
-                sats: nChange,
-                vout: 0,
-                script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[0].script),
-                status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-            });
-            _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                id: futureTxid,
-                path: strAddressPath,
-                script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[1].script),
-                sats: nValue,
-                vout: 1,
-                status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-            });
-        }
-    } else {
-        // Format the inputs how the Ledger SDK prefers
-        const arrInputs = [];
-        const arrAssociatedKeysets = [];
-        for (const cInput of cTx.inputs) {
-            const cInputFull = await (0,_network_js__WEBPACK_IMPORTED_MODULE_3__.getTxInfo)(cInput.outpoint.hash);
-            arrInputs.push([
-                await _wallet_js__WEBPACK_IMPORTED_MODULE_6__.cHardwareWallet.splitTransaction(cInputFull.hex),
-                cInput.outpoint.index,
-            ]);
-            arrAssociatedKeysets.push(cInput.path);
-        }
-        const cLedgerTx = await _wallet_js__WEBPACK_IMPORTED_MODULE_6__.cHardwareWallet.splitTransaction(
-            cTx.serialize()
-        );
-        const strOutputScriptHex = await _wallet_js__WEBPACK_IMPORTED_MODULE_6__.cHardwareWallet.serializeTransactionOutputs(cLedgerTx)
-            .toString('hex');
-
-        // Sign the transaction via Ledger
-        const strSerialisedTx = await (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.confirmPopup)({
-            title: _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.CONFIRM_POPUP_TRANSACTION,
-            html: createTxConfirmation(outputs),
-            resolvePromise: _wallet_js__WEBPACK_IMPORTED_MODULE_6__.cHardwareWallet.createPaymentTransaction({
-                inputs: arrInputs,
-                associatedKeysets: arrAssociatedKeysets,
-                outputScriptHex: strOutputScriptHex,
-            }),
-        });
-
-        // Broadcast the Hardware (Ledger) TX
-        const result = await (0,_network_js__WEBPACK_IMPORTED_MODULE_3__.sendTransaction)(strSerialisedTx);
-        if (result) {
-            for (const tx of cTx.inputs) {
-                _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.autoRemoveUTXO({
-                    id: tx.outpoint.hash,
-                    path: tx.path,
-                    vout: tx.outpoint.index,
-                });
-            }
-            const futureTxid = (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(
-                (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.dSHA256)((0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.hexToBytes)(strSerialisedTx)).reverse()
-            );
-
-            _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                id: futureTxid,
-                path: changeAddressPath,
-                sats: nChange,
-                vout: 0,
-                script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[0].script),
-                status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-            });
-            _global_js__WEBPACK_IMPORTED_MODULE_2__.mempool.addUTXO({
-                id: futureTxid,
-                path: strAddressPath,
-                script: (0,_utils_js__WEBPACK_IMPORTED_MODULE_9__.bytesToHex)(cTx.outputs[1].script),
-                sats: nValue,
-                vout: 1,
-                status: _mempool_js__WEBPACK_IMPORTED_MODULE_4__.Mempool.PENDING,
-            });
-        }
-    }
-    if (fGeneratePrivkey) {
-        let masternodePrivateKey = await (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.generateMnPrivkey)();
-        await (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.confirmPopup)({
-            title: _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.CONFIRM_POPUP_MN_P_KEY,
-            html: masternodePrivateKey + _i18n_js__WEBPACK_IMPORTED_MODULE_5__.ALERTS.CONFIRM_POPUP_MN_P_KEY_HTML,
-        });
-    }
-    (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
-        'success',
-        '<b>Masternode Created!<b><br>Wait 15 confirmations to proceed further'
-    );
-    // Remove any previous Masternode data, if there were any
-    localStorage.removeItem('masternode');
-}
-
-function addScriptLength(arrTxBytes, arrPubKey, nInputLen) {
-    // ???
-    let n_found = 0;
-    const new_transaction_bytes = arrTxBytes;
-    for (let i = 0; i < arrTxBytes.length; i++) {
-        if (
-            arrTxBytes[i + 1] === 71 ||
-            arrTxBytes[i + 1] === 72 ||
-            arrTxBytes[i + 1] === 73
-        ) {
-            if (
-                arrTxBytes[i + arrTxBytes[i]] ===
-                arrTxBytes[arrTxBytes.length - 1]
-            ) {
-                new_transaction_bytes[i]++;
-                n_found++;
-                if (n_found === nInputLen) {
-                    return new_transaction_bytes;
-                }
-            }
-        }
-    }
-}
-
-function findCompressedPubKey(arrTxBytes) {
-    const arrToFind = [1, 33];
-    for (let i = 0; i < arrTxBytes.length; i++) {
-        if (arrTxBytes[i] === arrToFind[0]) {
-            if (arrTxBytes[i + 1] === arrToFind[1]) {
-                const compressedPubKey = [];
-                for (let j = 0; j < 33; j++) {
-                    compressedPubKey.push(arrTxBytes[i + 2 + j]);
-                }
-                return compressedPubKey;
-            }
-        }
-    }
-}
-
-function addExtraBytes(arrTxBytes, arrPubkeyBytes, nLen) {
-    let arrNewTxBytes = [];
-    let nFound = 0;
-    for (let i = 0; i < arrTxBytes.length; i++) {
-        arrNewTxBytes.push(arrTxBytes[i]);
-        let fFound = true;
-
-        if (nFound !== nLen) {
-            for (let j = 0; j < arrPubkeyBytes.length; j++) {
-                if (arrTxBytes[i + j] !== arrPubkeyBytes[j]) {
-                    fFound = false;
-                    break;
-                }
-            }
-
-            if (fFound) {
-                arrNewTxBytes = insert(
-                    arrNewTxBytes,
-                    arrNewTxBytes.length - 2,
-                    0
-                );
-                nFound++;
-            }
-        }
-    }
-    return arrNewTxBytes;
-}
-
-function insert(arr, index, newItem) {
-    // part of the array before the specified index
-    return [
-        ...arr.slice(0, index),
-        // inserted item
-        newItem,
-        // part of the array after the specified index
-        ...arr.slice(index),
-    ];
-}
-
 function createTxConfirmation(outputs) {
     let strHtml =
         'Confirm this transaction matches the one on your ' +
-        _wallet_js__WEBPACK_IMPORTED_MODULE_6__.strHardwareName +
+        _wallet_js__WEBPACK_IMPORTED_MODULE_4__.strHardwareName +
         '.';
     for (const output of outputs) {
         strHtml += `<br> <br> You will send <b>${output[1].toFixed(2)} ${
@@ -121211,7 +123939,7 @@ async function importWallet({
             masterKey = new HardwareWalletMasterKey();
 
             // Hide the 'export wallet' button, it's not relevant to hardware wallets
-            _global_js__WEBPACK_IMPORTED_MODULE_5__.doms.domExportWallet.style.display = 'none';
+            _global_js__WEBPACK_IMPORTED_MODULE_5__.doms.domExportWallet.hidden = true;
 
             (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
                 'info',

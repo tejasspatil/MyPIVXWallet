@@ -650,8 +650,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _aes_gcm_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./aes-gcm.js */ "./scripts/aes-gcm.js");
 /* harmony import */ var _native_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./native.js */ "./scripts/native.js");
 /* harmony import */ var _prices_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./prices.js */ "./scripts/prices.js");
+/* harmony import */ var ip_address__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ip-address */ "./node_modules/ip-address/dist/esm/ip-address.js");
 /* provided dependency */ var console = __webpack_require__(/*! ./node_modules/console-browserify/index.js */ "./node_modules/console-browserify/index.js");
 /* provided dependency */ var $ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
+
 
 
 
@@ -780,11 +782,7 @@ function start() {
         domMnemonicModalButton: document.getElementById(
             'modalMnemonicConfirmButton'
         ),
-        domExportDiv: document.getElementById('exportKeyDiv'),
-        domExportPublicKey: document.getElementById('exportPublicKeyText'),
-        domExportPrivateKeyHold: document.getElementById('exportPrivateKey'),
-        domExportPrivateKey: document.getElementById('exportPrivateKeyText'),
-        domExportWallet: document.getElementById('guiExportWallet'),
+        domExportWallet: document.getElementById('guiExportWalletItem'),
         domWipeWallet: document.getElementById('guiWipeWallet'),
         domRestoreWallet: document.getElementById('guiRestoreWallet'),
         domNewAddress: document.getElementById('guiNewAddress'),
@@ -1208,22 +1206,52 @@ function destroyMasternode() {
     }
 }
 
+/**
+ * Takes an ip address and adds the port.
+ * If it's an IPv4 address, ip:port will be used, (e.g. 127.0.0.1:12345)
+ * If it's an IPv6 address, [ip]:port will be used, (e.g. [::1]:12345)
+ * @param {String} ip - Ip address with or without port
+ * @returns {String}
+ */
+function parseIpAddress(ip) {
+    // IPv4 without port
+    if (ip.match(/\d+\.\d+\.\d+\.\d+/)) {
+        return `${ip}:${_chain_params_js__WEBPACK_IMPORTED_MODULE_8__.cChainParams.current.MASTERNODE_PORT}`;
+    }
+    // IPv4 with port
+    if (ip.match(/\d+\.\d+\.\d+\.\d+:\d+/)) {
+        return ip;
+    }
+    // IPv6 without port
+    if (ip_address__WEBPACK_IMPORTED_MODULE_12__.Address6.isValid(ip)) {
+        return `[${ip}]:${_chain_params_js__WEBPACK_IMPORTED_MODULE_8__.cChainParams.current.MASTERNODE_PORT}`;
+    }
+
+    const groups = /\[(.*)\]:\d+/.exec(ip);
+    if (groups !== null && groups.length > 1) {
+        // IPv6 with port
+        if (ip_address__WEBPACK_IMPORTED_MODULE_12__.Address6.isValid(groups[1])) {
+            return ip;
+        }
+    }
+
+    // If we haven't returned yet, the address was invalid.
+    return null;
+}
+
 async function importMasternode() {
     const mnPrivKey = doms.domMnPrivateKey.value;
+    const address = parseIpAddress(doms.domMnIP.value);
+    if (!address) {
+        (0,_misc_js__WEBPACK_IMPORTED_MODULE_7__.createAlert)('warning', 'The ip address is invalid!', 5000);
+        return;
+    }
 
-    const ip = doms.domMnIP.value;
-    let address;
     let collateralTxId;
     let outidx;
     let collateralPrivKeyPath;
     doms.domMnIP.value = '';
     doms.domMnPrivateKey.value = '';
-
-    if (!ip.includes(':')) {
-        address = `${ip}:${_chain_params_js__WEBPACK_IMPORTED_MODULE_8__.cChainParams.current.MASTERNODE_PORT}`;
-    } else {
-        address = ip;
-    }
 
     if (!_wallet_js__WEBPACK_IMPORTED_MODULE_4__.masterKey.isHD) {
         // Find the first UTXO matching the expected collateral size
@@ -2112,8 +2140,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wallet_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./wallet.js */ "./scripts/wallet.js");
 /* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./utils.js */ "./scripts/utils.js");
 /* harmony import */ var buffer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! buffer */ "./node_modules/buffer/index.js");
-/* harmony import */ var _noble_secp256k1__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @noble/secp256k1 */ "./node_modules/@noble/secp256k1/lib/esm/index.js");
+/* harmony import */ var ip_address__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ip-address */ "./node_modules/ip-address/dist/esm/ip-address.js");
+/* harmony import */ var _noble_secp256k1__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @noble/secp256k1 */ "./node_modules/@noble/secp256k1/lib/esm/index.js");
 /* provided dependency */ var console = __webpack_require__(/*! ./node_modules/console-browserify/index.js */ "./node_modules/console-browserify/index.js");
+
 
 
 
@@ -2177,14 +2207,20 @@ class Masternode {
         return cMasternode ? cMasternode.status : 'MISSING';
     }
 
+    /**
+     * @param {String} ip
+     * @param {Number} port
+     * @returns {string} hex representation of the IP + port pair
+     */
     static _decodeIpAddress(ip, port) {
-        // Only IPV4 for now
-        let start = '00000000000000000000ffff';
-        for (const digit of ip.split('.').map((n) => parseInt(n))) {
-            start += ('0' + digit.toString(16)).slice(-2);
-        }
-        start += (0,_utils_js__WEBPACK_IMPORTED_MODULE_3__.bytesToHex)(Masternode._numToBytes(port, 2, false));
-        return start;
+        const address = ip.includes('.')
+            ? ip_address__WEBPACK_IMPORTED_MODULE_5__.Address6.fromAddress4(ip)
+            : new ip_address__WEBPACK_IMPORTED_MODULE_5__.Address6(ip);
+        const bytes = address.toUnsignedByteArray();
+        const res =
+            (0,_utils_js__WEBPACK_IMPORTED_MODULE_3__.bytesToHex)([...new Array(16 - bytes.length).fill(0), ...bytes]) +
+            (0,_utils_js__WEBPACK_IMPORTED_MODULE_3__.bytesToHex)(Masternode._numToBytes(port, 2, false));
+        return res;
     }
 
     static _numToBytes(number, numBytes = 8, littleEndian = true) {
@@ -2226,7 +2262,15 @@ class Masternode {
      * Then hashed two times with SHA256
      */
     static getToSign({ walletPrivateKey, addr, mnPrivateKey, sigTime }) {
-        const [ip, port] = addr.split(':');
+        let ip, port;
+        if (addr.includes('.')) {
+            // IPv4
+            [ip, port] = addr.split(':');
+        } else {
+            // IPv6
+            [ip, port] = addr.slice(1).split(']');
+            port = port.slice(1);
+        }
         const publicKey = (0,_utils_js__WEBPACK_IMPORTED_MODULE_3__.hexToBytes)(
             (0,_wallet_js__WEBPACK_IMPORTED_MODULE_2__.deriveAddress)({
                 pkBytes: (0,_wallet_js__WEBPACK_IMPORTED_MODULE_2__.parseWIF)(walletPrivateKey, true),
@@ -2282,7 +2326,7 @@ class Masternode {
             .split('')
             .map((c) => c.charCodeAt(0));
         const hash = (0,_utils_js__WEBPACK_IMPORTED_MODULE_3__.dSHA256)(padding.concat(toSign.length).concat(toSign));
-        const [signature, v] = await _noble_secp256k1__WEBPACK_IMPORTED_MODULE_5__.sign(
+        const [signature, v] = await _noble_secp256k1__WEBPACK_IMPORTED_MODULE_6__.sign(
             hash,
             (0,_wallet_js__WEBPACK_IMPORTED_MODULE_2__.parseWIF)(walletPrivateKey, true),
             { der: false, recovered: true }
@@ -2301,7 +2345,7 @@ class Masternode {
             blockHash,
             sigTime,
         });
-        const [signature, v] = await _noble_secp256k1__WEBPACK_IMPORTED_MODULE_5__.sign(
+        const [signature, v] = await _noble_secp256k1__WEBPACK_IMPORTED_MODULE_6__.sign(
             toSign,
             (0,_wallet_js__WEBPACK_IMPORTED_MODULE_2__.parseWIF)(this.mnPrivateKey, true),
             { der: false, recovered: true }
@@ -2422,7 +2466,7 @@ class Masternode {
             ...Masternode._numToBytes(sigTime, 8, true),
         ];
 
-        const [signature, v] = await _noble_secp256k1__WEBPACK_IMPORTED_MODULE_5__.sign(
+        const [signature, v] = await _noble_secp256k1__WEBPACK_IMPORTED_MODULE_6__.sign(
             (0,_utils_js__WEBPACK_IMPORTED_MODULE_3__.dSHA256)(msg),
             (0,_wallet_js__WEBPACK_IMPORTED_MODULE_2__.parseWIF)(this.mnPrivateKey, true),
             { der: false, recovered: true }
@@ -4575,7 +4619,7 @@ async function importWallet({
             masterKey = new HardwareWalletMasterKey();
 
             // Hide the 'export wallet' button, it's not relevant to hardware wallets
-            _global_js__WEBPACK_IMPORTED_MODULE_5__.doms.domExportWallet.style.display = 'none';
+            _global_js__WEBPACK_IMPORTED_MODULE_5__.doms.domExportWallet.hidden = true;
 
             (0,_misc_js__WEBPACK_IMPORTED_MODULE_8__.createAlert)(
                 'info',
@@ -5176,7 +5220,7 @@ async function getHardwareWalletKeys(
 /******/ 	__webpack_require__.x = () => {
 /******/ 		// Load entry module and return exports
 /******/ 		// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 		var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_ledgerhq_hw-app-btc_lib-es_Btc_js-node_modules_ledgerhq_hw-transport-web-ba78a5"], () => (__webpack_require__("./scripts/vanitygen_worker.js")))
+/******/ 		var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_ledgerhq_hw-app-btc_lib-es_Btc_js-node_modules_ledgerhq_hw-transport-web-4a43ac"], () => (__webpack_require__("./scripts/vanitygen_worker.js")))
 /******/ 		__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 		return __webpack_exports__;
 /******/ 	};
@@ -5401,7 +5445,7 @@ async function getHardwareWalletKeys(
 /******/ 	(() => {
 /******/ 		var next = __webpack_require__.x;
 /******/ 		__webpack_require__.x = () => {
-/******/ 			return __webpack_require__.e("vendors-node_modules_ledgerhq_hw-app-btc_lib-es_Btc_js-node_modules_ledgerhq_hw-transport-web-ba78a5").then(next);
+/******/ 			return __webpack_require__.e("vendors-node_modules_ledgerhq_hw-app-btc_lib-es_Btc_js-node_modules_ledgerhq_hw-transport-web-4a43ac").then(next);
 /******/ 		};
 /******/ 	})();
 /******/ 	

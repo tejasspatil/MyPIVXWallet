@@ -62,7 +62,11 @@ export async function createTxGUI() {
     if (!hasWalletUnlocked(true)) return;
 
     // Ensure the wallet is unlocked
-    if (masterKey.isViewOnly && !(await restoreWallet('Unlock to send your transaction!'))) return;
+    if (
+        masterKey.isViewOnly &&
+        !(await restoreWallet('Unlock to send your transaction!'))
+    )
+        return;
 
     // Clear the inputs on 'Continue'
     if (doms.domGenIt.innerHTML === 'Continue') {
@@ -117,7 +121,13 @@ export async function createTxGUI() {
  */
 export async function delegateGUI() {
     // Ensure the wallet is unlocked
-    if (masterKey.isViewOnly && !(await restoreWallet(`Unlock to stake your ${cChainParams.current.TICKER}!`))) return;
+    if (
+        masterKey.isViewOnly &&
+        !(await restoreWallet(
+            `Unlock to stake your ${cChainParams.current.TICKER}!`
+        ))
+    )
+        return;
 
     // Verify the amount; Delegations must be a minimum of 1 PIV, enforced by the network
     const nAmount = Number(doms.domGuiDelegateAmount.value.trim()) * COIN;
@@ -151,7 +161,13 @@ export async function undelegateGUI() {
     }
 
     // Ensure the wallet is unlocked
-    if (masterKey.isViewOnly && !(await restoreWallet(`Unlock to unstake your ${cChainParams.current.TICKER}!`))) return;
+    if (
+        masterKey.isViewOnly &&
+        !(await restoreWallet(
+            `Unlock to unstake your ${cChainParams.current.TICKER}!`
+        ))
+    )
+        return;
 
     // Verify the amount
     const nAmount = Math.round(
@@ -205,7 +221,11 @@ async function createAndSendTransaction({
     }
 
     // Ensure the wallet is unlocked
-    if (masterKey.isViewOnly && !(await restoreWallet('Unlock to send your transaction!'))) return;
+    if (
+        masterKey.isViewOnly &&
+        !(await restoreWallet('Unlock to send your transaction!'))
+    )
+        return;
 
     // Construct a TX and fetch Standard inputs
     const nBalance = getBalance();
@@ -352,7 +372,11 @@ async function createAndSendTransaction({
  */
 export async function createMasternode() {
     // Ensure the wallet is unlocked
-    if (masterKey.isViewOnly && !(await restoreWallet('Unlock to create your Masternode!'))) return;
+    if (
+        masterKey.isViewOnly &&
+        !(await restoreWallet('Unlock to create your Masternode!'))
+    )
+        return;
 
     // Generate the Masternode collateral
     const [address] = await getNewAddress();
@@ -363,7 +387,7 @@ export async function createMasternode() {
     if (!result.ok) {
         return;
     }
-    
+
     // Generate a Masternode private key if the user wants a self-hosted masternode
     const fGeneratePrivkey = doms.domMnCreateType.value === 'VPS';
     if (fGeneratePrivkey) {

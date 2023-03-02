@@ -534,7 +534,11 @@ async function govVote(hash, voteCode) {
  */
 export async function startMasternode(fRestart = false) {
     if (localStorage.getItem('masternode')) {
-        if (masterKey.isViewOnly && !(await restoreWallet('Unlock to start your Masternode!'))) return;
+        if (
+            masterKey.isViewOnly &&
+            !(await restoreWallet('Unlock to start your Masternode!'))
+        )
+            return;
         const cMasternode = new Masternode(
             JSON.parse(localStorage.getItem('masternode'))
         );
@@ -990,7 +994,7 @@ export async function restoreWallet(strReason = '') {
 
     // If there's a reason given; display it as a sub-text
     strHTML += `<p style="opacity: 0.75">${strReason}</p>`;
-    
+
     // Prompt the user
     if (
         await confirmPopup({
@@ -999,7 +1003,9 @@ export async function restoreWallet(strReason = '') {
         })
     ) {
         // Attempt to unlock the wallet with the provided password
-        const strPassword = document.getElementById('restoreWalletPassword').value;
+        const strPassword = document.getElementById(
+            'restoreWalletPassword'
+        ).value;
         if (await decryptWallet(strPassword)) {
             doms.domRestoreWallet.hidden = true;
             doms.domWipeWallet.hidden = false;

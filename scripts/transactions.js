@@ -8,6 +8,7 @@ import {
     isMasternodeUTXO,
     askForCSAddr,
     cachedColdStakeAddr,
+    restoreWallet,
 } from './global.js';
 import {
     hasWalletUnlocked,
@@ -53,16 +54,15 @@ function validateAmount(nAmountSats, nMinSats = 10000) {
     return true;
 }
 
+/**
+ * Create a transaction using input from the user interface
+ */
 export async function createTxGUI() {
+    // Ensure a wallet is loaded
     if (!hasWalletUnlocked(true)) return;
 
-    if (masterKey.isViewOnly) {
-        return createAlert(
-            'warning',
-            'Attempting to send funds in view only mode.',
-            6000
-        );
-    }
+    // Ensure the wallet is unlocked
+    if (masterKey.isViewOnly && !(await restoreWallet('Unlock to send your transaction!'))) return;
 
     // Clear the inputs on 'Continue'
     if (doms.domGenIt.innerHTML === 'Continue') {
@@ -112,14 +112,13 @@ export async function createTxGUI() {
     createAndSendTransaction({ address, amount: nValue, isDelegation: false });
 }
 
+/**
+ * Create a Cold Staking delegation transaction
+ */
 export async function delegateGUI() {
-    if (masterKey.isViewOnly) {
-        return createAlert(
-            'warning',
-            'Attempting to delegate in view only mode.',
-            6000
-        );
-    }
+    // Ensure the wallet is unlocked
+    if (masterKey.isViewOnly && !(await restoreWallet(`Unlock to stake your ${cChainParams.current.TICKER}!`))) return;
+
     // Verify the amount; Delegations must be a minimum of 1 PIV, enforced by the network
     const nAmount = Number(doms.domGuiDelegateAmount.value.trim()) * COIN;
     if (!validateAmount(nAmount, COIN)) return;
@@ -143,22 +142,24 @@ export async function delegateGUI() {
     });
 }
 
+/**
+ * Create a Cold Staking undelegation transaction
+ */
 export async function undelegateGUI() {
     if (masterKey.isHardwareWallet) {
         return createAlert('warning', 'Ledger not supported', 6000);
     }
-    if (masterKey.isViewOnly) {
-        return createAlert(
-            'warning',
-            'Attempting to undelegate in view only mode.',
-            6000
-        );
-    }
+
+    // Ensure the wallet is unlocked
+    if (masterKey.isViewOnly && !(await restoreWallet(`Unlock to unstake your ${cChainParams.current.TICKER}!`))) return;
+
     // Verify the amount
     const nAmount = Math.round(
         Number(doms.domGuiUndelegateAmount.value.trim()) * COIN
     );
     if (!validateAmount(nAmount)) return;
+
+    // Generate a new address to undelegate towards
     const [address] = await getNewAddress();
     const result = await createAndSendTransaction({
         address,
@@ -168,6 +169,7 @@ export async function undelegateGUI() {
         delegateChange: true,
         changeDelegationAddress: cachedColdStakeAddr,
     });
+
     if (!result.ok && result.err === 'No change addr') {
         askForCSAddr(true);
         await undelegateGUI();
@@ -202,13 +204,8 @@ async function createAndSendTransaction({
         );
     }
 
-    if (masterKey.isViewOnly) {
-        return createAlert(
-            'warning',
-            'Attempting to send funds in view only mode.',
-            6000
-        );
-    }
+    // Ensure the wallet is unlocked
+    if (masterKey.isViewOnly && !(await restoreWallet('Unlock to send your transaction!'))) return;
 
     // Construct a TX and fetch Standard inputs
     const nBalance = getBalance();
@@ -350,15 +347,14 @@ async function createAndSendTransaction({
     return { ok: result };
 }
 
+/**
+ * Create a Masternode collateral transaction for the user
+ */
 export async function createMasternode() {
-    if (masterKey.isViewOnly) {
-        return createAlert(
-            'warning',
-            "Can't create a masternode in view only mode",
-            6000
-        );
-    }
-    const fGeneratePrivkey = doms.domMnCreateType.value === 'VPS';
+    // Ensure the wallet is unlocked
+    if (masterKey.isViewOnly && !(await restoreWallet('Unlock to create your Masternode!'))) return;
+
+    // Generate the Masternode collateral
     const [address] = await getNewAddress();
     const result = await createAndSendTransaction({
         amount: cChainParams.current.collateralInSats,
@@ -367,6 +363,9 @@ export async function createMasternode() {
     if (!result.ok) {
         return;
     }
+    
+    // Generate a Masternode private key if the user wants a self-hosted masternode
+    const fGeneratePrivkey = doms.domMnCreateType.value === 'VPS';
     if (fGeneratePrivkey) {
         const masternodePrivateKey = await generateMnPrivkey();
         await confirmPopup({

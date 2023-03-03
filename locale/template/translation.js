@@ -32,7 +32,6 @@ var translation = {
     available:"",                   //Available
 
     // Nav Bar
-    navIntro: "",                   //Intro
     navDashboard: "",               //Dashboard
     navSend: "",                    //Send
     navStake: "",                   //Stake

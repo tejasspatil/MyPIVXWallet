@@ -14,7 +14,6 @@ export const en_translation = {
     available:"Available",                   //
 
     // Nav Bar
-    navIntro: "Intro",                   //
     navDashboard: "Dashboard",               //
     navSend: "Send",                    //
     navStake: "Stake",                   //

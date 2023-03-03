@@ -14,7 +14,6 @@ export const uwu_translation = {
     available:"Avawable",                   //Available
 
     // Nav Bar
-    navIntro: "Intwo",                   //Intro
     navDashboard: "Dashbowed",               //Dashboard
     navSend: "Send❣",                    //Send
     navStake: "",                   //Stake

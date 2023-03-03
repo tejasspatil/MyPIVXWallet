@@ -29,7 +29,6 @@ export const en_translation = {
 
     // Footer
     footerBuiltWithPivxLabs: "Built with 💜 by PIVX Labs",    //
-    footerGithubLink: "MyPIVXWallet",           //
 
     // Intro
     title: "Welcome to",                      //

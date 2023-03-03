@@ -47,7 +47,6 @@ var translation = {
 
     // Footer
     footerBuiltWithPivxLabs: "",    //Built with 💜 by PIVX Labs
-    footerGithubLink: "",           //MyPIVXWallet
 
     // Intro
     title: "",                      //Welcome to

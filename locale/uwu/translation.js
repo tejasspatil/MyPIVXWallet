@@ -29,7 +29,6 @@ export const uwu_translation = {
 
     // Footer
     footerBuiltWithPivxLabs: "Built with wuv by PIVX Wabs❣",    //Built with 💜 by PIVX Labs
-    footerGithubLink: "",           //MyPIVXWallet
 
     // Intro
     title: "Wewcome to",                      //Welcome to

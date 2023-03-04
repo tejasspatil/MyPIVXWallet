@@ -39,6 +39,7 @@
     "html-loader": "^4.2.0",
     "html-webpack-plugin": "^5.5.0",
     "mini-css-extract-plugin": "^2.7.2",
+    "css-minimizer-webpack-plugin": "^4.2.2",
     "node-polyfill-webpack-plugin": "^2.0.1",
     "prettier": "^2.8.1",
     "resource-loader": "^4.0.0-rc4",

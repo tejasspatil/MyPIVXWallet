@@ -2,6 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 const webpack = require('webpack');
 module.exports = {
@@ -24,7 +25,7 @@ module.exports = {
             overlay: false
         }
     },
-    mode: 'development',
+    mode: 'production',
     module: {
         rules: [
             {
@@ -73,4 +74,8 @@ module.exports = {
             ],
         }),
     ],
+    optimization: {
+        // Inject a CSS minimizer alongside the default JS minimizer (the '...' is the inclusion of the default webpack JS minimizer!)
+        minimizer: [new CssMinimizerPlugin(), '...'],
+    },
 };

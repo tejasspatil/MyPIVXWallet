@@ -2061,7 +2061,7 @@ a {
 
 
 
-.navbar-nav .nav-item a {
+.navbar-nav .nav-item span {
   transition: all .2s ease-in-out;
 }
 

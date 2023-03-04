@@ -7,7 +7,7 @@ import { deriveAddress, parseWIF, getDerivationPath } from './wallet.js';
 import { sha256 } from '@noble/hashes/sha256';
 import { cachedBlockCount } from './network.js';
 import { cChainParams } from './chain_params.js';
-import _ from 'lodash';
+import { cloneDeep } from 'lodash/cloneDeep';
 
 export default class bitjs {
     static get pub() {
@@ -96,7 +96,7 @@ export default class bitjs {
         }
         /* generate the transaction hash to sign from a transaction input */
         transactionHash(index, sigHashType) {
-            let clone = bitjs.clone(this);
+            let clone = cloneDeep(this);
             const shType = sigHashType || 1;
 
             /* black out all other ins, except this one */
@@ -312,11 +312,6 @@ export default class bitjs {
     static bytesToNum(bytes) {
         if (bytes.length == 0) return 0;
         else return bytes[0] + 256 * bitjs.bytesToNum(bytes.slice(1));
-    }
-
-    /* clone an object */
-    static clone(obj) {
-        return _.cloneDeep(obj);
     }
 
     static isValidDestination(address, base58Prefix) {

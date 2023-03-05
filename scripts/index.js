@@ -1,5 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '@fortawesome/fontawesome-free/css/all.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 import '../assets/style/style.css';
 
 import 'bootstrap';
@@ -30,6 +30,7 @@ export {
     checkVanity,
     toggleDropDown,
     unblurPrivKey,
+    toggleBottomMenu,
 } from './global.js';
 export { generateWallet, getNewAddress, importWallet } from './wallet.js';
 export { toggleTestnet, toggleDebug } from './settings.js';

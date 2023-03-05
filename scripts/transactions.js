@@ -68,18 +68,6 @@ export async function createTxGUI() {
     )
         return;
 
-    // Clear the inputs on 'Continue'
-    if (doms.domGenIt.innerHTML === 'Continue') {
-        doms.domGenIt.innerHTML = 'Send Transaction';
-        doms.domTxOutput.innerHTML = '';
-        doms.domHumanReadable.innerHTML = '';
-        doms.domValue1s.value = '';
-        doms.domAddress1s.value = '';
-        doms.domReqDesc.value = '';
-        doms.domReqDisplay.style.display = 'none';
-        return;
-    }
-
     // Sanity check the address
     const address = doms.domAddress1s.value.trim();
 
@@ -98,7 +86,9 @@ export async function createTxGUI() {
         );
 
     // Sanity check the amount
-    let nValue = Math.round(Number(doms.domValue1s.value.trim()) * COIN);
+    let nValue = Math.round(
+        Number(doms.domSendAmountCoins.value.trim()) * COIN
+    );
     if (nValue <= 0 || isNaN(nValue))
         return createAlert(
             'warning',

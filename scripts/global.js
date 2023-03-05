@@ -35,7 +35,6 @@ export let doms = {};
 
 export function start() {
     doms = {
-        domStart: document.getElementById('start'),
         domInstall: document.getElementById('installTab'),
         domNavbarToggler: document.getElementById('navbarToggler'),
         domGuiStaking: document.getElementById('guiStaking'),
@@ -181,7 +180,6 @@ export function start() {
     };
     i18nStart();
     loadImages();
-    doms.domStart.click();
 
     // Register native app service
     registerWorker();

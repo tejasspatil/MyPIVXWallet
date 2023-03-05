@@ -63,15 +63,16 @@ export function start() {
         ),
         domGuiDelegateAmount: document.getElementById('delegateAmount'),
         domGuiUndelegateAmount: document.getElementById('undelegateAmount'),
-        domTxTab: document.getElementById('txTab'),
         domStakeTab: document.getElementById('stakeTab'),
-        domsendNotice: document.getElementById('sendNotice'),
-        domSimpleTXs: document.getElementById('simpleTransactions'),
-        domSimpleTXsDropdown: document.getElementById(
-            'simpleTransactionsDropdown'
-        ),
         domAddress1s: document.getElementById('address1s'),
-        domValue1s: document.getElementById('value1s'),
+        domSendAmountCoins: document.getElementById('sendAmountCoins'),
+        domSendAmountCoinsTicker: document.getElementById(
+            'sendAmountCoinsTicker'
+        ),
+        domSendAmountValue: document.getElementById('sendAmountValue'),
+        domSendAmountValueCurrency: document.getElementById(
+            'sendAmountValueCurrency'
+        ),
         domGuiViewKey: document.getElementById('guiViewKey'),
         domModalQR: document.getElementById('ModalQR'),
         domModalQrLabel: document.getElementById('ModalQRLabel'),
@@ -123,7 +124,6 @@ export function start() {
         domGuiAddress: document.getElementById('guiAddress'),
         domGenIt: document.getElementById('genIt'),
         domHumanReadable: document.getElementById('HumanReadable'),
-        domTxOutput: document.getElementById('transactionFinal'),
         domReqDesc: document.getElementById('reqDesc'),
         domReqDisplay: document.getElementById('reqDescDisplay'),
         domIdenticon: document.getElementById('identicon'),
@@ -144,6 +144,7 @@ export function start() {
         domMnemonicModalButton: document.getElementById(
             'modalMnemonicConfirmButton'
         ),
+        domExportPrivateKey: document.getElementById('exportPrivateKeyText'),
         domExportWallet: document.getElementById('guiExportWalletItem'),
         domWipeWallet: document.getElementById('guiWipeWallet'),
         domRestoreWallet: document.getElementById('guiRestoreWallet'),
@@ -177,27 +178,41 @@ export function start() {
         domExplorerSelect: document.getElementById('explorer'),
         domNodeSelect: document.getElementById('node'),
         domTranslationSelect: document.getElementById('translation'),
+        domBlackBack: document.getElementById('blackBack'),
     };
     i18nStart();
     loadImages();
+
+    // Register Input Pair events
+    doms.domSendAmountCoins.oninput = () => {
+        updateAmountInputPair(
+            doms.domSendAmountCoins,
+            doms.domSendAmountValue,
+            true
+        );
+    };
+    doms.domSendAmountValue.oninput = () => {
+        updateAmountInputPair(
+            doms.domSendAmountCoins,
+            doms.domSendAmountValue,
+            false
+        );
+    };
 
     // Register native app service
     registerWorker();
 
     // Configure Identicon
     jdenticon.configure();
+
     // URL-Query request processing
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    let requestTo;
-    let requestAmount;
-    // Check for a payment request
-    if (urlParams.has('pay') && urlParams.has('amount')) {
-        requestTo = urlParams.get('pay');
-        requestAmount = parseFloat(urlParams.get('amount'));
-        console.log(requestTo + ' ' + requestAmount);
-        // We have our payment request info, wait until the page is fully loaded then display the payment request via .onload
-    }
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Check for a payment request address
+    const reqTo = urlParams.has('pay') ? urlParams.get('pay') : '';
+
+    // Check for a payment request amount
+    const reqAmount = urlParams.has('amount') ? parseFloat(urlParams.get('amount')) : 0;
 
     // Customise the UI if a saved wallet exists
     if (hasEncryptedWallet()) {
@@ -216,10 +231,10 @@ export function start() {
     }
 
     // Payment processor redirect
-    if (requestTo && requestAmount) {
+    if (reqTo.length || reqAmount > 0) {
         guiPreparePayment(
-            requestTo,
-            requestAmount,
+            reqTo,
+            reqAmount,
             urlParams.has('desc') ? urlParams.get('desc') : ''
         );
     }
@@ -302,14 +317,17 @@ export function getBalance(updateGUI = false) {
                 'en-gb',
                 cLocale
             );
+
+            // Update the Dashboard currency
             doms.domGuiBalanceValueCurrency.innerText =
                 strCurrency.toUpperCase();
-        });
 
-        // Add a notice to the Send page if balance is lacking
-        doms.domsendNotice.innerHTML = nBalance
-            ? ''
-            : '<div class="alert alert-danger" role="alert"><h4>Note:</h4><h5>You don\'t have any funds, get some coins first!</h5></div>';
+            // Update the Send menu ticker and currency
+            doms.domSendAmountValueCurrency.innerText =
+                strCurrency.toUpperCase();
+            doms.domSendAmountCoinsTicker.innerText =
+                cChainParams.current.TICKER;
+        });
     }
 
     return nBalance;
@@ -337,6 +355,13 @@ export function getStakingBalance(updateGUI = false) {
 
 export function selectMaxBalance(domValueInput, fCold = false) {
     domValueInput.value = (fCold ? getStakingBalance() : getBalance()) / COIN;
+    // Update the Send menu's value (assumption: if it's not a Cold balance, it's probably for Sending!)
+    if (!fCold)
+        updateAmountInputPair(
+            doms.domSendAmountCoins,
+            doms.domSendAmountValue,
+            true
+        );
 }
 
 export function updateStakingRewardsGUI(fCallback = false) {
@@ -378,9 +403,6 @@ async function loadImages() {
             document.getElementById('privateKeyImage').src = (
                 await import('../assets/key.png')
             ).default;
-            document.getElementById('pivxLogoSend').src = (
-                await import('../assets/pivx.png')
-            ).default;
         })(),
     ]);
 }
@@ -421,6 +443,43 @@ export function unblurPrivKey() {
     }
 }
 
+export function toggleBottomMenu(dom, ani) {
+    let element = document.getElementById(dom);
+    if (element.classList.contains(ani)) {
+        element.classList.remove(ani);
+        doms.domBlackBack.classList.remove('d-none');
+        setTimeout(() => {
+            doms.domBlackBack.classList.remove('blackBackHide');
+        }, 10);
+    } else {
+        element.classList.add(ani);
+        doms.domBlackBack.classList.add('blackBackHide');
+        setTimeout(() => {
+            doms.domBlackBack.classList.add('d-none');
+        }, 150);
+    }
+}
+
+/**
+ * Updates an Amount Input UI pair ('Coin' and 'Value' input boxes) in relation to the input box used
+ * @param {HTMLInputElement} domCoin - The DOM input for the Coin amount
+ * @param {HTMLInputElement} domValue - The DOM input for the Value amount
+ * @param {boolean} fCoinEdited - `true` if Coin, `false` if Value
+ */
+export async function updateAmountInputPair(domCoin, domValue, fCoinEdited) {
+    // Fetch the price in the user's preferred currency
+    const nPrice = await cMarket.getPrice(strCurrency);
+    if (fCoinEdited) {
+        // If the 'Coin' input is edited, then update the 'Value' input with it's converted currency
+        const nValue = Number(doms.domSendAmountCoins.value) * nPrice;
+        domValue.value = nValue <= 0 ? '' : nValue;
+    } else {
+        // If the 'Value' input is edited, then update the 'Coin' input with the reversed conversion rate
+        const nValue = Number(doms.domSendAmountValue.value) / nPrice;
+        domCoin.value = nValue <= 0 ? '' : nValue;
+    }
+}
+
 export function toClipboard(source, caller) {
     // Fetch the text/value source
     const domCopy = document.getElementById(source) || source;
@@ -449,16 +508,36 @@ export function toClipboard(source, caller) {
     }, 1000);
 }
 
-export function guiPreparePayment(strTo = '', strAmount = 0, strDesc = '') {
-    doms.domTxTab.click();
-    if (doms.domSimpleTXs.style.display === 'none')
-        doms.domSimpleTXsDropdown.click();
+/**
+ * Prompt for a payment in the GUI with pre-filled inputs
+ * @param {string} strTo - The address receiving the payment
+ * @param {number} nAmount - The payment amount in full coins
+ * @param {string} strDesc - The payment message or description
+ */
+export function guiPreparePayment(strTo = '', nAmount = 0, strDesc = '') {
     // Apply values
     doms.domAddress1s.value = strTo;
-    doms.domValue1s.value = strAmount;
+    doms.domSendAmountCoins.value = nAmount;
     doms.domReqDesc.value = strDesc;
     doms.domReqDisplay.style.display = strDesc ? 'block' : 'none';
-    doms.domValue1s.focus();
+
+    // Switch to the Dashboard
+    document.getElementById('dashboard').click();
+
+    // Open the Send menu (with a small timeout post-load to allow for CSS loading)
+    setTimeout(() => {
+        toggleBottomMenu('transferMenu', 'transferAnimation');
+    }, 300);
+
+    // Update the conversion value
+    updateAmountInputPair(
+        doms.domSendAmountCoins,
+        doms.domSendAmountValue,
+        true
+    );
+
+    // Focus on the coin input box
+    doms.domSendAmountCoins.focus();
 }
 
 export function hideAllWalletOptions() {

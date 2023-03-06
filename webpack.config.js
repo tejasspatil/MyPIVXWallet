@@ -38,6 +38,11 @@ module.exports = {
             },
         ],
     },
+    resolve: {
+        alias: {
+          'bn.js': path.join(__dirname, 'node_modules/bn.js/lib/bn.js'),
+        }
+    },
     devtool: 'source-map',
     plugins: [
         new HtmlWebpackPlugin({

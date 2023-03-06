@@ -100,7 +100,7 @@ export async function confirmPopup({ title, html, resolvePromise }) {
 
     // If there's an input in the prompt, focus the cursor upon it
     for (const domElement of doms.domConfirmModalContent.children) {
-        if (domElement.type === "text" || domElement.type === "password") {
+        if (domElement.type === 'text' || domElement.type === 'password') {
             domElement.focus();
             break;
         }

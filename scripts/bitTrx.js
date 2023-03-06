@@ -7,7 +7,7 @@ import { deriveAddress, parseWIF, getDerivationPath } from './wallet.js';
 import { sha256 } from '@noble/hashes/sha256';
 import { cachedBlockCount } from './network.js';
 import { cChainParams } from './chain_params.js';
-import { cloneDeep } from 'lodash/cloneDeep';
+import { cloneDeep } from 'lodash-es';
 
 export default class bitjs {
     static get pub() {

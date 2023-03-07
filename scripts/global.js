@@ -181,6 +181,7 @@ export function start() {
     i18nStart();
     loadImages();
 
+    // Enable all Bootstrap Tooltips
     $(function () {
         $('[data-toggle="tooltip"]').tooltip()
     });

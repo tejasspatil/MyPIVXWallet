@@ -170,8 +170,6 @@ export function start() {
         // Alert DOM element
         domAlertPos: document.getElementsByClassName('alertPositioning')[0],
         domNetwork: document.getElementById('Network'),
-        domNetworkE: document.getElementById('NetworkE'),
-        domNetworkD: document.getElementById('NetworkD'),
         domDebug: document.getElementById('Debug'),
         domTestnet: document.getElementById('Testnet'),
         domCurrencySelect: document.getElementById('currency'),
@@ -182,6 +180,10 @@ export function start() {
     };
     i18nStart();
     loadImages();
+
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    });
 
     // Register Input Pair events
     doms.domSendAmountCoins.oninput = () => {

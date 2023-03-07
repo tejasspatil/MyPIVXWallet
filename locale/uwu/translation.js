@@ -21,11 +21,6 @@ export const uwu_translation = {
     navGovernance:"",               //Governance
     navSettings: "",                //Settings
 
-    navTestnet: "Testnet Mowode On",                 //<b>Testnet Mode On</b>
-    navNetwork: "<b>Netwowork</b>",                 //<b>Network:</b>
-    navDebug: "Debuwug",                   //Debug
-    navExperimentalSync:"<b>Dangewous sync actiwated!</b>",         //<b>Experimental Sync Active</b>
-
     // Footer
     footerBuiltWithPivxLabs: "Built with wuv by PIVX Wabs❣",    //Built with 💜 by PIVX Labs
 

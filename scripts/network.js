@@ -16,10 +16,7 @@ export function disableNetwork() {
 
 export function toggleNetwork() {
     networkEnabled = !networkEnabled;
-    //TRANSLATION CHANGE
-    //doms.domNetwork.innerHTML = '<b>Network:</b> ' + (networkEnabled ? 'Enabled' : 'Disabled');
-    doms.domNetworkE.style.display = networkEnabled ? '' : 'none';
-    doms.domNetworkD.style.display = networkEnabled ? 'none' : '';
+    doms.domNetwork.innerHTML = '<i class="fa-solid fa-' + (networkEnabled ? 'wifi' : 'ban') + '"></i>';
     return networkEnabled;
 }
 

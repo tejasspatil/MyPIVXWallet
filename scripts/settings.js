@@ -68,7 +68,8 @@ export let cAnalyticsLevel = arrAnalytics[2];
 // --- DOM Cache
 export function start() {
     // Initialise status icons as their default variables
-    doms.domNetwork.innerHTML = '<i class="fa-solid fa-' + (networkEnabled ? 'wifi' : 'ban') + '"></i>';
+    doms.domNetwork.innerHTML =
+        '<i class="fa-solid fa-' + (networkEnabled ? 'wifi' : 'ban') + '"></i>';
     doms.domTestnet.style.display = cChainParams.current.isTestnet
         ? ''
         : 'none';

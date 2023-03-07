@@ -183,7 +183,7 @@ export function start() {
 
     // Enable all Bootstrap Tooltips
     $(function () {
-        $('[data-toggle="tooltip"]').tooltip()
+        $('[data-toggle="tooltip"]').tooltip();
     });
 
     // Register Input Pair events
@@ -215,7 +215,9 @@ export function start() {
     const reqTo = urlParams.has('pay') ? urlParams.get('pay') : '';
 
     // Check for a payment request amount
-    const reqAmount = urlParams.has('amount') ? parseFloat(urlParams.get('amount')) : 0;
+    const reqAmount = urlParams.has('amount')
+        ? parseFloat(urlParams.get('amount'))
+        : 0;
 
     // Customise the UI if a saved wallet exists
     if (hasEncryptedWallet()) {

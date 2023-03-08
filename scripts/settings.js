@@ -67,10 +67,9 @@ export let cAnalyticsLevel = arrAnalytics[2];
 
 // --- DOM Cache
 export function start() {
-    //TRANSLATIONS
-    //to make translations work we need to change it so that we just enable or disable the visibility of the text
-    doms.domNetworkE.style.display = networkEnabled ? '' : 'none';
-    doms.domNetworkD.style.display = networkEnabled ? 'none' : '';
+    // Initialise status icons as their default variables
+    doms.domNetwork.innerHTML =
+        '<i class="fa-solid fa-' + (networkEnabled ? 'wifi' : 'ban') + '"></i>';
     doms.domTestnet.style.display = cChainParams.current.isTestnet
         ? ''
         : 'none';
@@ -320,8 +319,6 @@ export function toggleTestnet() {
 
 export function toggleDebug() {
     debug = !debug;
-    //TRANSLATION CHANGES
-    //doms.domDebug.innerHTML = debug ? '<b>DEBUG MODE ON</b>' : '';
     doms.domDebug.style.display = debug ? '' : 'none';
 }
 

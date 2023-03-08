@@ -170,8 +170,6 @@ export function start() {
         // Alert DOM element
         domAlertPos: document.getElementsByClassName('alertPositioning')[0],
         domNetwork: document.getElementById('Network'),
-        domNetworkE: document.getElementById('NetworkE'),
-        domNetworkD: document.getElementById('NetworkD'),
         domDebug: document.getElementById('Debug'),
         domTestnet: document.getElementById('Testnet'),
         domCurrencySelect: document.getElementById('currency'),
@@ -182,6 +180,11 @@ export function start() {
     };
     i18nStart();
     loadImages();
+
+    // Enable all Bootstrap Tooltips
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
 
     // Register Input Pair events
     doms.domSendAmountCoins.oninput = () => {
@@ -212,7 +215,9 @@ export function start() {
     const reqTo = urlParams.has('pay') ? urlParams.get('pay') : '';
 
     // Check for a payment request amount
-    const reqAmount = urlParams.has('amount') ? parseFloat(urlParams.get('amount')) : 0;
+    const reqAmount = urlParams.has('amount')
+        ? parseFloat(urlParams.get('amount'))
+        : 0;
 
     // Customise the UI if a saved wallet exists
     if (hasEncryptedWallet()) {

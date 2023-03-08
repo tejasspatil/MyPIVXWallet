@@ -98,6 +98,14 @@ export async function confirmPopup({ title, html, resolvePromise }) {
     // Set content display
     doms.domConfirmModalContent.innerHTML = html;
 
+    // If there's an input in the prompt, focus the cursor upon it
+    for (const domElement of doms.domConfirmModalContent.children) {
+        if (domElement.type === 'text' || domElement.type === 'password') {
+            domElement.focus();
+            break;
+        }
+    }
+
     // Wait for the promise to resolve OR create a new one which resolves upon a modal button click
     resolvePromise =
         resolvePromise ||

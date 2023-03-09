@@ -21,11 +21,6 @@ export const en_translation = {
     navGovernance:"Governance",               //
     navSettings: "Settings",                //
 
-    navTestnet: "<b>Testnet Mode On</b>",                 //
-    navNetwork: "<b>Network:</b>",                 //
-    navDebug: "Debug",                   //
-    navExperimentalSync:"<b>Experimental Sync Active</b>",         //
-
     // Footer
     footerBuiltWithPivxLabs: "Built with 💜 by PIVX Labs",    //
 

@@ -170,8 +170,6 @@ export function start() {
         // Alert DOM element
         domAlertPos: document.getElementsByClassName('alertPositioning')[0],
         domNetwork: document.getElementById('Network'),
-        domNetworkE: document.getElementById('NetworkE'),
-        domNetworkD: document.getElementById('NetworkD'),
         domDebug: document.getElementById('Debug'),
         domTestnet: document.getElementById('Testnet'),
         domCurrencySelect: document.getElementById('currency'),
@@ -182,6 +180,11 @@ export function start() {
     };
     i18nStart();
     loadImages();
+
+    // Enable all Bootstrap Tooltips
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
 
     // Register Input Pair events
     doms.domSendAmountCoins.oninput = () => {
@@ -212,7 +215,9 @@ export function start() {
     const reqTo = urlParams.has('pay') ? urlParams.get('pay') : '';
 
     // Check for a payment request amount
-    const reqAmount = urlParams.has('amount') ? parseFloat(urlParams.get('amount')) : 0;
+    const reqAmount = urlParams.has('amount')
+        ? parseFloat(urlParams.get('amount'))
+        : 0;
 
     // Customise the UI if a saved wallet exists
     if (hasEncryptedWallet()) {
@@ -605,15 +610,17 @@ async function govVote(hash, voteCode) {
     }
 }
 
+/**
+ * Start a Masternode via a signed network broadcast
+ * @param {boolean} fRestart - Whether this is a Restart or a first Start
+ */
 export async function startMasternode(fRestart = false) {
     if (localStorage.getItem('masternode')) {
-        if (masterKey.isViewOnly) {
-            return createAlert(
-                'warning',
-                "Can't start masternode in view only mode",
-                6000
-            );
-        }
+        if (
+            masterKey.isViewOnly &&
+            !(await restoreWallet('Unlock to start your Masternode!'))
+        )
+            return;
         const cMasternode = new Masternode(
             JSON.parse(localStorage.getItem('masternode'))
         );
@@ -1058,18 +1065,41 @@ export async function wipePrivateData() {
     }
 }
 
-export async function restoreWallet() {
+/**
+ * Prompt the user in the GUI to unlock their wallet
+ * @param {string} strReason - An optional reason for the unlock
+ * @returns {Promise<boolean>} - If the unlock was successful or rejected
+ */
+export async function restoreWallet(strReason = '') {
+    // Build up the UI elements based upon conditions for the unlock prompt
+    let strHTML = '';
+
+    // If there's a reason given; display it as a sub-text
+    strHTML += `<p style="opacity: 0.75">${strReason}</p>`;
+
+    // Prompt the user
     if (
         await confirmPopup({
             title: 'Unlock your wallet',
-            html: '<input type="password" id="restoreWalletPassword" placeholder="Wallet password">',
+            html: `${strHTML}<input type="password" id="restoreWalletPassword" placeholder="Wallet password" style="text-align: center;">`,
         })
     ) {
-        const password = document.getElementById('restoreWalletPassword').value;
-        if (await decryptWallet(password)) {
+        // Attempt to unlock the wallet with the provided password
+        const strPassword = document.getElementById(
+            'restoreWalletPassword'
+        ).value;
+        if (await decryptWallet(strPassword)) {
             doms.domRestoreWallet.hidden = true;
             doms.domWipeWallet.hidden = false;
+            // Wallet is unlocked!
+            return true;
+        } else {
+            // Password is invalid
+            return false;
         }
+    } else {
+        // User rejected the unlock
+        return false;
     }
 }
 

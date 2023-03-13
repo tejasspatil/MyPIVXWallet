@@ -398,6 +398,23 @@ export function updateStakingRewardsGUI(fCallback = false) {
     doms.domStakingRewardsList.innerHTML = strList;
 }
 
+/**
+ * Open the Explorer in a new tab for the loaded master public key
+ */
+export async function openExplorer() {
+    if (masterKey.isHD) {
+        const derivationPath = getDerivationPath(masterKey.isHardwareWallet)
+            .split('/')
+            .slice(0, 4)
+            .join('/');
+        const xpub = await masterKey.getxpub(derivationPath);
+        window.open(cExplorer.url + '/xpub/' + xpub, '_blank');
+    } else {
+        const address = await masterKey.getAddress();
+        window.open(cExplorer.url + '/address/' + address, '_blank');
+    }
+}
+
 async function loadImages() {
     // Promise.all is useless since we only need to load one image, but we might need to load more in the future
     Promise.all([

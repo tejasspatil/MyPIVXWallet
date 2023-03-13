@@ -8,6 +8,7 @@ import {
     importWallet,
     encryptWallet,
     decryptWallet,
+    getDerivationPath,
 } from './wallet.js';
 import {
     submitAnalytics,

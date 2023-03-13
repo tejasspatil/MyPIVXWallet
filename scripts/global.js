@@ -8,6 +8,7 @@ import {
     importWallet,
     encryptWallet,
     decryptWallet,
+    getDerivationPath,
 } from './wallet.js';
 import {
     submitAnalytics,
@@ -396,6 +397,23 @@ export function updateStakingRewardsGUI(fCallback = false) {
     // UpdateDOMS.DOM
     doms.domStakingRewardsTitle.innerHTML = `Staking Rewards: ≥${nRewards} ${cChainParams.current.TICKER}`;
     doms.domStakingRewardsList.innerHTML = strList;
+}
+
+/**
+ * Open the Explorer in a new tab for the loaded master public key
+ */
+export async function openExplorer() {
+    if (masterKey.isHD) {
+        const derivationPath = getDerivationPath(masterKey.isHardwareWallet)
+            .split('/')
+            .slice(0, 4)
+            .join('/');
+        const xpub = await masterKey.getxpub(derivationPath);
+        window.open(cExplorer.url + '/xpub/' + xpub, '_blank');
+    } else {
+        const address = await masterKey.getAddress();
+        window.open(cExplorer.url + '/address/' + address, '_blank');
+    }
 }
 
 async function loadImages() {

@@ -560,9 +560,6 @@ export async function importWallet({
                         // Lastly, attempt to parse as a WIF private key
                         const pkBytes = parseWIF(privateImportValue);
 
-                        // Hide the 'new address' button, since non-HD wallets are essentially single-address MPW wallets
-                        doms.domNewAddress.style.display = 'none';
-
                         // Import the raw private key
                         masterKey = new LegacyMasterKey({ pkBytes });
                     }
@@ -587,6 +584,9 @@ export async function importWallet({
                 doms.domRestoreWallet.hidden = false;
             }
         }
+
+        // For non-HD wallets: hide the 'new address' button, since these are essentially single-address MPW wallets
+        if (!masterKey.isHD) doms.domNewAddress.style.display = 'none';
 
         getNewAddress({ updateGUI: true });
         // Display Text

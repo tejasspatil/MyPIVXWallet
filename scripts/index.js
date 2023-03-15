@@ -4,6 +4,7 @@ import '../assets/style/style.css';
 
 import 'bootstrap';
 import { start } from './global.js';
+import { getNetwork } from './network.js';
 
 window.onload = start;
 
@@ -32,6 +33,7 @@ export {
     toggleDropDown,
     unblurPrivKey,
     toggleBottomMenu,
+    updateStakingRewardsGUI,
 } from './global.js';
 export { generateWallet, getNewAddress, importWallet } from './wallet.js';
 export { toggleTestnet, toggleDebug } from './settings.js';
@@ -43,4 +45,6 @@ export {
     createMasternode,
 } from './transactions.js';
 export { hexToBytes, bytesToHex, dSHA256 } from './utils.js';
-export { toggleNetwork } from './network.js';
+export { getNetwork } from './network.js';
+const toggleNetwork = () => getNetwork().toggle();
+export { toggleNetwork };

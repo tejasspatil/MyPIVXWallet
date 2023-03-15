@@ -10,13 +10,7 @@ import {
     decryptWallet,
     getDerivationPath,
 } from './wallet.js';
-import {
-    submitAnalytics,
-    networkEnabled,
-    getBlockCount,
-    arrRewards,
-    getStakingRewards,
-} from './network.js';
+import { getNetwork } from './network.js';
 import {
     start as settingsStart,
     cExplorer,
@@ -31,6 +25,7 @@ import { decrypt } from './aes-gcm.js';
 import { registerWorker } from './native.js';
 import { refreshPriceDisplay } from './prices.js';
 import { Address6 } from 'ip-address';
+import { getEventEmitter } from './event_bus.js';
 
 export let doms = {};
 
@@ -248,13 +243,52 @@ export function start() {
         );
     }
 
-    // If allowed by settings: submit a simple 'hit' (app load) to Labs Analytics
-    submitAnalytics('hit');
-    setInterval(refreshChainData, 15000);
+    subscribeToNetworkEvents();
+
     doms.domPrefix.value = '';
     doms.domPrefixNetwork.innerText =
         cChainParams.current.PUBKEY_PREFIX.join(' or ');
     settingsStart();
+    // If allowed by settings: submit a simple 'hit' (app load) to Labs Analytics
+    getNetwork().submitAnalytics('hit');
+    setInterval(refreshChainData, 15000);
+}
+
+function subscribeToNetworkEvents() {
+    getEventEmitter().on('network-toggle', (value) => {
+        doms.domNetwork.innerHTML =
+            '<i class="fa-solid fa-' + (value ? 'wifi' : 'ban') + '"></i>';
+    });
+
+    getEventEmitter().on('sync-status', (value) => {
+        switch (value) {
+            case 'start':
+                // Play reload anim
+                doms.domBalanceReload.classList.add('playAnim');
+                doms.domBalanceReloadStaking.classList.add('playAnim');
+                break;
+            case 'stop':
+                doms.domBalanceReload.classList.remove('playAnim');
+                doms.domBalanceReloadStaking.classList.remove('playAnim');
+                break;
+        }
+    });
+
+    getEventEmitter().on('transaction-sent', (success, result) => {
+        if (success) {
+            doms.domAddress1s.value = '';
+            doms.domSendAmountCoins.innerHTML = '';
+            createAlert(
+                'success',
+                `Transaction sent!<br>${result}`,
+                result ? 1250 + result.length * 50 : 3000
+            );
+            // If allowed by settings: submit a simple 'tx' ping to Labs Analytics
+            getNetwork().submitAnalytics('transaction');
+        } else {
+            createAlert('warning', 'Transaction Failed!', 1250);
+        }
+    });
 }
 
 // WALLET STATE DATA
@@ -373,12 +407,14 @@ export function selectMaxBalance(domValueInput, fCold = false) {
         );
 }
 
-export function updateStakingRewardsGUI(fCallback = false) {
-    if (!arrRewards.length) {
-        // This ensures we don't spam network requests, since if a network callback says we have no stakes; no point checking again!
-        if (!fCallback) getStakingRewards();
-        return;
+export async function updateStakingRewardsGUI() {
+    const network = getNetwork();
+    const arrRewards = await network.getStakingRewards();
+    if (network.areRewardsComplete) {
+        // Hide the load more button
+        doms.domGuiStakingLoadMore.style.display = 'none';
     }
+
     //DOMS.DOM-optimised list generation
     const strList = arrRewards
         .map(
@@ -1421,18 +1457,14 @@ async function refreshMasternodeData(cMasternode, fAlert = false) {
 
 export function refreshChainData() {
     // If in offline mode: don't sync ANY data or connect to the internet
-    if (!networkEnabled)
+    if (!getNetwork().enabled)
         return console.warn(
             'Offline mode active: For your security, the wallet will avoid ALL internet requests.'
         );
     if (!masterKey) return;
 
-    // Play reload anim
-    doms.domBalanceReload.classList.add('playAnim');
-    doms.domBalanceReloadStaking.classList.add('playAnim');
-
     // Fetch block count + UTXOs
-    getBlockCount();
+    getNetwork().getBlockCount();
     getBalance(true);
 
     // Fetch pricing data

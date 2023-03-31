@@ -890,6 +890,8 @@ export async function guiImportWallet() {
             localStorage.setItem('encwif', strPrivKey);
             return importWallet({
                 newWif: strDecWIF,
+                // Save the public key to disk for future View Only mode post-decryption
+                fSavePublicKey: true
             });
         }
     }

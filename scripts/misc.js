@@ -3,7 +3,7 @@ import { doms } from './global.js';
 import qrcode from 'qrcode-generator';
 import bs58 from 'bs58';
 import { cChainParams } from './chain_params';
-import { hexToBytes, bytesToHex } from './utils.js';
+import { bytesToHex, dSHA256 } from './utils.js';
 
 /* MPW constants */
 export const pubKeyHashNetworkLen = 21;
@@ -135,59 +135,43 @@ export function createQR(strData = '', domImg, size = 4) {
     domImg.firstChild.style.borderRadius = '8px';
 }
 
-//generate private key for masternodes
-export async function generateMnPrivkey() {
-    // maximum value for a decoded private key
-    let max_decoded_value =
+/**
+ * Generate an encoded private key for masternodes
+ */
+export function generateMnPrivkey() {
+    // Maximum value for a decoded private key
+    const max_decoded_value =
         115792089237316195423570985008687907852837564279074904382605163141518161494337n;
-    let valid = false;
-    let priv_key = 0;
-    while (!valid) {
-        priv_key = bytesToHex(getSafeRand(32));
-        let decoded_priv_key = BigInt('0x' + priv_key);
 
+    // Generate a key
+    let privkey;
+    while (true) {
+        privkey = getSafeRand(32);
+
+        // Check if the private key is valid
+        const decoded_priv_key = BigInt('0x' + bytesToHex(privkey));
         if (0 < decoded_priv_key && decoded_priv_key < max_decoded_value) {
-            valid = true;
+            break;
         }
     }
-    return await convertMnPrivKeyFromHex(priv_key);
+
+    // Return the network-encoded key
+    return encodeMasternodePrivkey(privkey);
 }
 
-export async function convertMnPrivKeyFromHex(hexStr) {
-    //prefixes
-    let WIF_PREFIX = 212;
-    let TESTNET_WIF_PREFIX = 239;
-    let base58_secret = cChainParams.current.isTestnet
-        ? TESTNET_WIF_PREFIX
-        : WIF_PREFIX;
+/**
+ * Encode private key bytes in to a Masternode private key
+ * @param {Array<number>} bytes - Private key bytes
+ */
+export function encodeMasternodePrivkey(bytes) {
+    // Prefix the network byte with the private key
+    const data = [cChainParams.current.SECRET_KEY, ...bytes];
 
-    //convert the hexStr+ initial prefix to byte array hexToBytes(string)
-    let data = [...hexToBytes(hexStr)];
-    data.unshift(base58_secret);
+    // Generate the checksum with double sha256 hashing
+    const checksum = dSHA256(data).slice(0, 4);
 
-    //generate the checksum with double sha256 hashing
-    let checksum = hexToBytes(await hash(hexToBytes(await hash(data)))).slice(
-        0,
-        4
-    );
-
-    //concatenate data and checksum
-    for (const byte of checksum) {
-        data.push(byte);
-    }
-
-    return bs58.encode(data);
-}
-
-//sha256 a bytearray and return the hash in hexadecimal
-export async function hash(byteArray) {
-    const utf8 = new Uint8Array(byteArray);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray
-        .map((bytes) => bytes.toString(16).padStart(2, '0'))
-        .join('');
-    return hashHex;
+    // Concatenate the checksum and encode the private key as Base58
+    return bs58.encode([...data, ...checksum]);
 }
 
 export function sanitizeHTML(text) {

@@ -381,10 +381,9 @@ export async function createMasternode() {
     // Generate a Masternode private key if the user wants a self-hosted masternode
     const fGeneratePrivkey = doms.domMnCreateType.value === 'VPS';
     if (fGeneratePrivkey) {
-        const masternodePrivateKey = await generateMnPrivkey();
         await confirmPopup({
             title: ALERTS.CONFIRM_POPUP_MN_P_KEY,
-            html: masternodePrivateKey + ALERTS.CONFIRM_POPUP_MN_P_KEY_HTML,
+            html: generateMnPrivkey() + ALERTS.CONFIRM_POPUP_MN_P_KEY_HTML,
         });
     }
     createAlert(

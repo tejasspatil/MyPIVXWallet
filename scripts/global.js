@@ -20,7 +20,13 @@ import {
     strCurrency,
 } from './settings.js';
 import { createAndSendTransaction } from './transactions.js';
-import { createAlert, confirmPopup, sanitizeHTML, MAP_B58, isBase64 } from './misc.js';
+import {
+    createAlert,
+    confirmPopup,
+    sanitizeHTML,
+    MAP_B58,
+    isBase64,
+} from './misc.js';
 import { cChainParams, COIN, MIN_PASS_LENGTH } from './chain_params.js';
 import { decrypt } from './aes-gcm.js';
 
@@ -856,7 +862,7 @@ export function accessOrImportWallet() {
 }
 /**
  * An event function triggered apon private key UI input changes
- * 
+ *
  * Useful for adjusting the input types or displaying password prompts depending on the import scheme
  */
 export function onPrivateKeyChanged() {
@@ -865,7 +871,9 @@ export function onPrivateKeyChanged() {
     // and it doesn't have any spaces (would be a mnemonic seed)
     const fContainsSpaces = doms.domPrivKey.value.includes(' ');
     doms.domPrivKeyPassword.hidden =
-        (doms.domPrivKey.value.length < 128 || !isBase64(doms.domPrivKey.value)) && !fContainsSpaces;
+        (doms.domPrivKey.value.length < 128 ||
+            !isBase64(doms.domPrivKey.value)) &&
+        !fContainsSpaces;
 
     doms.domPrivKeyPassword.placeholder = fContainsSpaces
         ? 'Optional Passphrase'
@@ -878,7 +886,8 @@ export function onPrivateKeyChanged() {
  * Imports a wallet using the GUI input, handling decryption via UI
  */
 export async function guiImportWallet() {
-    const fEncrypted = doms.domPrivKey.value.length >= 128 && isBase64(doms.domPrivKey.value);
+    const fEncrypted =
+        doms.domPrivKey.value.length >= 128 && isBase64(doms.domPrivKey.value);
 
     // If we are in testnet: prompt an import
     if (cChainParams.current.isTestnet) return importWallet();
@@ -898,7 +907,7 @@ export async function guiImportWallet() {
             return importWallet({
                 newWif: strDecWIF,
                 // Save the public key to disk for future View Only mode post-decryption
-                fSavePublicKey: true
+                fSavePublicKey: true,
             });
         }
     }

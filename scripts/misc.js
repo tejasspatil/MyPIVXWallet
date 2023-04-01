@@ -206,19 +206,19 @@ export function isBase64(str) {
 
     // Check if the string contains only Base64 characters:
     if (!base64Regex.test(str)) {
-      return false;
+        return false;
     }
 
     // Check if the length is a multiple of 4 (required for Base64):
     if (str.length % 4 !== 0) {
-      return false;
+        return false;
     }
 
     // Try decoding the Base64 string to check for errors:
     try {
-      atob(str);
+        atob(str);
     } catch (e) {
-      return false;
+        return false;
     }
 
     // The string is likely Base64-encoded:

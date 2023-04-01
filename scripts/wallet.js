@@ -636,11 +636,13 @@ export async function importWallet({
                 masterKey.isViewOnly
             )
         ) {
-            if (// If the wallet was internally imported (not UI pasted), like via vanity, display the encryption prompt
-                ((fRaw && newWif.length) || newWif) && !hasEncryptedWallet() ||
+            if (
+                // If the wallet was internally imported (not UI pasted), like via vanity, display the encryption prompt
+                (((fRaw && newWif.length) || newWif) &&
+                    !hasEncryptedWallet()) ||
                 // If the wallet was pasted and is an unencrypted key, then display the encryption prompt
                 !hasEncryptedWallet()
-                ) {
+            ) {
                 doms.domGenKeyWarning.style.display = 'block';
             } else if (hasEncryptedWallet()) {
                 // If the wallet was pasted and is an encrypted import, display the lock wallet UI
@@ -782,7 +784,7 @@ export async function decryptWallet(strPassword = '') {
             newWif: strDecWIF,
             skipConfirmation: true,
             // Save the public key to disk for View Only mode
-            fSavePublicKey: true
+            fSavePublicKey: true,
         });
         return true;
     }

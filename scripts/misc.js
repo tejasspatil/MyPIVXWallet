@@ -138,40 +138,12 @@ export function createQR(strData = '', domImg, size = 4) {
 /**
  * Generate an encoded private key for masternodes
  */
-export function generateMnPrivkey() {
-    // Maximum value for a decoded private key
-    const max_decoded_value =
-        115792089237316195423570985008687907852837564279074904382605163141518161494337n;
+export function generateMasternodePrivkey() {
+    // Prefix the network byte with the private key (32 random bytes)
+    const data = [cChainParams.current.SECRET_KEY, ...getSafeRand(32)];
 
-    // Generate a key
-    let privkey;
-    while (true) {
-        privkey = getSafeRand(32);
-
-        // Check if the private key is valid
-        const decoded_priv_key = BigInt('0x' + bytesToHex(privkey));
-        if (0 < decoded_priv_key && decoded_priv_key < max_decoded_value) {
-            break;
-        }
-    }
-
-    // Return the network-encoded key
-    return encodeMasternodePrivkey(privkey);
-}
-
-/**
- * Encode private key bytes in to a Masternode private key
- * @param {Array<number>} bytes - Private key bytes
- */
-export function encodeMasternodePrivkey(bytes) {
-    // Prefix the network byte with the private key
-    const data = [cChainParams.current.SECRET_KEY, ...bytes];
-
-    // Generate the checksum with double sha256 hashing
-    const checksum = dSHA256(data).slice(0, 4);
-
-    // Concatenate the checksum and encode the private key as Base58
-    return bs58.encode([...data, ...checksum]);
+    // Compute and concatenate the checksum, then encode the private key as Base58
+    return bs58.encode([...data, ...dSHA256(data).slice(0, 4)]);
 }
 
 export function sanitizeHTML(text) {

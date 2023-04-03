@@ -21,7 +21,7 @@ import {
 import { Mempool, UTXO } from './mempool.js';
 import { getNetwork } from './network.js';
 import { cChainParams, COIN, COIN_DECIMALS } from './chain_params.js';
-import { createAlert, generateMnPrivkey, confirmPopup } from './misc.js';
+import { createAlert, generateMasternodePrivkey, confirmPopup } from './misc.js';
 import { bytesToHex, hexToBytes, dSHA256 } from './utils.js';
 
 function validateAmount(nAmountSats, nMinSats = 10000) {
@@ -383,7 +383,7 @@ export async function createMasternode() {
     if (fGeneratePrivkey) {
         await confirmPopup({
             title: ALERTS.CONFIRM_POPUP_MN_P_KEY,
-            html: generateMnPrivkey() + ALERTS.CONFIRM_POPUP_MN_P_KEY_HTML,
+            html: generateMasternodePrivkey() + ALERTS.CONFIRM_POPUP_MN_P_KEY_HTML,
         });
     }
     createAlert(

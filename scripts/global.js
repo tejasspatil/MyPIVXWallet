@@ -25,6 +25,8 @@ import {
     confirmPopup,
     sanitizeHTML,
     MAP_B58,
+    parseBIP21Request,
+    isValidBech32,
     isBase64,
 } from './misc.js';
 import { cChainParams, COIN, MIN_PASS_LENGTH } from './chain_params.js';
@@ -34,6 +36,7 @@ import { registerWorker } from './native.js';
 import { refreshPriceDisplay } from './prices.js';
 import { Address6 } from 'ip-address';
 import { getEventEmitter } from './event_bus.js';
+import { scanQRCode } from './scanner.js';
 
 export let doms = {};
 
@@ -80,6 +83,9 @@ export function start() {
         domGuiViewKey: document.getElementById('guiViewKey'),
         domModalQR: document.getElementById('ModalQR'),
         domModalQrLabel: document.getElementById('ModalQRLabel'),
+        domModalQRReader: document.getElementById('qrReaderModal'),
+        domQrReaderStream: document.getElementById('qrReaderStream'),
+        domCloseQrReaderBtn: document.getElementById('closeQrReader'),
         domPrefix: document.getElementById('prefix'),
         domPrefixNetwork: document.getElementById('prefixNetwork'),
         domWalletToggle: document.getElementById('wToggle'),
@@ -415,6 +421,51 @@ export function selectMaxBalance(domValueInput, fCold = false) {
         );
 }
 
+/**
+ * Prompt a QR scan for a Payment (Address or BIP21)
+ */
+export async function openSendQRScanner() {
+    const cScan = await scanQRCode();
+
+    if (!cScan || !cScan.data) return;
+
+    /* Check what data the scan contains - for the various QR request types */
+
+    // Plain address (Length and prefix matches)
+    if (
+        cScan.data.length === 34 &&
+        cChainParams.current.PUBKEY_PREFIX.includes(cScan.data[0])
+    ) {
+        return guiPreparePayment(cScan.data);
+    }
+
+    // Shield address (Valid bech32 string)
+    if (isValidBech32(cScan.data).valid) {
+        return guiPreparePayment(cScan.data);
+    }
+
+    // BIP21 Payment Request (Optional 'amount' and 'label')
+    const cBIP21Req = parseBIP21Request(cScan.data);
+    if (cBIP21Req) {
+        return guiPreparePayment(
+            cBIP21Req.address,
+            cBIP21Req.options.amount || 0,
+            cBIP21Req.options.label || ''
+        );
+    }
+
+    // No idea what this is...
+    createAlert(
+        'warning',
+        `"${cScan.data.substring(
+            0,
+            Math.min(cScan.data.length, 6)
+        )}…" is not a valid payment receiver`,
+        [],
+        7500
+    );
+}
+
 export async function updateStakingRewardsGUI() {
     const network = getNetwork();
     const arrRewards = await network.getStakingRewards();
@@ -594,10 +645,16 @@ export function guiPreparePayment(strTo = '', nAmount = 0, strDesc = '') {
     // Switch to the Dashboard
     doms.domDashboard.click();
 
-    // Open the Send menu (with a small timeout post-load to allow for CSS loading)
-    setTimeout(() => {
-        toggleBottomMenu('transferMenu', 'transferAnimation');
-    }, 300);
+    // Open the Send menu, if not already open (with a small timeout post-load to allow for CSS loading)
+    if (
+        document
+            .getElementById('transferMenu')
+            .classList.contains('transferAnimation')
+    ) {
+        setTimeout(() => {
+            toggleBottomMenu('transferMenu', 'transferAnimation');
+        }, 300);
+    }
 
     // Update the conversion value
     updateAmountInputPair(
@@ -606,8 +663,10 @@ export function guiPreparePayment(strTo = '', nAmount = 0, strDesc = '') {
         true
     );
 
-    // Focus on the coin input box
-    doms.domSendAmountCoins.focus();
+    // Focus on the coin input box (if no pre-fill was specified)
+    if (nAmount <= 0) {
+        doms.domSendAmountCoins.focus();
+    }
 }
 
 export function hideAllWalletOptions() {

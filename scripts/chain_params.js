@@ -13,6 +13,9 @@ export const MAX_ACCOUNT_GAP = 20;
 // A new encryption password must be 'at least' this long.
 export const MIN_PASS_LENGTH = 6;
 
+/** BIP21 coin prefix */
+export const BIP21_PREFIX = 'pivx';
+
 /* chainparams */
 export const cChainParams = {
     current: null,

@@ -24,6 +24,7 @@ export {
     openExplorer,
     guiEncryptWallet,
     guiPreparePayment,
+    openSendQRScanner,
     doms,
     generateVanityWallet,
     importMasternode,

@@ -2,8 +2,9 @@ import { translateAlerts } from './i18n.js';
 import { doms } from './global.js';
 import qrcode from 'qrcode-generator';
 import bs58 from 'bs58';
-import { cChainParams } from './chain_params';
-import { bytesToHex, dSHA256 } from './utils.js';
+import { bech32 } from 'bech32';
+import { BIP21_PREFIX, cChainParams } from './chain_params';
+import { dSHA256 } from './utils.js';
 
 /* MPW constants */
 export const pubKeyHashNetworkLen = 21;
@@ -133,6 +134,62 @@ export function createQR(strData = '', domImg, size = 4) {
     cQR.make();
     domImg.innerHTML = cQR.createImgTag(2, 2);
     domImg.firstChild.style.borderRadius = '8px';
+}
+
+/**
+ * Attempt to safely parse a BIP21 Payment Request
+ * @param {string} strReq - BIP21 Payment Request string
+ * @returns {object | false}
+ */
+export function parseBIP21Request(strReq) {
+    // Format should match: pivx:addr[?amount=x&label=x]
+    if (!strReq.includes(BIP21_PREFIX + ':')) return false;
+
+    const [addressPart, optionsPart] = strReq.includes('?')
+        ? strReq.split('?')
+        : [strReq, false];
+    const strAddress = addressPart.substring(BIP21_PREFIX.length + 1); // remove 'pivx:' prefix
+    let cOptions = {};
+
+    // Ensure the address is valid
+    if (
+        // Standard address
+        (strAddress.length !== 34 ||
+            !cChainParams.current.PUBKEY_PREFIX.includes(strAddress[0])) &&
+        // Shield address
+        !isValidBech32(strAddress).valid
+    ) {
+        return false;
+    }
+
+    if (optionsPart) {
+        cOptions = Object.fromEntries(
+            optionsPart
+                .split('&')
+                .map((opt) => opt.split('=').map(decodeURIComponent))
+        );
+    }
+
+    return { address: strAddress, options: cOptions };
+}
+
+/**
+ * @typedef {object} Bech32Check
+ * @property {boolean} valid - If the string is a valid bech32 address
+ * @property {object} res - The results of the bech32 decoding
+ */
+
+/**
+ * A safe bech32 wrapper for quickly checking if an address is valid
+ * @param {string} str - Bech32 Address
+ * @returns {Bech32Check} - Both the validity and decoding results
+ */
+export function isValidBech32(str) {
+    try {
+        return { valid: true, res: bech32.decode(str) };
+    } catch (e) {
+        return { valid: false, res: e };
+    }
 }
 
 /**

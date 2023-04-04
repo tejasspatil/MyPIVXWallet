@@ -167,6 +167,23 @@ button {
     transform: translate(-50%, -50%);
 }
 
+#qrReaderModal.modal {
+    z-index: 1100;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#qrReaderStream {
+    width: 100%;
+    height: 100%;
+}
+
+.scan-region-highlight-svg {
+    stroke: #6800ff !important;
+    filter: drop-shadow(0 0 3px rgb(122, 31, 255))
+}
+
 .modal {
     color: black;
 }
@@ -1483,6 +1500,19 @@ a {
     .stake-box.large-box.col-md-4 {
         padding: 10px 20px;
         width: 85% !important;
+    }
+
+    .modal-dialog {
+        max-width: 100%;
+        margin: 0;
+    }
+
+    .modal-content {
+        height: 100%;
+    }
+  
+    .modal-body {
+        overflow-y: auto;
     }
 }
 

@@ -96,6 +96,24 @@
             </div>
           </div>
         </div>
+
+        <!-- // QR Reader -->
+        <div class="modal fade" id="qrReaderModal" tabindex="-1" role="dialog" aria-labelledby="qrReaderModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content exportKeysModalColor">
+              <div class="modal-header">
+                <h5 class="modal-title" id="qrReaderModalLabel">QR Scanner</h5>
+                <button id="closeQrReader" type="button" class="close" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body center-text">
+                <video id="qrReaderStream"></video>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <br />
         <!-- // MNEMONIC MODAL -->
         <div class="modal fade" id="mnemonicModal" tabindex="-1" role="dialog" aria-labelledby="qrModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
@@ -506,7 +524,7 @@
                         <div class="input-group mb-3">
                           <input class="btn-group-input" style="font-family: monospace; " type="text" id="address1s" placeholder="Receiving address" autocomplete="nope" />
                           <div class="input-group-append">
-                            <span class="input-group-text"><i class="fa-solid fa-paste"></i></span>
+                            <span class="input-group-text ptr" onclick="MPW.openSendQRScanner()"><i class="fa-solid fa-qrcode fa-2xl"></i></span>
                           </div>
                         </div>
 

@@ -86,6 +86,12 @@ export function start() {
         domModalQRReader: document.getElementById('qrReaderModal'),
         domQrReaderStream: document.getElementById('qrReaderStream'),
         domCloseQrReaderBtn: document.getElementById('closeQrReader'),
+        domModalWalletBreakdown: document.getElementById(
+            'walletBreakdownModal'
+        ),
+        domWalletBreakdownCanvas: document.getElementById(
+            'walletBreakdownCanvas'
+        ),
         domPrefix: document.getElementById('prefix'),
         domPrefixNetwork: document.getElementById('prefixNetwork'),
         domWalletToggle: document.getElementById('wToggle'),

@@ -10,7 +10,14 @@ import {
 import { cChainParams, COIN } from './chain_params';
 import { doms, isMasternodeUTXO, mempool } from './global';
 
-Chart.register(Colors, DoughnutController, ArcElement, Legend, Tooltip, LinearScale);
+Chart.register(
+    Colors,
+    DoughnutController,
+    ArcElement,
+    Legend,
+    Tooltip,
+    LinearScale
+);
 
 /**
  * The wallet breakdown modal chart
@@ -81,13 +88,7 @@ export async function generateWalletBreakdown(arrBreakdown) {
             const x = left + width / 2 - image.width / 2;
             const y = top + height / 2 - image.height / 2;
             ctx.globalAlpha = 0.25;
-            ctx.drawImage(
-                image,
-                x,
-                y,
-                image.width,
-                image.height
-            );
+            ctx.drawImage(image, x, y, image.width, image.height);
             ctx.globalAlpha = 1;
         },
     };

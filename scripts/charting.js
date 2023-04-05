@@ -4,12 +4,13 @@ import {
     Colors,
     DoughnutController,
     Legend,
+    LinearScale,
     Tooltip,
 } from 'chart.js';
 import { cChainParams, COIN } from './chain_params';
 import { doms, isMasternodeUTXO, mempool } from './global';
 
-Chart.register(Colors, DoughnutController, ArcElement, Legend, Tooltip);
+Chart.register(Colors, DoughnutController, ArcElement, Legend, Tooltip, LinearScale);
 
 /**
  * The wallet breakdown modal chart

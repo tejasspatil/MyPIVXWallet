@@ -1180,8 +1180,8 @@ export function askForCSAddr(force = false) {
 
 export function isMasternodeUTXO(cUTXO, masternode = null) {
     const cMasternode =
-        masternode || JSON.parse(localStorage.getItem('masternode'));
-    if (cMasternode) {
+        masternode || JSON.parse(localStorage.getItem('masternode') || '{}');
+    if (cMasternode && cMasternode.collateralTxId) {
         const { collateralTxId, outidx } = cMasternode;
         return collateralTxId === cUTXO.id && cUTXO.vout === outidx;
     } else {

@@ -2288,7 +2288,7 @@ a {
 .dcWallet-topRightMenu .dropdown-move .dropdown-menu {
   backdrop-filter: blur(5px);
   background-color: rgba(88, 37, 131, 0.95);
-  border: 1px solid rgb(6 6 6 / 0%);
+  border: 1px solid hsl(273 54% 56% / 1);
 }
 
 .dcWallet-topRightMenu .dropdown-move .dropdown-menu .dropdown-item {
@@ -2539,4 +2539,8 @@ input {
     font-size:13px;
     background-color:#fff;
     border:0px;
+}
+
+.dropdown {
+    z-index:10;
 }

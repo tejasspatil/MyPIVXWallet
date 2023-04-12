@@ -91,6 +91,11 @@ button {
 
 .ptr {
     cursor: pointer;
+    transition: all .175s ease-in-out;
+}
+
+.ptr:hover {
+    opacity: 0.8;
 }
 
 .fa-stacked-ptr {
@@ -2145,6 +2150,7 @@ a {
 }
 
 .navbar-nav .nav-item span {
+  cursor: pointer;
   margin-left: 5px;
   margin-right: 5px;
   transition: all .2s ease-in-out;

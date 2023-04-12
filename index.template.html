@@ -450,6 +450,9 @@
                                   <div class="dropdown">
                                     <div class="dropdown-move">
                                       <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        <a class="dropdown-item ptr" onclick="MPW.renderWalletBreakdown()" data-toggle="modal" data-target="#walletBreakdownModal">
+                                          <i class="fa-solid fa-chart-pie"></i> Balance Breakdown
+                                        </a>
                                         <a class="dropdown-item ptr" onclick="MPW.openExplorer()">
                                           <i class="fa-solid fa-magnifying-glass"></i> View on Explorer
                                         </a>
@@ -467,7 +470,11 @@
                             </div>
 
                             <canvas id="identicon" class="innerShadow" style="width: 65px; height: 65px;" data-jdenticon-value=""></canvas><br />
-                            <span class="dcWallet-pivxBalance ptr" id="guiBalance" onclick="MPW.renderWalletBreakdown()" data-toggle="modal" data-target="#walletBreakdownModal"></span> <span id="guiBalanceTicker" class="dcWallet-pivxTicker">PIVX</span><br />
+                            <span class="ptr" onclick="MPW.renderWalletBreakdown()" data-toggle="modal" data-target="#walletBreakdownModal">
+                              <span class="dcWallet-pivxBalance" id="guiBalance"></span>
+                              <span id="guiBalanceTicker" class="dcWallet-pivxTicker">PIVX</span>
+                            </span>
+                            <br />
                             <div class="dcWallet-usdBalance">
                               <span id="guiBalanceValue" class="dcWallet-usdValue">$-</span>
                               <span id="guiBalanceValueCurrency" class="dcWallet-usdValue">USD</span>

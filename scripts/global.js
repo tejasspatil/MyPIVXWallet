@@ -86,6 +86,12 @@ export function start() {
         domModalQRReader: document.getElementById('qrReaderModal'),
         domQrReaderStream: document.getElementById('qrReaderStream'),
         domCloseQrReaderBtn: document.getElementById('closeQrReader'),
+        domModalWalletBreakdown: document.getElementById(
+            'walletBreakdownModal'
+        ),
+        domWalletBreakdownCanvas: document.getElementById(
+            'walletBreakdownCanvas'
+        ),
         domPrefix: document.getElementById('prefix'),
         domPrefixNetwork: document.getElementById('prefixNetwork'),
         domWalletToggle: document.getElementById('wToggle'),
@@ -1178,8 +1184,8 @@ export function askForCSAddr(force = false) {
 
 export function isMasternodeUTXO(cUTXO, masternode = null) {
     const cMasternode =
-        masternode || JSON.parse(localStorage.getItem('masternode'));
-    if (cMasternode) {
+        masternode || JSON.parse(localStorage.getItem('masternode') || '{}');
+    if (cMasternode && cMasternode.collateralTxId) {
         const { collateralTxId, outidx } = cMasternode;
         return collateralTxId === cUTXO.id && cUTXO.vout === outidx;
     } else {

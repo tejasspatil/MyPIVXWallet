@@ -179,6 +179,7 @@ export function start() {
         domRedeemCodeProgress: document.getElementById('redeemCodeProgress'),
         domRedeemCodeInputBox: document.getElementById('redeemCodeInputBox'),
         domRedeemCodeInput: document.getElementById('redeemCodeInput'),
+        domRedeemCodeConfirmBtn: document.getElementById('redeemCodeModalConfirmButton'),
         domConfirmModalHeader: document.getElementById('confirmModalHeader'),
         domConfirmModalTitle: document.getElementById('confirmModalTitle'),
         domConfirmModalContent: document.getElementById('confirmModalContent'),
@@ -1268,6 +1269,9 @@ export async function sweepPromoCode() {
  * @param {number} nSeconds - The seconds to wait until the full reset
  */
 function resetRedeemPromo(nSeconds = 5) {
+    // Nuke the in-memory Promo Wallet
+    cPromoWallet = null;
+
     // Reset Promo UI
     doms.domRedeemCodeInput.value = '';
     doms.domRedeemCodeGiftIcon.classList.remove('ptr');
@@ -1275,7 +1279,6 @@ function resetRedeemPromo(nSeconds = 5) {
 
     // After the specified seconds, reset the UI fully, and wipe the Promo Wallet
     setTimeout(() => {
-        cPromoWallet = null;
         doms.domRedeemCodeETA.innerHTML = '';
         doms.domRedeemCodeInputBox.style.display = '';
         doms.domRedeemCodeGiftIconBox.style.display = 'none';
@@ -1283,6 +1286,7 @@ function resetRedeemPromo(nSeconds = 5) {
         doms.domRedeemCodeGiftIcon.classList.add('fa-solid');
         doms.domRedeemCodeGiftIcon.classList.remove('fa-face-frown');
         doms.domRedeemCodeGiftIcon.classList.remove('fa-regular');
+        doms.domRedeemCodeConfirmBtn.style.display = '';
     }, nSeconds * 1000);
 }
 
@@ -1304,6 +1308,7 @@ export async function derivePromoCode(strCode) {
 
     // Hide unnecessary UI components
     doms.domRedeemCodeInputBox.style.display = 'none';
+    doms.domRedeemCodeConfirmBtn.style.display = 'none';
 
     // Display Progress data and Redeem Animations
     doms.domRedeemCodeETA.style.display = '';

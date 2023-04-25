@@ -10,6 +10,9 @@ import {
     decryptWallet,
     getNewAddress,
     getDerivationPath,
+    deriveAddress,
+    parseWIF,
+    LegacyMasterKey,
 } from './wallet.js';
 import { getNetwork } from './network.js';
 import {
@@ -19,7 +22,7 @@ import {
     cMarket,
     strCurrency,
 } from './settings.js';
-import { createAndSendTransaction } from './transactions.js';
+import { createAndSendTransaction, signTransaction } from './transactions.js';
 import {
     createAlert,
     confirmPopup,
@@ -37,6 +40,7 @@ import { refreshPriceDisplay } from './prices.js';
 import { Address6 } from 'ip-address';
 import { getEventEmitter } from './event_bus.js';
 import { scanQRCode } from './scanner.js';
+import bitjs from './bitTrx.js';
 
 export let doms = {};
 
@@ -168,6 +172,13 @@ export function start() {
         domWipeWallet: document.getElementById('guiWipeWallet'),
         domRestoreWallet: document.getElementById('guiRestoreWallet'),
         domNewAddress: document.getElementById('guiNewAddress'),
+        domRedeemCodeUse: document.getElementById('redeemCodeUse'),
+        domRedeemCodeGiftIconBox: document.getElementById('redeemCodeGiftIconBox'),
+        domRedeemCodeGiftIcon: document.getElementById('redeemCodeGiftIcon'),
+        domRedeemCodeETA: document.getElementById('redeemCodeETA'),
+        domRedeemCodeProgress: document.getElementById('redeemCodeProgress'),
+        domRedeemCodeInputBox: document.getElementById('redeemCodeInputBox'),
+        domRedeemCodeInput: document.getElementById('redeemCodeInput'),
         domConfirmModalHeader: document.getElementById('confirmModalHeader'),
         domConfirmModalTitle: document.getElementById('confirmModalTitle'),
         domConfirmModalContent: document.getElementById('confirmModalContent'),
@@ -1164,6 +1175,204 @@ export async function generateVanityWallet() {
                 'Stop (Searched ' + attempts.toLocaleString('en-GB') + ' keys)';
         }, 200);
     }
+}
+
+/**
+ * The GUI wrapper function for redeeming a Promo Code from DOM input
+ */
+export function redeemPromoCodeGUI() {
+    derivePromoCode(doms.domRedeemCodeInput.value);
+}
+
+/**
+ * @typedef {object} PromoWallet
+ * @property {string} address - The public key associated with the Promo Code
+ * @property {string} pkBytes - The private key bytes derived from the Promo Code
+ * @property {Array<BlockbookUTXO>} utxos - UTXOs associated with the Promo Code
+ */
+
+/**
+ * The global storage for temporary Promo Code wallets, this is used for sweeping funds
+ * @type {PromoWallet}
+ */
+export let cPromoWallet = null;
+
+/**
+ * Sweep an address to our own wallet, spending all it's UTXOs without change
+ * @param {Array<object>} arrUTXOs - The UTXOs belonging to the address to sweep
+ * @param {LegacyMasterKey} sweepingMasterKey - The address to sweep from
+ * @param {number} nFixedFee - An optional fixed satoshi fee
+ * @returns {Promise<string|false>} - TXID on success, false or error on failure
+ */
+export async function sweepAddress(arrUTXOs, sweepingMasterKey, nFixedFee = 0) {
+    const cTx = new bitjs.transaction();
+
+    // Load all UTXOs as inputs
+    let nTotal = 0;
+    for (const cUTXO of arrUTXOs) {
+        nTotal += cUTXO.sats;
+        cTx.addinput({
+            txid: cUTXO.id,
+            index: cUTXO.vout,
+            script: cUTXO.script,
+            path: cUTXO.path,
+        });
+    }
+
+    // Use a given fixed fee, or use the network fee if unspecified
+    const nFee = nFixedFee || getNetwork().getFee(cTx.serialize().length);
+
+    // Use a new address from our wallet to sweep the UTXOs in to
+    const strAddress = (await getNewAddress(true, false))[0];
+
+    // Sweep the full funds amount, minus the fee, leaving no change from any sweeped UTXOs
+    cTx.addoutput(strAddress, (nTotal - nFee) / COIN);
+
+    // Sign using the given Master Key, then broadcast the sweep, returning the TXID (or a failure)
+    const sign = await signTransaction(cTx, sweepingMasterKey);
+    return await getNetwork().sendTransaction(sign);
+}
+
+/**
+ * A sweep wrapper that handles the Promo UI after the sweep completes
+ */
+export async function sweepPromoCode() {
+    // Only allow clicking if there's a promo code loaded in memory
+    if (!cPromoWallet) return false;
+
+    // Convert the Promo Wallet in to a LegacyMasterkey
+    const cSweepMasterkey = new LegacyMasterKey( { pkBytes: cPromoWallet.pkBytes } );
+
+    // Perform sweep
+    const strTXID = await sweepAddress(cPromoWallet.utxos, cSweepMasterkey, 10000);
+
+    // Display the promo redeem results, then schedule a reset of the UI
+    if (strTXID) {
+        // Coins were redeemed!
+        const nAmt = (cPromoWallet.utxos.reduce((a, b) => a + b.sats, 0) - 10000) / COIN;
+        doms.domRedeemCodeETA.innerHTML = '<br><br>You redeemed <b>' + nAmt.toLocaleString('en-GB') + ' ' + cChainParams.current.TICKER + '!</b>';
+        resetRedeemPromo(15);
+    } else {
+        // Most likely; this TX was claimed very recently and a mempool conflict occurred
+        doms.domRedeemCodeETA.innerHTML = '<br><br>Oops, this code was valid, but someone may have claimed it seconds earlier!';
+        doms.domRedeemCodeGiftIcon.classList.remove('fa-gift');
+        doms.domRedeemCodeGiftIcon.classList.remove('fa-solid');
+        doms.domRedeemCodeGiftIcon.classList.add('fa-face-frown');
+        doms.domRedeemCodeGiftIcon.classList.add('fa-regular');
+        resetRedeemPromo(7.5);
+    }
+}
+
+/**
+ * Resets the 'Redeem' promo code system back to it's default state
+ * @param {number} nSeconds - The seconds to wait until the full reset
+ */
+function resetRedeemPromo(nSeconds = 5) {
+    // Reset Promo UI
+    doms.domRedeemCodeInput.value = '';
+    doms.domRedeemCodeGiftIcon.classList.remove('ptr');
+    doms.domRedeemCodeGiftIcon.classList.remove('fa-shake');
+
+    // After the specified seconds, reset the UI fully, and wipe the Promo Wallet
+    setTimeout(() => {
+        cPromoWallet = null;
+        doms.domRedeemCodeETA.innerHTML = '';
+        doms.domRedeemCodeInputBox.style.display = '';
+        doms.domRedeemCodeGiftIconBox.style.display = 'none';
+        doms.domRedeemCodeGiftIcon.classList.add('fa-gift');
+        doms.domRedeemCodeGiftIcon.classList.add('fa-solid');
+        doms.domRedeemCodeGiftIcon.classList.remove('fa-face-frown');
+        doms.domRedeemCodeGiftIcon.classList.remove('fa-regular');
+    }, nSeconds * 1000);
+}
+
+/**
+ * @type {Worker?} - The thread used for the PIVX Promos redeem process
+ */
+let promoThread = null;
+
+/**
+ * Derive a 'PIVX Promos' code with a webworker
+ * @param {string} strCode - The Promo Code to derive
+ */
+export async function derivePromoCode(strCode) {
+    // Ensure a Promo Code is not already being redeemed
+    if (promoThread) return;
+
+    // Create a new thread
+    promoThread = new Worker(new URL('./promos_worker.js', import.meta.url));
+
+    // Hide unnecessary UI components
+    doms.domRedeemCodeInputBox.style.display = 'none';
+
+    // Display Progress data and Redeem Animations
+    doms.domRedeemCodeETA.style.display = '';
+    doms.domRedeemCodeGiftIconBox.style.display = '';
+    doms.domRedeemCodeGiftIcon.classList.add('fa-bounce');
+
+    // Listen for and report derivation progress
+    promoThread.onmessage = async (evt) => {
+        if (evt.data.type === 'progress') {
+            doms.domRedeemCodeProgress.style.display = '';
+            doms.domRedeemCodeETA.innerHTML = '<br><br>' + evt.data.res.eta.toFixed(0) + 's remaining to unwrap...<br><br>' + evt.data.res.progress + '%';
+            doms.domRedeemCodeProgress.value = evt.data.res.progress;
+        } else {
+            // The finished key!
+            promoThread.terminate();
+            promoThread = null;
+
+            // Pause animations and finish 'unwrapping' by checking the derived Promo Key for a balance
+            doms.domRedeemCodeGiftIcon.classList.remove('fa-bounce');
+            doms.domRedeemCodeProgress.style.display = 'none';
+            doms.domRedeemCodeETA.innerHTML = '<br><br>Final checks...';
+
+            // Prepare the global Promo Wallet
+            cPromoWallet = {
+                address: '',
+                pkBytes: parseWIF(evt.data.res.wif),
+                utxos: []
+            }
+
+            // Derive the public key from the promo code's WIF
+            cPromoWallet.address = deriveAddress({ pkBytes: cPromoWallet.pkBytes });
+
+            // Check for UTXOs on the explorer, fetch their full datasets
+            const arrSimpleUTXOs = await getNetwork().getUTXOs(cPromoWallet.address);
+            cPromoWallet.utxos = [];
+            for (const cUTXO of arrSimpleUTXOs) {
+                cPromoWallet.utxos.push(await getNetwork().getUTXOFullInfo(cUTXO));
+            }
+
+            // Display if the code is Valid (has coins) or is empty
+            if (cPromoWallet.utxos.length) {
+                doms.domRedeemCodeGiftIcon.classList.add('fa-shake');
+                doms.domRedeemCodeETA.innerHTML = '<br><br>This code is <b>verified!</b> Tap the gift to open it!';
+                doms.domRedeemCodeGiftIcon.classList.add('ptr');
+            } else {
+                doms.domRedeemCodeETA.innerHTML = '<br><br>This code had no balance!';
+                doms.domRedeemCodeGiftIcon.classList.remove('fa-gift');
+                doms.domRedeemCodeGiftIcon.classList.remove('fa-solid');
+                doms.domRedeemCodeGiftIcon.classList.add('fa-face-frown');
+                doms.domRedeemCodeGiftIcon.classList.add('fa-regular');
+                resetRedeemPromo();
+            }
+        }
+    }
+
+    // Send our 'Promo Code' to be derived on a separate thread, allowing a faster and non-blocking derivation
+    promoThread.postMessage(strCode);
+}
+
+/**
+ * Prompt a QR scan for a PIVX Promos code
+ */
+export async function openPromoQRScanner() {
+    const cScan = await scanQRCode();
+
+    if (!cScan || !cScan.data) return;
+
+    // Enter the scanned code in to the redeem box
+    doms.domRedeemCodeInput.value = cScan.data;
 }
 
 export function toggleDropDown(id) {

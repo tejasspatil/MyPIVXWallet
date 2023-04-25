@@ -403,7 +403,7 @@ export async function createMasternode() {
     localStorage.removeItem('masternode');
 }
 
-async function signTransaction(cTx, masterKey, outputs, undelegate) {
+export async function signTransaction(cTx, masterKey, outputs, undelegate) {
     if (!masterKey.isHardwareWallet) {
         return await cTx.sign(
             masterKey,

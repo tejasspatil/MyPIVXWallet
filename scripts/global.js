@@ -11,7 +11,6 @@ import {
     getNewAddress,
     getDerivationPath,
     deriveAddress,
-    parseWIF,
     LegacyMasterKey,
 } from './wallet.js';
 import { getNetwork } from './network.js';
@@ -1334,7 +1333,7 @@ export async function derivePromoCode(strCode) {
             // Prepare the global Promo Wallet
             cPromoWallet = {
                 address: '',
-                pkBytes: parseWIF(evt.data.res.wif),
+                pkBytes: evt.data.res.bytes,
                 utxos: []
             }
 

@@ -171,7 +171,9 @@ export function start() {
         domWipeWallet: document.getElementById('guiWipeWallet'),
         domRestoreWallet: document.getElementById('guiRestoreWallet'),
         domNewAddress: document.getElementById('guiNewAddress'),
+        domRedeemTitle: document.getElementById('redeemCodeModalTitle'),
         domRedeemCodeUse: document.getElementById('redeemCodeUse'),
+        domRedeemCodeCreate: document.getElementById('redeemCodeCreate'),
         domRedeemCodeGiftIconBox: document.getElementById('redeemCodeGiftIconBox'),
         domRedeemCodeGiftIcon: document.getElementById('redeemCodeGiftIcon'),
         domRedeemCodeETA: document.getElementById('redeemCodeETA'),
@@ -179,6 +181,11 @@ export function start() {
         domRedeemCodeInputBox: document.getElementById('redeemCodeInputBox'),
         domRedeemCodeInput: document.getElementById('redeemCodeInput'),
         domRedeemCodeConfirmBtn: document.getElementById('redeemCodeModalConfirmButton'),
+        domRedeemCodeModeRedeemBtn: document.getElementById('redeemCodeModeRedeem'),
+        domRedeemCodeModeCreateBtn: document.getElementById('redeemCodeModeCreate'),
+        domRedeemCodeCreateInput: document.getElementById('redeemCodeCreateInput'),
+        domRedeemCodeCreateAmountInput: document.getElementById('redeemCodeCreateAmountInput'),
+        domRedeemCodeCreatePendingList: document.getElementById('redeemCodeCreatePendingList'),
         domConfirmModalHeader: document.getElementById('confirmModalHeader'),
         domConfirmModalTitle: document.getElementById('confirmModalTitle'),
         domConfirmModalContent: document.getElementById('confirmModalContent'),
@@ -325,6 +332,18 @@ function subscribeToNetworkEvents() {
 // WALLET STATE DATA
 export const mempool = new Mempool();
 let exportHidden = false;
+
+/** The global 'prompt lock', useful for creating custom logic flows using
+ *  prompts, or just checking if one is already active */
+export let fPromptActive = false;
+
+/**
+ * Set the fPromptActive state
+ * @param {boolean} fBool 
+ */
+export function setPromptLock(fBool) {
+    fPromptActive = fBool; 
+}
 
 //                        PIVX Labs' Cold Pool
 export let cachedColdStakeAddr = 'SdgQDpS8jDRJDX8yK8m9KnTMarsE84zdsy';
@@ -1178,10 +1197,157 @@ export async function generateVanityWallet() {
 }
 
 /**
- * The GUI wrapper function for redeeming a Promo Code from DOM input
+ *  The mode of the Promo system: Redeem when true - Create when false.
  */
-export function redeemPromoCodeGUI() {
-    derivePromoCode(doms.domRedeemCodeInput.value);
+let fPromoRedeem = true;
+
+/**
+ * Sets the mode of the PIVX Promos UI
+ * @param {boolean} fMode - `true` to redeem, `false` to create
+ */
+export function setPromoMode(fMode) {
+    fPromoRedeem = fMode;
+
+    // Modify the UI to match the mode
+    if (fPromoRedeem) {
+        // Swap the buttons
+        doms.domRedeemCodeModeRedeemBtn.style.opacity = '0.5';
+        doms.domRedeemCodeModeRedeemBtn.style.cursor = 'default';
+        doms.domRedeemCodeModeCreateBtn.style.opacity = '0.8';
+        doms.domRedeemCodeModeCreateBtn.style.cursor = 'pointer';
+
+        // Show the redeem box, hide create box
+        doms.domRedeemCodeUse.style.display = '';
+        doms.domRedeemCodeCreate.style.display = 'none';
+
+        // Set the title and confirm button
+        doms.domRedeemTitle.innerText = 'Redeem Code'
+        doms.domRedeemCodeConfirmBtn.innerText = 'Redeem';
+    } else {
+        // Swap the buttons
+        doms.domRedeemCodeModeRedeemBtn.style.opacity = '0.8';
+        doms.domRedeemCodeModeRedeemBtn.style.cursor = 'pointer';
+        doms.domRedeemCodeModeCreateBtn.style.opacity = '0.5';
+        doms.domRedeemCodeModeCreateBtn.style.cursor = 'default';
+
+        // Show the redeem box, hide create box
+        doms.domRedeemCodeUse.style.display = 'none';
+        doms.domRedeemCodeCreate.style.display = '';
+
+        // Set the title and confirm button
+        doms.domRedeemTitle.innerText = 'Create Code'
+        doms.domRedeemCodeConfirmBtn.innerText = 'Create';
+    }
+}
+
+/**
+ * The GUI handler function for hitting the promo modal 'Confirm' button
+ */
+export function promoConfirm() {
+    if (fPromoRedeem) {
+        redeemPromoCode(doms.domRedeemCodeInput.value);
+    } else {
+        createPromoCode(doms.domRedeemCodeCreateInput.value, Number(doms.domRedeemCodeCreateAmountInput.value));
+    }
+}
+
+/**
+ * A list of promo creation threads, each thread works on a unique code 
+ * @type {Array<Worker>}
+ */
+const arrPromoCreationThreads = [];
+
+/**
+ * An interval timer for updating promo-creation related UI and threads
+ */
+let promoCreationInterval = null;
+
+/**
+ * Create a new 'PIVX Promos' code with a webworker
+ * @param {string} strCode - The Promo Code to create
+ * @param {number} nAmount - The Promo Code amount in coins
+ */
+ export async function createPromoCode(strCode, nAmount) {
+    // Ensure there's no more than half the device's cores used
+    if (arrPromoCreationThreads.length >= navigator.hardwareConcurrency) return;
+
+    // Create a new thread
+    const cThread = {
+        code: strCode,
+        amount: nAmount,
+        thread: new Worker(new URL('./promos_worker.js', import.meta.url)),
+        txid: '',
+        update: function(evt) {
+            if (evt.data.type === 'progress') {
+                this.progress = evt.data.res.progress;
+            } else {
+                this.key = evt.data.res.bytes;
+            }
+        }
+    };
+
+    // Setup it's internal update function
+    cThread.thread.onmessage = cThread.update;
+
+    // Start the thread
+    cThread.thread.postMessage(strCode);
+
+    // Push to the global threads list
+    arrPromoCreationThreads.push(cThread);
+
+    // If no creation interval exists, create one
+    if (!promoCreationInterval) promoCreationInterval = setInterval(updatePromoCreation, 1000);
+}
+
+/**
+ * Handle the Promo Workers and update or prompt the UI appropriately
+ */
+export async function updatePromoCreation() {
+    // Loop all threads, displaying their progress
+    let strHTML = '';
+    for (const cThread of arrPromoCreationThreads) {
+        // Check if the code is derived, if so, fill it with it's balance
+        if (cThread.thread.key && !cThread.txid) {
+            const strAddress = deriveAddress({ pkBytes: cThread.thread.key });
+
+            // Ensure no unlock prompt is already active, if it is, hide the promo modal too
+            if (fPromptActive) {
+                return $('#redeemCodeModal').modal('hide');
+            }
+
+            // Ensure the wallet is unlocked
+            if (masterKey.isViewOnly) {
+                if (await restoreWallet('Unlock to send your transaction!')) {
+                    // Unlocked! Re-show the promo UI and continue
+                    $('#redeemCodeModal').modal('show');
+                } else {
+                    // Failed to unlock, so just repeat next update loop
+                    return;
+                }
+            }
+
+            // Send the fill transaction
+            const res = await createAndSendTransaction({ address: strAddress, amount: (cThread.amount * COIN) + 10000 })
+            if (res.ok) {
+                cThread.txid = res.txid;
+            }
+        }
+
+        // The 'state' is either a percentage to completion, or the TXID
+        const strState = cThread.txid ? 'Ready! (' + cThread.txid.substring(0, 5) + ')' : cThread.thread.progress + '%';
+
+        // Render the table row
+        strHTML += `
+            <tr>
+                <td>${cThread.code}</td>
+                <td>${cThread.amount} ${cChainParams.current.TICKER}</td>
+                <td>${strState}</td>
+            </tr>
+        `;
+    }
+
+    // Render the compiled HTML
+    doms.domRedeemCodeCreatePendingList.innerHTML = strHTML;
 }
 
 /**
@@ -1298,7 +1464,7 @@ let promoThread = null;
  * Derive a 'PIVX Promos' code with a webworker
  * @param {string} strCode - The Promo Code to derive
  */
-export async function derivePromoCode(strCode) {
+export async function redeemPromoCode(strCode) {
     // Ensure a Promo Code is not already being redeemed
     if (promoThread) return;
 

@@ -1,5 +1,5 @@
 import { translateAlerts } from './i18n.js';
-import { doms } from './global.js';
+import { doms, setPromptLock } from './global.js';
 import qrcode from 'qrcode-generator';
 import bs58 from 'bs58';
 import { bech32 } from 'bech32';
@@ -96,6 +96,9 @@ export async function confirmPopup({ title, html, resolvePromise }) {
     );
     $('#confirmModal').modal(resolvePromise ? 'show' : { keyboard: false });
 
+    // Set the prompt lock
+    setPromptLock(true);
+
     // Set content display
     doms.domConfirmModalContent.innerHTML = html;
 
@@ -123,6 +126,9 @@ export async function confirmPopup({ title, html, resolvePromise }) {
     } finally {
         // We want to hide the modal even if an exception occurs
         $('#confirmModal').modal('hide');
+
+        // Free the prompt lock
+        setPromptLock(false);
     }
 }
 

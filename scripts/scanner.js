@@ -48,14 +48,15 @@ export async function scanQRCode() {
                 doms.domModalQRReader.style.display = 'block';
             })
             .catch((err) => {
-                createAlert('warning', err);
-                reject(err);
+                createAlert('warning', err, 2500);
+                stopQRScan();
+                resolve();
             });
 
         // If the close button is clicked, shutdown the scanner and destroy it to free memory
         doms.domCloseQrReaderBtn.addEventListener('click', () => {
             stopQRScan();
-            reject();
+            resolve();
         });
     });
 }

@@ -24,7 +24,7 @@ export async function scanQRCode() {
         return false;
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
         // Create a scanner
         scanner = new QrScanner(
             doms.domQrReaderStream,

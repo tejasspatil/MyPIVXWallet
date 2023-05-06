@@ -279,7 +279,16 @@ export function start() {
     settingsStart();
     // If allowed by settings: submit a simple 'hit' (app load) to Labs Analytics
     getNetwork().submitAnalytics('hit');
-    setInterval(refreshChainData, 15000);
+    setInterval(() => {
+        // Refresh blockchain data
+        refreshChainData();
+
+        // Fetch the PIVX prices
+        refreshPriceDisplay();
+    }, 15000);
+
+    // Initial price fetch
+    refreshPriceDisplay();
 
     // After reaching here; we know MPW's base is fully loaded!
     fIsLoaded = true;
@@ -1735,9 +1744,6 @@ export function refreshChainData() {
     // Fetch block count + UTXOs
     getNetwork().getBlockCount();
     getBalance(true);
-
-    // Fetch pricing data
-    refreshPriceDisplay();
 }
 
 // A safety mechanism enabled if the user attempts to leave without encrypting/saving their keys

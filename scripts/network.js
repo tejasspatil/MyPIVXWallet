@@ -268,8 +268,9 @@ export class ExplorerNetwork extends Network {
     }
 
     async getStakingRewards() {
+        // Do not allow multiple calls at once
         if (this.rewardsSyncing) {
-            return this.arrRewards;
+            return false;
         }
         try {
             if (!this.enabled || !this.masterKey || this.areRewardsComplete)
@@ -303,7 +304,7 @@ export class ExplorerNetwork extends Network {
                     await fetch(
                         `${
                             this.strUrl
-                        }/api/v2/xpub/${xpub}?details=txs&pageSize=500&to=${
+                        }/api/v2/xpub/${xpub}?details=txs&pageSize=200&to=${
                             nHeight ? nHeight - 1 : 0
                         }`
                     )
@@ -319,7 +320,7 @@ export class ExplorerNetwork extends Network {
                     await fetch(
                         `${
                             this.strUrl
-                        }/api/v2/address/${address}?details=txs&pageSize=500&to=${
+                        }/api/v2/address/${address}?details=txs&pageSize=200&to=${
                             nHeight ? nHeight - 1 : 0
                         }`
                     )
@@ -400,7 +401,7 @@ let _network = null;
 
 /**
  * Sets the network in use by MPW.
- * @param {Network} network - network to use
+ * @param {ExplorerNetwork} network - network to use
  */
 export function setNetwork(network) {
     _network = network;
@@ -408,7 +409,7 @@ export function setNetwork(network) {
 
 /**
  * Sets the network in use by MPW.
- * @returns {Network?} Returns the network in use, may be null if MPW hasn't properly loaded yet.
+ * @returns {ExplorerNetwork?} Returns the network in use, may be null if MPW hasn't properly loaded yet.
  */
 export function getNetwork() {
     return _network;

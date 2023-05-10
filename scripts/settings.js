@@ -103,7 +103,7 @@ export function start() {
 
     // Fetch price data, then fetch chain data
     if (getNetwork().enabled) {
-        refreshPriceDisplay().then(refreshChainData);
+        refreshPriceDisplay().finally(refreshChainData);
     }
 
     // Add each analytics level into the UI selector

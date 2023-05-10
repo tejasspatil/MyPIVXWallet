@@ -307,8 +307,9 @@ export function start() {
 
         const publicKey = localStorage.getItem('publicKey');
 
+        // Import the wallet, and toggle the startup flag, which delegates the chain data refresh to settingsStart();
         if (publicKey) {
-            importWallet({ newWif: publicKey });
+            importWallet({ newWif: publicKey, fStartup: true });
         } else {
             // Display the password unlock upfront
             accessOrImportWallet();
@@ -339,9 +340,6 @@ export function start() {
         // Fetch the PIVX prices
         refreshPriceDisplay();
     }, 15000);
-
-    // Initial price fetch
-    refreshPriceDisplay();
 
     // After reaching here; we know MPW's base is fully loaded!
     fIsLoaded = true;

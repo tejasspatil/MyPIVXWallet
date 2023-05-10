@@ -38,6 +38,14 @@ import { Address6 } from 'ip-address';
 import { getEventEmitter } from './event_bus.js';
 import { scanQRCode } from './scanner.js';
 
+/** A flag showing if base MPW is fully loaded or not */
+export let fIsLoaded = false;
+
+/** A getter for the flag showing if base MPW is fully loaded or not */
+export function isLoaded() {
+    return fIsLoaded;
+}
+
 export let doms = {};
 
 export function start() {
@@ -324,7 +332,19 @@ export function start() {
     settingsStart();
     // If allowed by settings: submit a simple 'hit' (app load) to Labs Analytics
     getNetwork().submitAnalytics('hit');
-    setInterval(refreshChainData, 15000);
+    setInterval(() => {
+        // Refresh blockchain data
+        refreshChainData();
+
+        // Fetch the PIVX prices
+        refreshPriceDisplay();
+    }, 15000);
+
+    // Initial price fetch
+    refreshPriceDisplay();
+
+    // After reaching here; we know MPW's base is fully loaded!
+    fIsLoaded = true;
 }
 
 function subscribeToNetworkEvents() {
@@ -371,7 +391,15 @@ let exportHidden = false;
 //                        PIVX Labs' Cold Pool
 export let cachedColdStakeAddr = 'SdgQDpS8jDRJDX8yK8m9KnTMarsE84zdsy';
 
+/**
+ * Open a UI 'tab' menu, and close all other tabs, intended for frontend use
+ * @param {Event} evt - The click event target
+ * @param {string} tabName - The name of the tab to load
+ */
 export function openTab(evt, tabName) {
+    // Only allow switching tabs if MPw is loaded
+    if (!isLoaded()) return;
+
     // Hide all screens and deactivate link highlights
     for (const domScreen of doms.arrDomScreens)
         domScreen.style.display = 'none';
@@ -1888,9 +1916,6 @@ export function refreshChainData() {
     // Fetch block count + UTXOs
     getNetwork().getBlockCount();
     getBalance(true);
-
-    // Fetch pricing data
-    refreshPriceDisplay();
 }
 
 // A safety mechanism enabled if the user attempts to leave without encrypting/saving their keys

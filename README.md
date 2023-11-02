@@ -1,16 +1,16 @@
 <h2 align="center">
-  Send, Stake and Receive with PIVX's most universal wallet.
+  Send, Stake and Receive with xINR's most universal wallet.
 </h2>
 
 <p align="center">
-  <a href="https://mypivxwallet.org/">Production</a> (Stable) | <a href="https://pivx-labs.github.io/MyPIVXWallet/">Bleeding-Edge</a> (Unstable)
+  <a href="https://myxINRwallet.org/">Production</a> (Stable) | <a href="https://xINR-labs.github.io/MyxINRWallet/">Bleeding-Edge</a> (Unstable)
 </p>
 
 ---
 
 <br>
 
-<img align="left" src="https://pivx.org/build/images/content/img_governance.png" width="150">
+<img align="left" src="https://xINR.org/build/images/content/img_governance.png" width="150">
 
 ## Be your own Bank
 
@@ -22,11 +22,11 @@ MPW is a completely [non-custodial](https://www.bitcoin.com/get-started/custodia
 
 <br>
 
-<img align="left" src="https://pivx.org/build/images/content/img_pos.png" width="150">
+<img align="left" src="https://xINR.org/build/images/content/img_pos.png" width="150">
 
 ## Universal and Portable
 
-MPW is completely universal and portable, at both a user-experience level & protocol-level, MPW is interopable with much of the functionality within PIVX, while also being portable enough to run on almost **any device in the world**.
+MPW is completely universal and portable, at both a user-experience level & protocol-level, MPW is interopable with much of the functionality within xINR, while also being portable enough to run on almost **any device in the world**.
 
 <br>
 
@@ -34,7 +34,7 @@ MPW is completely universal and portable, at both a user-experience level & prot
 
 <br>
 
-<img align="left" src="https://pivx.org/build/images/content/img_privacy.png" width="150">
+<img align="left" src="https://xINR.org/build/images/content/img_privacy.png" width="150">
 
 ## Don't trust, Verify!
 
@@ -47,13 +47,13 @@ Alongside total codebase availability, MPW allows you to totally bunker-down, wi
 
 <br>
 
-<img align="left" src="https://pivx.org/build/images/content/img_slider_bars.png" width="150">
+<img align="left" src="https://xINR.org/build/images/content/img_slider_bars.png" width="150">
 
 ## By the Community, for the Community
 
-MPW is built with love by [PIVX Labs](https://github.com/PIVX-Labs), a micro-DAO of [awesome people](https://github.com/PIVX-Labs/MyPIVXWallet/graphs/contributors) that build both FOSS and Proprietary software for the PIVX community to enjoy.
+MPW is built with love by [xINR Labs](https://github.com/xINR-Labs), a micro-DAO of [awesome people](https://github.com/xINR-Labs/MyxINRWallet/graphs/contributors) that build both FOSS and Proprietary software for the xINR community to enjoy.
 
-The mission of PIVX Labs is to accelerate the adoption & growth of PIVX as a currency, using awesomeness. Join the [PIVX Labs Discord](https://discord.gg/v57eCP4MMx) to meet us!
+The mission of xINR Labs is to accelerate the adoption & growth of xINR as a currency, using awesomeness. Join the [xINR Labs Discord](https://discord.gg/v57eCP4MMx) to meet us!
 
 <br>
 
